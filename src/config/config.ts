@@ -24,7 +24,7 @@ const config: Config = {
   dbPort: Number(process.env.DB_PORT) || 5432,
   dbUsername: process.env.DB_USERNAME || "postgres",
   dbPassword: process.env.DB_PASSWORD || "password",
-  dbName: process.env.DB_NAME || "mydatabase",
+  dbName: process.env.DB_NAME || "InferNode",
   dbDialect: process.env.DB_DIALECT || "postgres",
 };
 
