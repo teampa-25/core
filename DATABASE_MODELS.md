@@ -101,3 +101,7 @@ According to the project specifications:
 - Video files and results are stored as BLOB in the database
 - Relationships are managed through foreign keys with CASCADE
 - Inference parameters are stored as JSON for flexibility
+
+## Workflow to Interact with DB Objects
+
+Controller -> Service -> Repository -> DAO -> Database
