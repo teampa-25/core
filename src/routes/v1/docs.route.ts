@@ -7,7 +7,7 @@ const router = Router();
 
 const specs = swaggerJsDoc({
   definition: swaggerDef,
-  apis: ["src/routes/v1/*.ts"], // aggiorna il percorso se necessario
+  apis: ["src/routes/v1/*.ts", "src/controllers/*.ts", "src/models/*.ts"],
 });
 
 router.use("/", swaggerUi.serve);
@@ -15,6 +15,8 @@ router.get(
   "/",
   swaggerUi.setup(specs, {
     explorer: true,
+    customCss: ".swagger-ui .topbar { display: none }",
+    customSiteTitle: "API Documentation",
   }),
 );
 

@@ -12,12 +12,13 @@
     "test": "jest -i --colors --verbose --detectOpenHandles",
     "format": "prettier --write",
     "format:file": "prettier --write",
-    "db:migrate": "sequelize-cli db:migrate --require ts-node/register",
-    "db:migrate:undo": "sequelize-cli db:migrate:undo --require ts-node/register",
-    "db:seed": "sequelize-cli db:seed:all --require ts-node/register",
-    "db:seed:undo": "sequelize-cli db:seed:undo:all --require ts-node/register",
+    "db:migrate": "sequelize-cli db:migrate",
+    "db:migrate:undo": "sequelize-cli db:migrate:undo",
+    "db:seed": "sequelize-cli db:seed:all",
+    "db:seed:undo": "sequelize-cli db:seed:undo:all",
     "db:migration:generate": "sequelize-cli migration:generate --name",
-    "db:seed:generate": "sequelize-cli seed:generate --name"
+    "db:seed:generate": "sequelize-cli seed:generate --name",
+    "keys:generate": "ts-node src/utils/generateKeys.ts"
   },
   "lint-staged": {
     "*.{ts,js}": [

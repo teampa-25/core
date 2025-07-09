@@ -2,6 +2,7 @@ import { Router } from "express";
 import docsRoute from "./docs.route";
 import config from "../../config/config";
 import testRoute from "./test.route";
+import healthRoute from "./health.route";
 
 const router = Router();
 
@@ -17,6 +18,10 @@ const devRoutes = [
   {
     path: "/docs",
     route: docsRoute,
+  },
+  {
+    path: "/health",
+    route: healthRoute,
   },
 ];
 
