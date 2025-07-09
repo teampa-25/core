@@ -1,4 +1,6 @@
-interface UserModel {
+import { Role } from "../utils/enums";
+
+interface User {
   id: string; // UUID
   email: string;
   password: string;
@@ -7,4 +9,4 @@ interface UserModel {
   createdAt: Date;
 }
 
-export default UserModel;
+export default User;
