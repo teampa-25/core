@@ -8,7 +8,7 @@ import {
   HasMany,
 } from "sequelize";
 import sequelize from "../../config/sequelize";
-import { Role } from "../../utils/role";
+import { Role } from "../../utils/enums";
 
 /**
  * Interface User defines the structure of a User object in the database.

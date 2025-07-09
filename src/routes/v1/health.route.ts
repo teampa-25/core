@@ -5,7 +5,7 @@ import config from "../../config/config";
 const router = Router();
 
 // Health check endpoint
-router.get("/health", (req: Request, res: Response) => {
+router.get("/", (req: Request, res: Response) => {
   res.status(StatusCodes.OK).json({
     status: "OK",
     timestamp: new Date().toISOString(),
@@ -14,3 +14,22 @@ router.get("/health", (req: Request, res: Response) => {
 });
 
 export default router;
+
+/**
+ * @swagger
+ * tags:
+ *   name: Health
+ *   description: Health check endpoint
+ */
+
+/**
+ * @swagger
+ * /api/v1/health:
+ *   get:
+ *     tags:
+ *        - Health
+ *     summary: Health check
+ *     responses:
+ *       200:
+ *         description: Health check is working!
+ */
