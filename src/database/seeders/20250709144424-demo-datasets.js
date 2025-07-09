@@ -16,24 +16,6 @@ module.exports = {
           updatedAt: new Date(),
         },
         {
-          id: "750e8400-e29b-41d4-a716-446655440001",
-          user_id: "550e8400-e29b-41d4-a716-446655440001", // user1@example.com
-          name: "Surveillance Dataset",
-          tags: ["surveillance", "object-detection"],
-          deleted_at: null,
-          created_at: new Date(),
-          updatedAt: new Date(),
-        },
-        {
-          id: "750e8400-e29b-41d4-a716-446655440002",
-          user_id: "550e8400-e29b-41d4-a716-446655440002", // user2@example.com
-          name: "ML Research Dataset",
-          tags: ["machine-learning", "computer-vision"],
-          deleted_at: null,
-          created_at: new Date(),
-          updatedAt: new Date(),
-        },
-        {
           id: "750e8400-e29b-41d4-a716-446655440003",
           user_id: "550e8400-e29b-41d4-a716-446655440001", // user1@example.com
           name: "Deleted Dataset",
