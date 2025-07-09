@@ -5,8 +5,10 @@ import {
   InferAttributes,
   InferCreationAttributes,
   CreationOptional,
+  HasMany,
 } from "sequelize";
 import sequelize from "../../config/sequelize";
+import { Role } from "../../utils/role";
 
 /**
  * Interface User defines the structure of a User object in the database.
@@ -24,7 +26,8 @@ export class User extends Model<
   declare password: string;
   declare role: Role;
   declare tokens: number;
-  declare createdAt: CreationOptional<Date>;
+  declare createdAt: CreationOptional<Date>; // CreationOptional indicates that this field can be omitted when creating a new instance
+  declare updatedAt: CreationOptional<Date>;
 }
 
 User.init(
@@ -46,8 +49,13 @@ User.init(
       allowNull: false,
       defaultValue: "user",
     },
-    tokens: { type: DataTypes.INTEGER, allowNull: false },
+    tokens: { type: DataTypes.INTEGER, allowNull: false, defaultValue: 100 },
     createdAt: {
+      type: DataTypes.DATE,
+      allowNull: false,
+      defaultValue: DataTypes.NOW,
+    },
+    updatedAt: {
       type: DataTypes.DATE,
       allowNull: false,
       defaultValue: DataTypes.NOW,
@@ -57,7 +65,7 @@ User.init(
     sequelize,
     modelName: "User",
     tableName: "Users",
-    timestamps: false,
+    timestamps: true,
   },
 );
 
