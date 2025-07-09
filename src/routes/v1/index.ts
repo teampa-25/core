@@ -1,15 +1,15 @@
 import { Router } from "express";
 import docsRoute from "./docs.route";
 import config from "../../config/config";
-import testRoute from "./test.route";
 import healthRoute from "./health.route";
+import datasetRoute from "./dataset.route";
 
 const router = Router();
 
 const defaultRoutes: Array<{ path: string; route: any }> = [
   {
-    path: "/test",
-    route: testRoute,
+    path: "/datasets",
+    route: datasetRoute,
   },
 ];
 
