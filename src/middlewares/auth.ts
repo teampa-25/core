@@ -1,6 +1,6 @@
 import { NextFunction, Request, Response } from "express";
 import { StatusCodes } from "http-status-codes";
-import jwt, { SignOptions, Algorithm } from "jsonwebtoken";
+import jwt from "jsonwebtoken";
 import config from "../config/config";
 import { UserPayload } from "../@types/CustomUser";
 import fs from "fs";

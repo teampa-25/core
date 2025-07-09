@@ -16,3 +16,19 @@ export enum InferenceJobStatus {
   ABORTED = "ABORTED",
   COMPLETED = "COMPLETED",
 }
+
+/**
+ * Enum for Error types
+ */
+export enum ErrorEnum {
+  None,
+  NotFound,
+  Generic,
+  Forbidden,
+  Unauthorized,
+  BadRequest,
+  InsufficientCredits,
+  DatasetNameConflict,
+  InvalidFileFormat,
+  InternalServer,
+}

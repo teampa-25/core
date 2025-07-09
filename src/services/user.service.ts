@@ -32,11 +32,11 @@ export class UserService {
   };
 
   findUserByEmail = async (email: string): Promise<User | null> => {
-    //call userService that call repo and dao
-    const emailUser = email;
-    // const user = await userService.findUserByEmail(email);
-    // if (!user) return null;
-    return null;
+    // const user = await userRepo.findByEmail(email);
+    // if (!user) {
+    //   throw getError(ErrorEnum.NotFound);
+    // }
     // return user;
+    return null;
   };
 }
