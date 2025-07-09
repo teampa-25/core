@@ -26,7 +26,10 @@ class SequelizeInstance {
           acquire: 30000,
           idle: 10000,
         },
-        logging: config.nodeEnv === "development" ? logger.debug : false,
+        logging:
+          config.nodeEnv === "development"
+            ? (msg: string) => logger.debug(msg)
+            : false,
       });
     }
     return SequelizeInstance.instance;

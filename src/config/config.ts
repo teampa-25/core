@@ -1,6 +1,8 @@
 import dotenv from "dotenv";
+import path from "path";
 
-dotenv.config();
+// Load .env file from the project root
+dotenv.config({ path: path.resolve(process.cwd(), ".env") });
 
 interface Config {
   port: number;

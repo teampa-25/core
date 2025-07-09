@@ -1,3 +1,5 @@
+import { Role } from "../utils/role";
+
 interface UserModel {
   id: string; // UUID
   email: string;
