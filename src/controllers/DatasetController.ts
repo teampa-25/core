@@ -509,61 +509,61 @@ export class DatasetController {
    * GET - Retrieve datasets by specific tags
    * GET /api/v1/datasets/by-tags?tags=tag1,tag2
    */
-  getDatasetsByTags = async (req: Request, res: Response): Promise<void> => {
-    try {
-      const { tags: tagsQuery } = req.query;
+  // getDatasetsByTags = async (req: Request, res: Response): Promise<void> => {
+  //   try {
+  //     const { tags: tagsQuery } = req.query;
 
-      if (!tagsQuery || typeof tagsQuery !== "string") {
-        res.status(StatusCodes.BAD_REQUEST).json({
-          status: "error",
-          message: "Tags query parameter is required",
-        });
-        return;
-      }
+  //     if (!tagsQuery || typeof tagsQuery !== "string") {
+  //       res.status(StatusCodes.BAD_REQUEST).json({
+  //         status: "error",
+  //         message: "Tags query parameter is required",
+  //       });
+  //       return;
+  //     }
 
-      const tags = tagsQuery
-        .split(",")
-        .map((tag) => tag.trim())
-        .filter((tag) => tag.length > 0);
+  //     const tags = tagsQuery
+  //       .split(",")
+  //       .map((tag) => tag.trim())
+  //       .filter((tag) => tag.length > 0);
 
-      if (tags.length === 0) {
-        res.status(StatusCodes.BAD_REQUEST).json({
-          status: "error",
-          message: "At least one valid tag is required",
-        });
-        return;
-      }
+  //     if (tags.length === 0) {
+  //       res.status(StatusCodes.BAD_REQUEST).json({
+  //         status: "error",
+  //         message: "At least one valid tag is required",
+  //       });
+  //       return;
+  //     }
 
-      const datasets = await this.datasetService.getDatasetsByTags(tags);
+  //     const datasets = await this.datasetService.getDatasetsByTags(tags);
 
-      logger.info(`Datasets retrieved by tags via API: ${tags.join(", ")}`);
+  //     logger.info(`Datasets retrieved by tags via API: ${tags.join(", ")}`);
 
-      res.status(StatusCodes.OK).json({
-        status: "success",
-        message: "Datasets retrieved by tags successfully",
-        data: {
-          datasets: datasets.map((dataset) => ({
-            id: dataset.id,
-            name: dataset.name,
-            tags: dataset.tags,
-            user_id: dataset.user_id,
-            created_at: dataset.created_at,
-            updatedAt: dataset.updatedAt,
-          })),
-          searchTags: tags,
-          count: datasets.length,
-        },
-      });
-    } catch (error) {
-      logger.error("Error retrieving datasets by tags via API:", error);
+  //     res.status(StatusCodes.OK).json({
+  //       status: "success",
+  //       message: "Datasets retrieved by tags successfully",
+  //       data: {
+  //         datasets: datasets.map((dataset) => ({
+  //           id: dataset.id,
+  //           name: dataset.name,
+  //           tags: dataset.tags,
+  //           user_id: dataset.user_id,
+  //           created_at: dataset.created_at,
+  //           updatedAt: dataset.updatedAt,
+  //         })),
+  //         searchTags: tags,
+  //         count: datasets.length,
+  //       },
+  //     });
+  //   } catch (error) {
+  //     logger.error("Error retrieving datasets by tags via API:", error);
 
-      res.status(StatusCodes.BAD_REQUEST).json({
-        status: "error",
-        message:
-          error instanceof Error
-            ? error.message
-            : "Failed to retrieve datasets by tags",
-      });
-    }
-  };
+  //     res.status(StatusCodes.BAD_REQUEST).json({
+  //       status: "error",
+  //       message:
+  //         error instanceof Error
+  //           ? error.message
+  //           : "Failed to retrieve datasets by tags",
+  //     });
+  //   }
+  // };
 }

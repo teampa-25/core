@@ -8,17 +8,7 @@ import {
   ForeignKey,
 } from "sequelize";
 import sequelize from "../../config/sequelize";
-
-/**
- * Enum for InferenceJob status
- */
-export enum InferenceJobStatus {
-  PENDING = "PENDING",
-  RUNNING = "RUNNING",
-  FAILED = "FAILED",
-  ABORTED = "ABORTED",
-  COMPLETED = "COMPLETED",
-}
+import { InferenceJobStatus } from "../../utils/enums";
 
 /**
  * Interface InferenceJob defines the structure of an InferenceJob object in the database.
