@@ -33,12 +33,12 @@ app.use(errorHandler);
 // Database connection and server start
 const startServer = async () => {
   try {
-    // await sequelize.authenticate();
-    // logger.info("✅ Database connection established successfully.");
+    await sequelize.authenticate();
+    logger.info("Database connection established successfully.");
 
-    // // Sync database models
-    // await sequelize.sync({ alter: config.nodeEnv === "development" });
-    // logger.info("✅ Database models synchronized.");
+    // Sync database models
+    await sequelize.sync({ alter: config.nodeEnv === "development" });
+    logger.info("Database models synchronized.");
 
     app.listen(config.port, () => {
       logger.info(`Server running on port ${config.port}`);

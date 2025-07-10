@@ -31,7 +31,7 @@ First, you need to setup the `.env` with the following required values
 ```env
 
 # Server configurations
-PORT=3000
+API_PORT=3000
 HOSTNAME=localhost
 NODE_ENV=development
 API_VERSION=v1
