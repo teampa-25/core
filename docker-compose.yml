@@ -32,7 +32,7 @@ services:
       - "${API_PORT}:3000"
     environment:
       DB_HOST: db # Docker override
-      PORT: ${PORT}
+      PORT: ${API_PORT}
       NODE_ENV: ${NODE_ENV}
       JWT_EXPIRATION: ${JWT_EXPIRATION}
       JWT_PRIVATE_KEY_PATH: ${JWT_PRIVATE_KEY_PATH}
