@@ -34,23 +34,23 @@ app.use((req: Request, res: Response, next: NextFunction) => {
 const startServer = async () => {
   try {
     await sequelize.authenticate();
-    console.log("✅ Database connection established successfully.");
+    logger.info("Database connection established successfully.");
 
     // Sync database models
     await sequelize.sync({ alter: config.nodeEnv === "development" });
-    console.log("✅ Database models synchronized.");
+    logger.info("Database models synchronized.");
 
     app.listen(config.port, () => {
-      logger.info(`🚀 Server running on port ${config.port}`);
+      logger.info(`Server running on port ${config.port}`);
       logger.info(
-        `📚 API Documentation: http://localhost:${config.port}/api/${config.apiVersion}/docs`,
+        `API Documentation: http://localhost:${config.port}/api/${config.apiVersion}/docs`,
       );
       logger.info(
-        `🏥 Health Check: http://localhost:${config.port}/api/${config.apiVersion}/health`,
+        `Health Check: http://localhost:${config.port}/api/${config.apiVersion}/health`,
       );
     });
   } catch (error) {
-    logger.error("❌ Unable to start server:", error);
+    logger.error("Unable to start server:", error);
     process.exit(1);
   }
 };

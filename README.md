@@ -18,6 +18,12 @@
 
 # Usage
 
+Create a `.env` with your configuration, you can copy `.env.example` as a boilerplate.
+
+```bash
+cp .env.example .env
+```
+
 ## Env Variables
 
 First, you need to setup the `.env` with the following required values
@@ -26,6 +32,7 @@ First, you need to setup the `.env` with the following required values
 
 # Server configurations
 PORT=3000
+HOSTNAME=localhost
 NODE_ENV=development
 API_VERSION=v1
 

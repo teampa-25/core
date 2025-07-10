@@ -19,20 +19,16 @@ services:
       - .env
 
   api:
-    build:
-      context: .
-      dockerfile: Dockerfile
+    build: .
     command: sh -c "./wait-for-db.sh && npm run dev"
     volumes:
       - .:/app
-      - /app/node_modules
     ports:
       - "${PORT}:3000"
     environment:
-      DB_HOST: db  # Docker override
+      DB_HOST: db # Docker override
       PORT: ${PORT}
       NODE_ENV: ${NODE_ENV}
-      API_VERSION: ${API_VERSION}
       JWT_EXPIRATION: ${JWT_EXPIRATION}
       JWT_PRIVATE_KEY_PATH: ${JWT_PRIVATE_KEY_PATH}
       JWT_PUBLIC_KEY_PATH: ${JWT_PUBLIC_KEY_PATH}
