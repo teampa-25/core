@@ -258,3 +258,5 @@ dist/
 .vscode
 .env
 keys
+db-data/
+logs/

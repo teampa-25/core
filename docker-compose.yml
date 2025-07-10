@@ -1,7 +1,8 @@
-version: "3.8"
 services:
   db:
     image: postgres:15-alpine
+    container_name: infernode-db
+    restart: unless-stopped
     environment:
       POSTGRES_USER: ${DB_USERNAME}
       POSTGRES_PASSWORD: ${DB_PASSWORD}
@@ -13,18 +14,22 @@ services:
       retries: 5
     volumes:
       - db-data:/var/lib/postgresql/data
-    ports:
-      - "${DB_PORT}:5432"
     env_file:
       - .env
+    ports:
+      - "${DB_PORT}:5432"
 
   api:
     build: .
-    command: sh -c "./wait-for-db.sh && npm run dev"
+    restart: unless-stopped
+    container_name: infernode-api
+    command: sh -c "chmod +x ./scripts/* && ./scripts/wait-for-db.sh && npm run keys:generate && chown -R 1000:1000 ./keys && npm run dev"
+    env_file:
+      - .env
     volumes:
-      - .:/app
+      - .:/usr/src/app
     ports:
-      - "${PORT}:3000"
+      - "${API_PORT}:3000"
     environment:
       DB_HOST: db # Docker override
       PORT: ${PORT}

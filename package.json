@@ -18,7 +18,8 @@
     "db:seed:undo": "sequelize-cli db:seed:undo:all",
     "db:migration:generate": "sequelize-cli migration:generate --name",
     "db:seed:generate": "sequelize-cli seed:generate --name",
-    "keys:generate": "ts-node src/utils/generateKeys.ts"
+    "keys:generate": "ts-node src/utils/generateKeys.ts",
+    "keys:force-generate": "ts-node src/utils/generateKeys.ts --force"
   },
   "lint-staged": {
     "*.{ts,js}": [
