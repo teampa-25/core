@@ -23,12 +23,6 @@ export const swaggerDef = {
       },
     },
   },
-  tags: [
-    {
-      name: "Test",
-      description: "Test route",
-    },
-  ],
 };
 
 export default swaggerDef;

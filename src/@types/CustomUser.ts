@@ -1,4 +1,4 @@
-import { Role } from "../utils/role";
+import { Role } from "../utils/enums";
 
 // types/User.ts
 export interface UserPayload {

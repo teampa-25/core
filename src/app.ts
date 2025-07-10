@@ -1,13 +1,16 @@
 import express from "express";
-import { Request, Response, NextFunction } from "express";
-import routes from "./routes/v1";
+import routes from "./routes/v1/routes";
 import config from "./config/config";
 import helmet from "helmet";
 import compression from "compression";
 import { morganMiddleware } from "./config/morgan";
 import { logger } from "./config/logger";
 import sequelize from "./config/sequelize";
-import { StatusCodes } from "http-status-codes";
+import {
+  errorConverter,
+  errorHandler,
+  notFoundHandler,
+} from "./middlewares/error";
 
 const app = express();
 
@@ -20,24 +23,22 @@ app.use(express.urlencoded({ extended: true }));
 // v1 api routes
 app.use(`/api/${config.apiVersion}`, routes);
 
-app.use((req: Request, res: Response, next: NextFunction) => {
-  logger.error(`Not Found - ${req.originalUrl}`);
-  res.status(StatusCodes.NOT_FOUND).json({
-    status: "fail",
-    message: "Not Found",
-  });
-  next();
-});
+// Error Handlers
+app.use(notFoundHandler);
+
+app.use(errorConverter);
+
+app.use(errorHandler);
 
 // Database connection and server start
 const startServer = async () => {
   try {
-    await sequelize.authenticate();
-    console.log("✅ Database connection established successfully.");
+    // await sequelize.authenticate();
+    // logger.info("✅ Database connection established successfully.");
 
-    // Sync database models
-    await sequelize.sync({ alter: config.nodeEnv === "development" });
-    console.log("✅ Database models synchronized.");
+    // // Sync database models
+    // await sequelize.sync({ alter: config.nodeEnv === "development" });
+    // logger.info("✅ Database models synchronized.");
 
     app.listen(config.port, () => {
       logger.info(`🚀 Server running on port ${config.port}`);
