@@ -6,9 +6,9 @@ port="${DB_PORT:-5432}"
 user="${DB_USER:-postgres}"
 
 until pg_isready -h "$host" -p "$port" -U "$user"; do
-  echo "⏳ Attendo Postgres su $host:$port..."
+  echo "waiting for postgres to be ready on $host:$port..."
   sleep 1
 done
 
-echo "✅ Postgres è pronto!"
+echo "postres is ready"
 exec "$@"
