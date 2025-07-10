@@ -2,15 +2,11 @@ import { Router } from "express";
 import docsRoute from "./docs.route";
 import config from "../../config/config";
 import healthRoute from "./health.route";
-import datasetRoute from "./dataset.route";
 
 const router = Router();
 
 const defaultRoutes: Array<{ path: string; route: any }> = [
-  {
-    path: "/datasets",
-    route: datasetRoute,
-  },
+  // Add route here
 ];
 
 // Add the docs route

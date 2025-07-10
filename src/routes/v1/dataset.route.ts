@@ -303,7 +303,7 @@ router.get("/search", datasetController.searchDatasets);
  *       400:
  *         description: Bad request
  */
-router.get("/by-tags", datasetController.getDatasetsByTags);
+// router.get("/by-tags", datasetController.getDatasetsByTags); // TODO: decomment when i'm ready to not stress again
 
 /**
  * @swagger

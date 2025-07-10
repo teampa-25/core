@@ -8,7 +8,6 @@ import { morganMiddleware } from "./config/morgan";
 import { logger } from "./config/logger";
 import sequelize from "./config/sequelize";
 import { StatusCodes } from "http-status-codes";
-//import "./@types/CustomUser"; // Import to extend Express Request type
 
 const app = express();
 
