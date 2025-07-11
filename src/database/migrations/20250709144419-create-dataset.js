@@ -3,7 +3,7 @@
 /** @type {import("sequelize-cli").Migration} */
 module.exports = {
   async up(queryInterface, Sequelize) {
-    await queryInterface.createTable("Datasets", {
+    await queryInterface.createTable("Dataset", {
       id: {
         type: Sequelize.UUID,
         defaultValue: Sequelize.UUIDV4,
@@ -13,7 +13,7 @@ module.exports = {
         type: Sequelize.UUID,
         allowNull: false,
         references: {
-          model: "Users",
+          model: "User",
           key: "id",
         },
         onUpdate: "CASCADE",
@@ -31,21 +31,21 @@ module.exports = {
       deleted_at: {
         type: Sequelize.DATE,
         allowNull: true,
+        
       },
       created_at: {
         type: Sequelize.DATE,
         allowNull: false,
-        defaultValue: Sequelize.NOW,
+        defaultValue: Sequelize.literal('CURRENT_TIMESTAMP'),
       },
-      updatedAt: {
+      updated_at: {
         type: Sequelize.DATE,
         allowNull: false,
-        defaultValue: Sequelize.NOW,
+        defaultValue: Sequelize.literal('CURRENT_TIMESTAMP'),
       },
     });
 
-    // user id and name combination must be unique
-    await queryInterface.addIndex("Datasets", {
+    await queryInterface.addIndex("Dataset", {
       fields: ["user_id", "name"],
       unique: true,
       where: {
@@ -56,6 +56,6 @@ module.exports = {
   },
 
   async down(queryInterface, Sequelize) {
-    await queryInterface.dropTable("Datasets");
+    await queryInterface.dropTable("Dataset");
   },
 };

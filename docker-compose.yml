@@ -1,50 +1,36 @@
-version: "3.8"
 services:
-  db:
-    image: postgres:15-alpine
-    environment:
-      POSTGRES_USER: ${DB_USERNAME}
-      POSTGRES_PASSWORD: ${DB_PASSWORD}
-      POSTGRES_DB: ${DB_NAME}
-    healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U $$POSTGRES_USER"]
-      interval: 5s
-      timeout: 5s
-      retries: 5
-    volumes:
-      - db-data:/var/lib/postgresql/data
+  app:
+    build: .
+    # restart: unless-stopped
     ports:
-      - "${DB_PORT}:5432"
+      - "${API_HOST}:${API_PORT}"
+    container_name: api
     env_file:
-      - .env
-
-  api:
-    build:
-      context: .
-      dockerfile: Dockerfile
-    command: sh -c "./wait-for-db.sh && npm run dev"
+      .env
+    environment:
+      - NODE_ENV=${NODE_ENV}
+    depends_on:
+      postgres: 
+        condition: service_healthy
     volumes:
       - .:/app
-      - /app/node_modules
-    ports:
-      - "${PORT}:3000"
-    environment:
-      DB_HOST: db  # Docker override
-      PORT: ${PORT}
-      NODE_ENV: ${NODE_ENV}
-      API_VERSION: ${API_VERSION}
-      JWT_EXPIRATION: ${JWT_EXPIRATION}
-      JWT_PRIVATE_KEY_PATH: ${JWT_PRIVATE_KEY_PATH}
-      JWT_PUBLIC_KEY_PATH: ${JWT_PUBLIC_KEY_PATH}
-      JWT_ALGORITHM: ${JWT_ALGORITHM}
-      DB_PORT: ${DB_PORT}
-      DB_USERNAME: ${DB_USERNAME}
-      DB_PASSWORD: ${DB_PASSWORD}
-      DB_NAME: ${DB_NAME}
-      DB_DIALECT: ${DB_DIALECT}
-    depends_on:
-      db:
-        condition: service_healthy
+#      - /app/node_modules
 
+  postgres:
+    image: postgres:latest
+    restart: unless-stopped
+    environment:
+      - POSTGRES_USER=${POSTGRES_USER}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+      - POSTGRES_DB=${POSTGRES_DB}
+    container_name: db
+    env_file:
+      .env
+    ports:
+      - "${POSTGRES_PORT}:${POSTGRES_PORT}"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: "exit 0"
 volumes:
-  db-data:
+  postgres_data:
