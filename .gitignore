@@ -257,3 +257,6 @@ node_modules/
 dist/
 .vscode
 .env
+keys
+db-data/
+logs/

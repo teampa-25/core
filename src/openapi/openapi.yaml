@@ -1,0 +1,268 @@
+openapi: 3.1.3
+# https://learn.openapis.org/specification/paths.html
+info:
+  title: InferNode API
+  description: InferNode APIT specification
+  version: 1.0.0
+
+paths:
+  /api/signIn:
+    post:
+      summary: Sign in
+      tags: [Public]
+      responses:
+        "200":
+          description: Signed in successfully
+
+  /api/signUp:
+    post:
+      summary: Sign up
+      tags: [Public]
+      responses:
+        "200":
+          description: Signed up successfully
+
+  /api/dataset/:
+    post:
+      summary: Create a dataset
+      tags: [AuthenticatedUser]
+      security:
+        - bearerAuth: []
+      responses:
+        "201":
+          description: Dataset created
+
+  /api/dataset/{dataset-id}:
+    delete:
+      summary: Delete dataset
+      tags: [AuthenticatedUser]
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: dataset-id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "204":
+          description: Dataset deleted
+
+    put:
+      summary: Update dataset
+      tags: [AuthenticatedUser]
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: dataset-id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Dataset updated
+
+  /api/dataset/{filters}:
+    get:
+      summary: Get dataset
+      tags: [AuthenticatedUser]
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: filters
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Dataset list
+
+  /api/content/{dataset-id}:
+    put:
+      summary: Upload content to dataset
+      description: Automatically determine if content is .zip or video (.mp4, .webm, etc.)
+      tags: [AuthenticatedUser]
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: dataset-id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/octet-stream:
+            schema:
+              type: string
+              format: binary
+      responses:
+        "200":
+          description: Content uploaded
+
+  /api/model/start/{model-id}/{dataset-id}:
+    post:
+      summary: Start inference process
+      tags: [AuthenticatedUser]
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: model-id
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: dataset-id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                partition:
+                  oneOf:
+                    - type: string
+                      enum: [null]
+                    - type: object
+                      properties:
+                        type:
+                          type: string
+                          enum: [range, ids]
+                        range:
+                          type: array
+                          items:
+                            type: integer
+                          minItems: 2
+                          maxItems: 2
+                        ids:
+                          type: array
+                          items:
+                            type: integer
+                inferenceConfiguration:
+                  oneOf:
+                    - type: string
+                      enum: [null]
+                    - type: object
+                      description: JSON config for inference
+                skip-n:
+                  type: integer
+      responses:
+        "200":
+          description: Inference started, returns process id
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  processId:
+                    type: string
+        "400":
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    enum:
+                      - BadConfiguration
+                      - ModelNotFound
+                      - DatasetNotFound
+                      - PartitionOutOfRange
+
+  /api/porocessStatus/{process-id}:
+    get:
+      summary: Get process status
+      tags: [AuthenticatedUser]
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: process-id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Process status
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    enum: [PENDING, RUNNING, FAILED, ABORTED, COMPLETED]
+                  inference-result:
+                    type: object
+                    nullable: true
+                  carbonFootprint:
+                    type: number
+                    nullable: true
+        "404":
+          description: Process not found or unauthorized
+
+  /api/processResult/{process-id}/{type}:
+    get:
+      summary: Get process result
+      tags: [AuthenticatedUser]
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: process-id
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: type
+          in: path
+          required: true
+          schema:
+            type: string
+            enum: [JSON, PNG]
+      responses:
+        "200":
+          description: Process result if COMPLETED
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  inference-result:
+                    type: object
+                  carbonFootprint:
+                    type: number
+        "404":
+          description: Process not found or unauthorized
+
+  /api/credits/:
+    get:
+      summary: Get remaining credits
+      tags: [AuthenticatedUser]
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: Credit balance
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  credits:
+                    type: number
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT

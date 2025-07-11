@@ -10,6 +10,11 @@
 
 ## Features
 
+# Dependencies
+
+- [helmet](https://www.npmjs.com/package/helmet): automatically set HTTP response headers
+- [morgan](https://expressjs.com/en/resources/middleware/morgan.html): logger for express
+
 ## Installation
 
 ### Building
@@ -20,12 +25,19 @@
 
 ## Env Variables
 
-First, you need to setup the `.env` with the following required values
+Create a `.env` with your configuration, you can copy `.env.example` as a boilerplate.
+
+```bash
+cp .env.example .env
+```
+
+First, you need to setup the `.env` with the following required values.
 
 ```env
 
 # Server configurations
-PORT=3000
+API_PORT=3000
+HOSTNAME=localhost
 NODE_ENV=development
 API_VERSION=v1
 
