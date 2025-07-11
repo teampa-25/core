@@ -4,7 +4,7 @@ import { join } from "path";
 import { logger } from "../config/logger";
 import { exit } from "process";
 
-const keysDir = join(__dirname, "../../keys");
+const keysDir = "./keys";
 let force = false;
 let directory_exists = false;
 let keys_found = false;

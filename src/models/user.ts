@@ -1,4 +1,4 @@
-import { Role } from "../utils/enums";
+import { Role } from "@/utils/enums";
 
 interface User {
   id: string; // UUID

@@ -4,48 +4,40 @@ services:
     container_name: infernode-db
     restart: unless-stopped
     environment:
-      POSTGRES_USER: ${DB_USERNAME}
+      POSTGRES_USER: ${DB_USER}
       POSTGRES_PASSWORD: ${DB_PASSWORD}
       POSTGRES_DB: ${DB_NAME}
-    healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U $$POSTGRES_USER"]
-      interval: 5s
-      timeout: 5s
-      retries: 5
     volumes:
-      - db-data:/var/lib/postgresql/data
+      - ./db-data:/var/lib/postgresql/data
     env_file:
       - .env
     ports:
-      - "${DB_PORT}:5432"
+      - "${DB_PORT:-5432}:5432"
 
   api:
     build: .
     restart: unless-stopped
     container_name: infernode-api
-    command: sh -c "chmod +x ./scripts/* && ./scripts/wait-for-db.sh && npm run keys:generate && chown -R 1000:1000 ./keys && npm run dev"
+    command: sh -c "chmod +x ./scripts/* && ./scripts/wait-for-db.sh && npm run keys:generate && chown -R 1000 . && npm run dev"
     env_file:
       - .env
     volumes:
-      - .:/usr/src/app
+      - .:/app/
+      - /app/node_modules
+      - /app/keys
     ports:
-      - "${API_PORT}:3000"
+      - "${INF_PORT:-3000}:3000"
     environment:
-      DB_HOST: db # Docker override
-      PORT: ${API_PORT}
+      DB_HOST: db # use docker network hostname
+      PORT: ${INF_PORT:-3000}
       NODE_ENV: ${NODE_ENV}
-      JWT_EXPIRATION: ${JWT_EXPIRATION}
-      JWT_PRIVATE_KEY_PATH: ${JWT_PRIVATE_KEY_PATH}
-      JWT_PUBLIC_KEY_PATH: ${JWT_PUBLIC_KEY_PATH}
-      JWT_ALGORITHM: ${JWT_ALGORITHM}
-      DB_PORT: ${DB_PORT}
-      DB_USERNAME: ${DB_USERNAME}
+      DB_PORT: ${DB_PORT:-5432}
+      DB_USERNAME: ${DB_USER}
       DB_PASSWORD: ${DB_PASSWORD}
-      DB_NAME: ${DB_NAME}
-      DB_DIALECT: ${DB_DIALECT}
+      DB_NAME: ${DB_NAME:-infernode}
+      DB_DIALECT: postgres
     depends_on:
-      db:
-        condition: service_healthy
+      - db
 
 volumes:
   db-data:

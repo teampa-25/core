@@ -10,5 +10,5 @@ until pg_isready -h "$host" -p "$port" -U "$user"; do
   sleep 1
 done
 
-echo "postres is ready"
+echo "postgres is ready"
 exec "$@"
