@@ -1,4 +1,7 @@
 {
+  "scripts": {
+    "dev": "nodemon --exec ts-node src/app.ts"
+  },
   "dependencies": {
     "dotenv": "^16.4.5",
     "express": "^4.19.2",
@@ -20,9 +23,7 @@
     "nodemon": "^2.0.15",
     "sequelize-cli": "^6.6.3",
     "ts-node": "^10.9.2",
+    "tsconfig-paths": "^4.2.0",
     "typescript": "^5.5.2"
-  },
-  "scripts": {
-    "dev": "nodemon --exec ts-node src/app.ts"
   }
 }

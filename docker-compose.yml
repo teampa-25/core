@@ -11,7 +11,7 @@ services:
       postgres:
         condition: service_healthy
     volumes:
-      - .:/app
+      - ./src/:/app/src
 
   postgres:
     image: postgres:latest
