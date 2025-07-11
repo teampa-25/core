@@ -28,6 +28,16 @@ docker compose up --build
 docker compose up --build -d
 ```
 
+Also, remember to run migrations and seeders
+
+```bash
+
+docker exec -it infernode-api npx sequelize-cli db:migrate:all
+
+docker exec -it infernode-api npx sequelize-cli db:seed:all
+
+```
+
 #### Every other launch
 
 ```bash
@@ -65,9 +75,21 @@ DB_DIALECT=postgres
 
 ```
 
-### API
+## Adding packages
 
-### PostgreSQL
+After running containers, just lunch:
+
+```bash
+
+docker exec -it infernode-api npm install package-name
+
+docker exec -it infernode-api npm uninstall package-name
+
+```
+
+# API
+
+# PostgreSQL
 
 # Design
 

@@ -2,7 +2,13 @@ import { Router } from "express";
 // import { DatasetController } from "@/controllers/dataset.controller";
 
 const router = Router();
-// const datasetController = new DatasetController();
+const dataset = new DatasetController();
+
+// router.route("/:id")
+//   .get(dataset.getByFilters)
+//   .post(dataset.create)
+//   .put(dataset.updateById)
+//   .delete(dataset.deleteById)
 
 // router.get("/:id", datasetController.getByFilters);
 // router.post("/", datasetController.create);

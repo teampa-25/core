@@ -1,46 +1,48 @@
-"use strict";
+const crypt = require("bcrypt");
+const { v4: uuidv4 } = require("uuid");
+const saltRounds = 10;
+const { faker } = require("@faker-js/faker")
 
-/** @type {import("sequelize-cli").Migration} */
 module.exports = {
-  up: async (queryInterface, Sequelize) => {
-    await queryInterface.bulkInsert(
+  add_user: async (qi, email, password, role, credit, id) => {
+    await qi.bulkInsert(
       "User",
       [
         {
-          id: "550e8400-e29b-41d4-a716-446655440000",
-          email: "admin@example.com",
-          password:
-            "$2b$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi",
-          role: "admin",
-          credit: 1000,
+          id: id ?? uuidv4(),
+          email,
+          password,
+          role,
+          credit,
           created_at: new Date(),
           updated_at: new Date(),
-        },
-        {
-          id: "550e8400-e29b-41d4-a716-446655440001",
-          email: "user1@example.com",
-          password:
-            "$2b$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi",
-          role: "user",
-          credit: 100,
-          created_at: new Date(),
-          updated_at: new Date(),
-        },
-        {
-          id: "550e8400-e29b-41d4-a716-446655440002",
-          email: "user2@example.com",
-          password:
-            "$2b$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi",
-          role: "user",
-          credit: 50,
-          created_at: new Date(),
-          updated_at: new Date(),
-        },
-      ],
-      {},
+        }
+      ]
     );
   },
-  down: async (queryInterface, Sequelize) => {
-    await queryInterface.bulkDelete("User", null, {});
+
+  secure_add: async (qi, email, password, role, credit, id) => {
+    const hash = await crypt.hash(password, saltRounds);
+    await module.exports.add_user(qi, email, hash, role, credit, id);
+  },
+
+  up: async (qi, s) => {
+    const admin_password = "verabaddie";
+    const user_password = "chainconilmioname";
+    const random_users_num = 100;
+
+    await module.exports.secure_add(qi, "admin@infernode.example.org", admin_password, "admin", 100000);
+    await module.exports.secure_add(qi, "user1@infernode.example.org", user_password, "user", 100);
+    await module.exports.secure_add(qi, "user2@infernode.example.org", user_password, "user", 100);
+    await module.exports.secure_add(qi, "user3@infernode.example.org", user_password, "user", 100);
+    await module.exports.secure_add(qi, "user4@infernode.example.org", user_password, "user", 100);
+
+    for (let i = 0; i < random_users_num; i++) {
+      await module.exports.secure_add(qi, faker.internet.email(), faker.internet.password(), "user", 100);
+    }
+  },
+
+  down: async (qi, s) => {
+    await qi.bulkDelete("User", null, {});
   },
 };

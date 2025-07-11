@@ -1,38 +1,34 @@
 "use strict";
 
+const crypt = require("bcrypt");
+const { randomInt } = require("crypto");
+const { v4: uuidv4 } = require('uuid');
+
 /** @type {import("sequelize-cli").Seed} */
 module.exports = {
-  async up(queryInterface, Sequelize) {
-    await queryInterface.bulkInsert("Video", [
-      {
-        id: "750e8400-e29b-41d4-a716-446655440101",
-        dataset_id: "750e8400-e29b-41d4-a716-446655440000", // Dataset 1
-        file: Buffer.from("Fake video data 1"),
-        name: "Sample Video 1",
-        frame_count: 1500,
-        created_at: new Date(),
-        updated_at: new Date(),
-      },
-      {
-        id: "750e8400-e29b-41d4-a716-446655440102",
-        dataset_id: "750e8400-e29b-41d4-a716-446655440003", // Dataset 2
-        file: Buffer.from("Fake video data 2"),
-        name: "Sample Video 2",
-        frame_count: 2300,
-        created_at: new Date(),
-        updated_at: new Date(),
-      },
-    ]);
+  async up(qi, Sequelize) {
+    const { faker } = require("@faker-js/faker");
+    const [results] = await qi.sequelize.query(`SELECT id FROM "Dataset"`);
+
+    console.log(results);
+    const videos = [Buffer.from("Fake video data 1"), Buffer.from("Fake video data 2")];
+
+    for (const element of results) {
+      await qi.bulkInsert("Video", [
+        {
+          id: uuidv4(),
+          dataset_id: element.id,
+          file: faker.helpers.arrayElement(videos),
+          name: faker.word.words({ count: 3 }),
+          frame_count: 1500,
+          created_at: new Date(),
+          updated_at: new Date(),
+        },
+      ]);
+    }
   },
 
-  async down(queryInterface, Sequelize) {
-    await queryInterface.bulkDelete("Video", {
-      id: [
-        "750e8400-e29b-41d4-a716-446655440101",
-        "750e8400-e29b-41d4-a716-446655440102",
-      ],
-    });
+  async down(qi, Sequelize) {
+    await qi.bulkDelete("Video", null, {});
   },
 };
-
-

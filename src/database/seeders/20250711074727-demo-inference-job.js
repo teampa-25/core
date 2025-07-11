@@ -1,38 +1,56 @@
 "use strict";
 
+const crypt = require("bcrypt");
+const { randomInt } = require("crypto");
+const { v4: uuidv4 } = require('uuid');
+
 /** @type {import('sequelize-cli').Migration} */
 module.exports = {
-  async up(queryInterface, Sequelize) {
-    await queryInterface.bulkInsert("InferenceJob", [
-      {
-        id: "660e8400-e29b-41d4-a716-446655440001",
-        dataset_id: "750e8400-e29b-41d4-a716-446655440000", // Dataset 1
-        user_id: "550e8400-e29b-41d4-a716-446655440000",    // User 1
-        video_id: "750e8400-e29b-41d4-a716-446655440101",   // video 1
-        status: "PENDING",
+
+  async insert(qi, s, ids) {
+
+    // NOTE: I know this is not ideal, but for some reason it doesn't work outside... -beg
+    const { faker } = require("@faker-js/faker")
+    // NOTE: this should be an Enum -beg
+    const statuses = [
+      "PENDING",
+      "RUNNING",
+      "FAILED",
+      "ABORTED",
+      "COMPLETED",
+    ]
+
+    await qi.bulkInsert("InferenceJob",
+      [{
+        id: uuidv4(),
+        dataset_id: ids.dataset_id,
+        user_id: ids.user_id,
+        video_id: ids.video_id,
+        status: faker.helpers.arrayElement(statuses),
         params: JSON.stringify({
           threshold: 0.5,
-          model: "yolov8",
+          model: "cns",
         }),
-        carbon_footprint: 25,
+        carbon_footprint: 25, // TODO: write a function that actually calculates it
         created_at: new Date(),
         updated_at: new Date(),
-      },
-      {
-        id: "660e8400-e29b-41d4-a716-446655440001",
-        dataset_id: "aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa",
-        user_id: "550e8400-e29b-41d4-a716-446655440001", // User 2
-        video_id: "750e8400-e29b-41d4-a716-446655440102", // Video 2
-        status: "RUNNING",
-        params: JSON.stringify({
-          threshold: 0.7,
-          model: "yolov5",
-        }),
-        carbon_footprint: 42,
-        created_at: new Date(),
-        updated_at: new Date(),
-      },
-    ]);
+      }]
+    );
+  },
+
+  async up(qi, s) {
+
+    const [results] = await qi.sequelize.query(`
+      SELECT u.id AS user_id, d.id AS dataset_id, v.id AS video_id
+      FROM "User" AS u
+      JOIN "Dataset" AS d ON u.id = d.user_id
+      JOIN "Video" AS v ON v.dataset_id = d.id
+    `);
+
+    console.log(results)
+    for (const element of results) {
+      await module.exports.insert(qi, s, element);
+    }
   },
 
   async down(queryInterface, Sequelize) {
