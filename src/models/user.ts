@@ -1,6 +1,6 @@
-import {SingletonDBConnection} from "../database/dbConnection";
-import {DataTypes, Model, CreationOptional, InferAttributes, InferCreationAttributes} from "sequelize";
-import {UserRole} from "@/utils/roles";
+import { SingletonDBConnection } from "../database/dbConnection";
+import { DataTypes, Model, CreationOptional, InferAttributes, InferCreationAttributes } from "sequelize";
+import { UserRole } from "@/utils/roles";
 
 const sequelize = SingletonDBConnection.getInstance();
 
@@ -11,59 +11,59 @@ const sequelize = SingletonDBConnection.getInstance();
 */
 
 class User extends Model<InferAttributes<User>, InferCreationAttributes<User>> {
-    declare id: string;
-    declare email: string;  
-    declare password: string;
-    declare role: UserRole;
-    declare tokens: number;
-    declare created_at: Date;
-    declare updated_at: Date;
+  declare id: string;
+  declare email: string;
+  declare password: string;
+  declare role: UserRole;
+  declare tokens: number;
+  declare created_at: Date;
+  declare updated_at: Date;
 }
 
 User.init({
-  id: { 
+  id: {
     type: DataTypes.UUID,
-          defaultValue: DataTypes.UUIDV4,
-          primaryKey: true,
+    defaultValue: DataTypes.UUIDV4,
+    primaryKey: true,
+  },
+  email: {
+    type: DataTypes.STRING,
+    allowNull: false,
+    unique: true,
+    validate: {
+      isEmail: true,
     },
-    email: {
-          type: DataTypes.STRING,
-          allowNull: false,
-          unique: true,
-          validate: {
-            isEmail: true,
-          },
-        },
-    password: {
-        type: DataTypes.STRING,
-        allowNull: false,
-    },
-    role: {
-        type: DataTypes.ENUM(...Object.values(UserRole)),
-        allowNull: false,
-    },
-    tokens: {
-        type: DataTypes.INTEGER,
-        defaultValue: 100,
-    },
-    created_at: {
-        type: DataTypes.DATE,
-        allowNull: false,
-        defaultValue: DataTypes.NOW,
-    },
-    updated_at: {
-        type: DataTypes.DATE,
-        allowNull: false,
-        defaultValue: DataTypes.NOW,
-    },
-}, 
-{
-sequelize,
-modelName: "User",
-tableName: "User",
-timestamps: false,
-}
+  },
+  password: {
+    type: DataTypes.STRING,
+    allowNull: false,
+  },
+  role: {
+    type: DataTypes.ENUM(...Object.values(UserRole)),
+    allowNull: false,
+  },
+  tokens: {
+    type: DataTypes.INTEGER,
+    defaultValue: 100,
+  },
+  created_at: {
+    type: DataTypes.DATE,
+    allowNull: false,
+    defaultValue: DataTypes.NOW,
+  },
+  updated_at: {
+    type: DataTypes.DATE,
+    allowNull: false,
+    defaultValue: DataTypes.NOW,
+  },
+},
+  {
+    sequelize,
+    modelName: "User",
+    tableName: "User",
+    timestamps: false,
+  }
 );
 
-export {User};
+export { User };
 

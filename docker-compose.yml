@@ -1,20 +1,17 @@
 services:
   app:
     build: .
-    # restart: unless-stopped
     ports:
       - "${API_HOST}:${API_PORT}"
     container_name: api
-    env_file:
-      .env
+    env_file: .env
     environment:
       - NODE_ENV=${NODE_ENV}
     depends_on:
-      postgres: 
+      postgres:
         condition: service_healthy
     volumes:
       - .:/app
-#      - /app/node_modules
 
   postgres:
     image: postgres:latest
@@ -24,13 +21,13 @@ services:
       - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
       - POSTGRES_DB=${POSTGRES_DB}
     container_name: db
-    env_file:
-      .env
+    env_file: .env
     ports:
       - "${POSTGRES_PORT}:${POSTGRES_PORT}"
     volumes:
       - postgres_data:/var/lib/postgresql/data
     healthcheck:
       test: "exit 0"
+
 volumes:
   postgres_data:
