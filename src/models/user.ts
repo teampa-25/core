@@ -1,6 +1,6 @@
 import { Database } from "@/database/database";
-import { DataTypes, Model, CreationOptional, InferAttributes, InferCreationAttributes } from "sequelize";
-import { UserRole } from "@/utils/roles";
+import { DataTypes, Model, InferAttributes, InferCreationAttributes } from "sequelize";
+import { UserRole } from "@/models/enums/user.role";
 
 const sequelize = Database.getInstance();
 
@@ -61,7 +61,9 @@ User.init({
     sequelize,
     modelName: "User",
     tableName: "User",
-    timestamps: false,
+    timestamps: true,
+    createdAt: "created_at",
+    updatedAt: "updated_at",
   }
 );
 

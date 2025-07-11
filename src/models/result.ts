@@ -4,46 +4,42 @@ import { DataTypes, Model, InferAttributes, InferCreationAttributes, ForeignKey 
 const sequelize = SingletonDBConnection.getInstance();
 
 /**
- * Video Model Definition
+ * Result Model Definition
  * 
- * @exports Video - Sequelize video model
+ * @extends Result - Sequelize result model
 */
 
-class Video extends Model<InferAttributes<Video>, InferCreationAttributes<Video>> {
+class Result extends Model<InferAttributes<Result>, InferCreationAttributes<Result>> {
   declare id: string;
-  declare dataset_id: ForeignKey<string>;
-  declare file: Buffer;
-  declare name: string;
-  declare frame_count: number;
+  declare inference_job_id: ForeignKey<string>;
+  declare json_res: object;
+  declare image_zip: Buffer;
   declare created_at: Date;
   declare updated_at: Date;
 }
 
-Video.init(
+Result.init(
   {
     id: {
       type: DataTypes.UUID,
       defaultValue: DataTypes.UUIDV4,
       primaryKey: true,
     },
-    dataset_id: {
+    inference_job_id: {
       type: DataTypes.UUID,
       allowNull: false,
+      unique: true,
       references: {
-        model: "Dataset",
+        model: "InferenceJob",
         key: "id",
       },
     },
-    file: {
+    json_res: {
+      type: DataTypes.JSON,
+      allowNull: false,
+    },
+    image_zip: {
       type: DataTypes.BLOB("long"),
-      allowNull: false,
-    },
-    name: {
-      type: DataTypes.STRING,
-      allowNull: false,
-    },
-    frame_count: {
-      type: DataTypes.INTEGER,
       allowNull: false,
     },
     created_at: {
@@ -59,13 +55,13 @@ Video.init(
   },
   {
     sequelize,
-    modelName: "Video",
-    tableName: "Video",
+    modelName: "Result",
+    tableName: "Result",
     timestamps: true,
     createdAt: "created_at",
     updatedAt: "updated_at",
   },
 );
 
-export { Video };
+export { Result };
 

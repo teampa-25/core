@@ -1,5 +1,5 @@
-import { Database } from "@/database/database";
-import { DataTypes, Model, CreationOptional, InferAttributes, InferCreationAttributes } from "sequelize";
+import {  Database  } from "@/database/database";
+import {  DataTypes, Model, CreationOptional, InferAttributes, InferCreationAttributes, ForeignKey } from "sequelize";
 import { User } from "@/models/user";
 
 const sequelize = Database.getInstance();
@@ -12,7 +12,7 @@ const sequelize = Database.getInstance();
 
 class Dataset extends Model<InferAttributes<Dataset>, InferCreationAttributes<Dataset>> {
   declare id: string;
-  declare user_id: string;
+  declare user_id: ForeignKey<string>;
   declare name: string;
   declare tags: string[];
   declare deleted_at: CreationOptional<Date | null>;
@@ -65,7 +65,9 @@ Dataset.init(
     sequelize,
     modelName: "Dataset",
     tableName: "Dataset",
-    timestamps: false,
+    timestamps: true,
+    createdAt: "created_at",
+    updatedAt: "updated_at",
     indexes: [
       {
         name: "unique_user_dataset_name",
