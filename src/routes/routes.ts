@@ -25,7 +25,7 @@ defaultRoutes.forEach((route) => {
 })
 
 router.get('/', (_, res) => {
-  res.send('API is running (dev mode) \n visit http://localhost:3000/api/docs for Swagger Documentation');
+  res.send('<h1>InferNode is running<h1/>');
 });
 
 export default router
