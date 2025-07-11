@@ -1,8 +1,8 @@
-import {SingletonDBConnection} from "../database/dbConnection";
-import {DataTypes, Model, CreationOptional, InferAttributes, InferCreationAttributes} from "sequelize";
+import { Database } from "@/database/database";
+import { DataTypes, Model, CreationOptional, InferAttributes, InferCreationAttributes } from "sequelize";
 import { User } from "@/models/user";
 
-const sequelize = SingletonDBConnection.getInstance();
+const sequelize = Database.getInstance();
 
 /**
  * Dataset Model Definition
@@ -15,7 +15,7 @@ class Dataset extends Model<InferAttributes<Dataset>, InferCreationAttributes<Da
   declare user_id: string;
   declare name: string;
   declare tags: string[];
-  declare deleted_at: CreationOptional< Date | null>;
+  declare deleted_at: CreationOptional<Date | null>;
   declare created_at: Date;
   declare updated_at: Date;
 }

@@ -10,9 +10,9 @@ module.exports = {
           id: "550e8400-e29b-41d4-a716-446655440000",
           email: "admin@example.com",
           password:
-            "$2b$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi", 
+            "$2b$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi",
           role: "admin",
-          tokens: 1000,
+          credit: 1000,
           created_at: new Date(),
           updated_at: new Date(),
         },
@@ -20,9 +20,9 @@ module.exports = {
           id: "550e8400-e29b-41d4-a716-446655440001",
           email: "user1@example.com",
           password:
-            "$2b$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi", 
+            "$2b$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi",
           role: "user",
-          tokens: 100,
+          credit: 100,
           created_at: new Date(),
           updated_at: new Date(),
         },
@@ -32,7 +32,7 @@ module.exports = {
           password:
             "$2b$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi",
           role: "user",
-          tokens: 50,
+          credit: 50,
           created_at: new Date(),
           updated_at: new Date(),
         },

@@ -11,4 +11,7 @@ RUN npm install -g ts-node typescript nodemon
 
 COPY . .
 
+# RUN chmod +x entrypoint/*
+# ENTRYPOINT [ "./entrypoint/entrypoint.sh" ]
+#
 CMD ["npm", "run", "dev"]

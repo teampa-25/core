@@ -25,7 +25,7 @@ module.exports = {
         type: Sequelize.ENUM("admin", "user"),
         allowNull: false,
       },
-      tokens: {
+      credit: {
         type: Sequelize.INTEGER,
         defaultValue: 100,
       },

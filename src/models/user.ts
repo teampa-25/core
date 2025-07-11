@@ -1,8 +1,8 @@
-import { SingletonDBConnection } from "../database/dbConnection";
+import { Database } from "@/database/database";
 import { DataTypes, Model, CreationOptional, InferAttributes, InferCreationAttributes } from "sequelize";
 import { UserRole } from "@/utils/roles";
 
-const sequelize = SingletonDBConnection.getInstance();
+const sequelize = Database.getInstance();
 
 /**
  * User Model Definition
@@ -15,7 +15,7 @@ class User extends Model<InferAttributes<User>, InferCreationAttributes<User>> {
   declare email: string;
   declare password: string;
   declare role: UserRole;
-  declare tokens: number;
+  declare credit: number;
   declare created_at: Date;
   declare updated_at: Date;
 }
@@ -42,7 +42,7 @@ User.init({
     type: DataTypes.ENUM(...Object.values(UserRole)),
     allowNull: false,
   },
-  tokens: {
+  credit: {
     type: DataTypes.INTEGER,
     defaultValue: 100,
   },

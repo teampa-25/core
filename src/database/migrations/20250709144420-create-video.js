@@ -43,8 +43,8 @@ module.exports = {
       },
     });
 
-    await queryInterface.addIndex("Videos", ["dataset_id"]);
-    
+    await queryInterface.addIndex("Video", ["dataset_id"]);
+
   },
 
   async down(queryInterface, Sequelize) {

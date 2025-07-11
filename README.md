@@ -10,6 +10,8 @@
 
 ## Features
 
+- [ ] : encrypted passwords
+
 ## Installation
 
 ### Building
