@@ -2,7 +2,7 @@ services:
   app:
     build: .
     ports:
-      - "${API_HOST}:${API_PORT}"
+      - "${API_HOST:-3000}:3000"
     container_name: api
     env_file: .env
     environment:
@@ -12,6 +12,7 @@ services:
         condition: service_healthy
     volumes:
       - ./src/:/app/src
+      - ./tsconfig.json:/app/tsconfig.json
 
   postgres:
     image: postgres:latest
@@ -23,7 +24,7 @@ services:
     container_name: db
     env_file: .env
     ports:
-      - "${POSTGRES_PORT}:${POSTGRES_PORT}"
+      - "${POSTGRES_PORT:-5432}:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
     healthcheck:

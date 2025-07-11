@@ -14,7 +14,25 @@
 
 ### Building
 
-### Docker
+When building, docker copies all but `src` and `tsconfig.json` into container, so it can generate an independent `node_modules`.
+`src` and `tsconfig.json` are mounted as volumes into container so that every change to those is automatically synced to container.
+Other changes, outside `src` and `tsconfig.json`, require a new build.
+
+#### First launch or those that need a rebuild
+
+```bash
+docker compose up --build
+# or
+docker compose up --build -d
+```
+
+#### Every other launch
+
+```bash
+docker compose up
+# or
+docker compose up -d
+```
 
 # Usage
 
