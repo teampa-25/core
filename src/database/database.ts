@@ -2,7 +2,7 @@ import { parse } from 'path';
 import { Sequelize } from 'sequelize';
 
 /**
- * SingletonDBConnection manages a single shared instance of Sequelize for database connection.
+ * Database connection
  * 
  * @class Database
  * @property {Sequelize} sequelize - The Sequelize instance managing the database connection.
@@ -30,7 +30,8 @@ export class Database {
       throw new Error("Missing required environment variables");
     }
 
-    // NOTE: this hard ties the object to postgres! what if someone decides to use something else?
+    // NOTE: this hard ties the object to postgres!
+    // what if someone decides to use something else?
     // should we let them do it?
     // -beg
     this.sequelize = new Sequelize(db_name, db_user, db_password, {
@@ -45,7 +46,6 @@ export class Database {
     if (!Database.instance) {
       Database.instance = new Database();
     }
-    // return sequelize instance
     return Database.instance.sequelize;
   }
 }

@@ -1,4 +1,4 @@
-import { SingletonDBConnection } from "../database/dbConnection";
+import { SingletonDBConnection } from "@/database/dbConnection";
 import { DataTypes, Model, InferAttributes, InferCreationAttributes, ForeignKey } from "sequelize";
 
 const sequelize = SingletonDBConnection.getInstance();

@@ -1,6 +1,6 @@
 import express from 'express';
-import "tsconfig-paths/register"            // required for paath aliases like @/*
-import router from '@/routes/routes'
+import "tsconfig-paths/register";            // required for path aliases like @/*
+import router from '@/routes/routes';
 
 const app = express();
 const API_PORT = process.env.API_PORT || 3000;

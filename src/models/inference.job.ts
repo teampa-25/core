@@ -1,4 +1,4 @@
-import { SingletonDBConnection } from "../database/dbConnection";
+import { SingletonDBConnection } from "@/database/database";
 import { DataTypes, Model, InferAttributes, InferCreationAttributes, ForeignKey } from "sequelize";
 import { InferenceJobStatus } from "./enums/inference.job.status";
 

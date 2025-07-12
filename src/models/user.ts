@@ -4,23 +4,26 @@ import { UserRole } from "@/models/enums/user.role";
 
 const sequelize = Database.getInstance();
 
+
 /**
  * User Model Definition
  * 
  * @exports User - Sequelize user model
 */
 
-class User extends Model<InferAttributes<User>, InferCreationAttributes<User>> {
-  declare id: string;
-  declare email: string;
-  declare password: string;
-  declare role: UserRole;
-  declare credit: number;
-  declare created_at: Date;
-  declare updated_at: Date;
+// inferattributes automatically infers what attributes the UserModel has
+// we don't need a UserAttributes interface
+export class UserModel extends Model<InferAttributes<UserModel>, InferCreationAttributes<UserModel>> {
+  public id!: string;
+  public email!: string;
+  public password!: string;
+  public role!: UserRole;
+  public credit!: number;
+  public created_at!: Date;
+  public updated_at!: Date;
 }
 
-User.init({
+UserModel.init({
   id: {
     type: DataTypes.UUID,
     defaultValue: DataTypes.UUIDV4,
@@ -44,6 +47,7 @@ User.init({
   },
   credit: {
     type: DataTypes.INTEGER,
+    validate: { min: 0 },
     defaultValue: 100,
   },
   created_at: {
@@ -67,5 +71,4 @@ User.init({
   }
 );
 
-export { User };
 
