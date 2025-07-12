@@ -1,4 +1,4 @@
-import { User } from "@/models/user";
+import { UserModel } from "@/models/user";
 
 export class AdminController {
 }
