@@ -1,12 +1,12 @@
 
 import jwt, { JwtPayload } from "jsonwebtoken";
 import fs from "fs";
-import path from "path";
+import enviroment from "@/config/enviroment";
 
 export class JwtUtils {
-  private static privateKeyPath = process.env.JWT_PRIVATE_KEY_PATH || path.resolve(__dirname, "../keys/private.key");
-  private static publicKeyPath = process.env.JWT_PUBLIC_KEY_PATH || path.resolve(__dirname, "../keys/public.key");
-  private static expiresIn = process.env.JWT_EXPIRES_IN || "1h";
+  private static privateKeyPath = enviroment.jwtPrivateKeyPath;
+  private static publicKeyPath = enviroment.jwtPublicKeyPath;
+  private static expiresIn = enviroment.jwtExpiresIn;
 
   private static privateKey = fs.readFileSync(JwtUtils.privateKeyPath, "utf8");
   private static publicKey = fs.readFileSync(JwtUtils.publicKeyPath, "utf8");

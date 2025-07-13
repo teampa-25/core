@@ -1,8 +1,9 @@
 import { Job, Worker } from "bullmq";
 import { redisConnection } from "./queue";
 import { InferenceJobProcessor } from "./processor";
+import enviroment from "@/config/enviroment";
 
-const MAX_CONCURRENT_JOBS = process.env.MAX_CONCURRENT_JOBS || 2
+const MAX_CONCURRENT_JOBS = enviroment.maxConcurrentJobs;
 
 export const inferenceWorker = new Worker(
   'inference',

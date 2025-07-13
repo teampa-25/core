@@ -1,6 +1,5 @@
-import { parse } from 'path';
 import { Sequelize } from 'sequelize';
-
+import enviroment from '@/config/enviroment';
 /**
  * Database connection
  * 
@@ -19,16 +18,15 @@ export class Database {
     // is missing, the following if statement will throw an error
     // (i dont like undefined values honestly, hard to understand why they exist)
     // -beg
-    const db_user = process.env.POSTGRES_USER || false;
-    const db_password = process.env.POSTGRES_PASSWORD || false;
-    const db_name = process.env.POSTGRES_DB || false;
-    const db_host = process.env.POSTGRES_HOST || false;
-    const db_port = process.env.POSTGRES_PORT || false;
-    //const db_logging = process.env.POSTGRES_LOGGING || false;
+    const db_user = enviroment.postgresUser;
+    const db_password = enviroment.postgresPassword;
+    const db_name = enviroment.postgresDB;
+    const db_host = enviroment.postgresHost;
+    const db_port = enviroment.postgresPort;
 
-    if (!db_user || !db_password || !db_name || !db_host || !db_port) {
-      throw new Error("Missing required environment variables");
-    }
+    // if (!db_user || !db_password || !db_name || !db_host || !db_port) {
+    //   throw new Error("Missing required environment variables");
+    // }
 
     // NOTE: this hard ties the object to postgres!
     // what if someone decides to use something else?

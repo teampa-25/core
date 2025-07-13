@@ -1,9 +1,10 @@
+import enviroment from '@/config/enviroment';
 import { Queue } from 'bullmq';
 import IORedis from 'ioredis';
 
 export const redisConnection = new IORedis({
-  host: process.env.REDIS_HOST,
-  port: Number(process.env.REDIS_PORT),
+  host: enviroment.redisHost,
+  port: Number(enviroment.redisPort),
   maxRetriesPerRequest: 2,
   enableReadyCheck: true,
 });

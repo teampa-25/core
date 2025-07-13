@@ -1,7 +1,8 @@
+import enviroment from "@/config/enviroment";
 import bcrypt from "bcrypt";
 
 export async function hashPass(pass: string): Promise<string> {
-  const SALT_ROUNDS = parseInt(process.env.SALT_ROUNDS || "12", 10);
+  const SALT_ROUNDS = enviroment.jwtSaltRounds;
   return bcrypt.hash(pass, SALT_ROUNDS);
 }
 export async function comparePass(plainPass: string, hashPass: string): Promise<boolean> {
