@@ -3,40 +3,39 @@ import { JwtUtils } from "@/utils/jwt";
 import { ErrorEnum, getError } from "@/utils/api-error";
 import { UserPayload } from "@/@types/UserPayload";
 
-export function authenticate(req: Request, res: Response, next: NextFunction){
+export function authenticate(req: Request, res: Response, next: NextFunction) {
   try {
     const authHeader = req.headers.authorization;
-    
+
     if (!authHeader) {
       const error = getError(ErrorEnum.UNAUTHORIZED_ERROR)?.getErrorObj();
-      throw(error)
+      throw error;
     }
 
-    const tokenParts = authHeader.split(' ');
-    
-    if (tokenParts.length !== 2 || tokenParts[0] !== 'Bearer') {
+    const tokenParts = authHeader.split(" ");
+
+    if (tokenParts.length !== 2 || tokenParts[0] !== "Bearer") {
       const error = getError(ErrorEnum.INVALID_JWT_FORMAT)?.getErrorObj();
-      throw(error)
+      throw error;
     }
 
     const token = tokenParts[1];
 
     if (!token) {
       const error = getError(ErrorEnum.UNAUTHORIZED_ERROR)?.getErrorObj();
-      throw(error)
+      throw error;
     }
 
     const payload = JwtUtils.verifyToken(token);
-    
+
     req.user = <UserPayload>payload;
-    
+
     next();
-    
   } catch (err) {
     const error = getError(ErrorEnum.FORBIDDEN_ERROR)?.getErrorObj();
-    res.status(error?.status || 403).json({ 
-      message: error?.msg || 'Invalid or expired token' 
+    res.status(error?.status || 403).json({
+      message: error?.msg || "Invalid or expired token",
     });
-    next(err)
+    next(err);
   }
 }
