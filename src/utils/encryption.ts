@@ -1,6 +1,5 @@
-import bcrypt from "bcrypt"
+import bcrypt from "bcrypt";
 
-export function hashPass(pass: string): string {
-  const hash = await crypt.hash(password, saltRounds);
-  return hash
+export async function hashPass(pass: string): Promise<string> {
+  return await bcrypt.hash(pass, 12);
 }

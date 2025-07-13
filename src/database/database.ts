@@ -38,7 +38,7 @@ export class Database {
       host: db_host,
       port: Number(db_port),
       dialect: 'postgres',
-      logging: db_logging,
+      //logging: db_logging,
     });
   }
 
