@@ -1,4 +1,4 @@
-import { UserDAO } from "@/dao-bak/user";
+import { UserDAO } from "@/dao/user.dao";
 import { User } from "@/models/user";
 import { hashPass } from "@/utils/encryption";
 import { Request, Response, NextFunction } from "express";
@@ -17,7 +17,7 @@ export class UserController {
     user.role = content.role
     user.credit = content.credit
 
-    dao.create(user)
+    //dao.create(user)
     next()
   }
 

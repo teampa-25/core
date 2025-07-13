@@ -1,6 +1,6 @@
 import { Database } from "@/database/database";
 import { DataTypes, Model, CreationOptional, InferAttributes, InferCreationAttributes, ForeignKey } from "sequelize";
-import { User } from "@/models/user";
+import { UserModel } from "@/models/user";
 
 const sequelize = Database.getInstance();
 
