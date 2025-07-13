@@ -32,9 +32,9 @@ Also, remember to run migrations and seeders
 
 ```bash
 
-docker exec -it infernode-api npx sequelize-cli db:migrate:all
+docker exec -it infernode-app npx sequelize-cli db:migrate
 
-docker exec -it infernode-api npx sequelize-cli db:seed:all
+docker exec -it infernode-app npx sequelize-cli db:seed:all
 
 ```
 

@@ -1,22 +1,22 @@
-import { User } from "@/models";
-import { Role } from "@/utils/role";
+import { UserModel } from "@/models/user";
+import { UserRole } from "@/models/enums/user.role";
 import { Op, InferAttributes, InferCreationAttributes } from "sequelize";
 import { SequelizeBaseDAO } from "./base/sequelize.base.dao";
 
 // helpers for better type safety and consistency
-export type UserCreateAttributes = InferCreationAttributes<User>;
-export type UserUpdateAttributes = Partial<InferAttributes<User>>;
+export type UserCreateAttributes = InferCreationAttributes<UserModel>;
+export type UserUpdateAttributes = Partial<InferAttributes<UserModel>>;
 
 /**
  * User DAO class for database operations
  */
 export class UserDAO extends SequelizeBaseDAO<
-  User,
+  UserModel,
   UserCreateAttributes,
   UserUpdateAttributes
 > {
   constructor() {
-    super(User);
+    super(UserModel);
   }
 
   /**
@@ -24,7 +24,7 @@ export class UserDAO extends SequelizeBaseDAO<
    * @param email - The email to search for
    * @returns Promise of the user or null if not found
    */
-  async findByEmail(email: string): Promise<User | null> {
+  async findByEmail(email: string): Promise<UserModel | null> {
     try {
       return await this.findOneBy({ email });
     } catch (error) {
@@ -37,7 +37,7 @@ export class UserDAO extends SequelizeBaseDAO<
    * @param role - The role to search for
    * @returns Promise of array of users
    */
-  async findByRole(role: Role): Promise<User[]> {
+  async findByRole(role: UserRole): Promise<UserModel[]> {
     try {
       return await this.findBy({ role });
     } catch (error) {
@@ -51,9 +51,9 @@ export class UserDAO extends SequelizeBaseDAO<
    * @param tokens - New token amount
    * @returns Promise of the updated user or null if not found
    */
-  async updateTokens(id: string, tokens: number): Promise<User | null> {
+  async updateTokens(id: string, credit: number): Promise<UserModel | null> {
     try {
-      return await this.update(id, { tokens });
+      return await this.update(id, { credit });
     } catch (error) {
       throw new Error(`Error updating tokens for user ${id}: ${error}`);
     }
@@ -65,18 +65,18 @@ export class UserDAO extends SequelizeBaseDAO<
    * @param amount - Amount to deduct
    * @returns Promise of the updated user or null if insufficient tokens or user not found
    */
-  async deductTokens(id: string, amount: number): Promise<User | null> {
+  async deductTokens(id: string, amount: number): Promise<UserModel | null> {
     try {
       const user = await this.findById(id);
-      if (!user) {
+      if (!user || !user.credit) {
         return null;
       }
 
-      if (user.tokens < amount) {
+      if (user.credit < amount) {
         throw new Error("Insufficient tokens");
       }
 
-      const newTokens = user.tokens - amount;
+      const newTokens = user.credit - amount;
       return await this.updateTokens(id, newTokens);
     } catch (error) {
       throw new Error(`Error deducting tokens for user ${id}: ${error}`);
@@ -89,14 +89,14 @@ export class UserDAO extends SequelizeBaseDAO<
    * @param amount - Amount to add
    * @returns Promise of the updated user or null if user not found
    */
-  async addTokens(id: string, amount: number): Promise<User | null> {
+  async addTokens(id: string, amount: number): Promise<UserModel | null> {
     try {
       const user = await this.findById(id);
-      if (!user) {
+      if (!user || !user.credit) {
         return null;
       }
 
-      const newTokens = user.tokens + amount;
+      const newTokens = user.credit + amount;
       return await this.updateTokens(id, newTokens);
     } catch (error) {
       throw new Error(`Error adding tokens for user ${id}: ${error}`);
@@ -112,7 +112,12 @@ export class UserDAO extends SequelizeBaseDAO<
   async hasSufficientTokens(id: string, amount: number): Promise<boolean> {
     try {
       const user = await this.findById(id);
-      return user ? user.tokens >= amount : false;
+
+      if(!user || !user.credit){
+        return false;
+      }
+
+      return user ? user.credit >= amount : false;
     } catch (error) {
       throw new Error(`Error checking tokens for user ${id}: ${error}`);
     }
@@ -123,15 +128,15 @@ export class UserDAO extends SequelizeBaseDAO<
    * @param threshold - The token threshold
    * @returns Promise of array of users
    */
-  async findUsersWithLowTokens(threshold: number): Promise<User[]> {
+  async findUsersWithLowTokens(threshold: number): Promise<UserModel[]> {
     try {
       return (await this.model.findAll({
         where: {
-          tokens: {
+          credit: {
             [Op.lt]: threshold,
           },
         },
-      })) as User[];
+      })) as UserModel[];
     } catch (error) {
       throw new Error(`Error finding users with low tokens: ${error}`);
     }
