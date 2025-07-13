@@ -1,5 +1,5 @@
 
-import jwt from "jsonwebtoken";
+import jwt, { JwtPayload } from "jsonwebtoken";
 import fs from "fs";
 import path from "path";
 
@@ -18,7 +18,7 @@ export class JwtUtils {
     });
   }
 
-  static verifyToken(token: string): any {
+  static verifyToken(token: string): JwtPayload | string  {
     return jwt.verify(token, JwtUtils.publicKey, {
       algorithms: ["RS256"],
     });

@@ -11,6 +11,7 @@ export enum ErrorEnum {
   INSUFFICIENT_CREDITS_ERROR = "INSUFFICIENT_CREDITS_ERROR",
   DATASET_NAME_CONFLICT_ERROR = "DATASET_NAME_CONFLICT_ERROR",
   INVALID_FILE_FORMAT_ERROR = "INVALID_FILE_FORMAT_ERROR",
+  INVALID_JWT_FORMAT = "INVALID_JWT_FORMAT"
 }
 
 /**
@@ -104,6 +105,15 @@ class InvalidFileFormatError implements ErrorObj {
   }
 }
 
+class InvalidJWTFormat implements ErrorObj {
+  getErrorObj(): { status: number; msg: string } {
+    return {
+      status: StatusCodes.BAD_REQUEST,
+      msg: "Invalid jwt format.",
+    };
+  }
+}
+
 /**
  * Function 'getError'
  *
@@ -112,8 +122,8 @@ class InvalidFileFormatError implements ErrorObj {
  * @param type exception type, one of the ErrorEnum values
  * @returns An object implementing the ErrorObj interface, or null if the type is None.
  */
-export function getError(type: ErrorEnum): ErrorObj | null {
-  let retval: ErrorObj | null = null;
+export function getError(type: ErrorEnum): ErrorObj {
+  let retval: ErrorObj;
 
   switch (type) {
     case ErrorEnum.GENERIC_ERROR:
@@ -143,6 +153,8 @@ export function getError(type: ErrorEnum): ErrorObj | null {
     case ErrorEnum.INVALID_FILE_FORMAT_ERROR:
       retval = new InvalidFileFormatError();
       break;
+    case ErrorEnum.INVALID_JWT_FORMAT:
+      retval = new InvalidJWTFormat();
   }
 
   return retval;
