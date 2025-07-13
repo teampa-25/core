@@ -14,13 +14,13 @@ const sequelize = Database.getInstance();
 // inferattributes automatically infers what attributes the UserModel has
 // we don't need a UserAttributes interface
 export class User extends Model<InferAttributes<User>, InferCreationAttributes<User>> {
-  public id!: string;
+  public id?: string;
   public email!: string;
   public password!: string;
   public role!: UserRole;
-  public credit!: number;
-  public created_at!: Date;
-  public updated_at!: Date;
+  public credit?: number;
+  public created_at?: Date;
+  public updated_at?: Date;
 }
 
 User.init({

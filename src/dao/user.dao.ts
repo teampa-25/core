@@ -35,15 +35,14 @@ export class UserDAO implements IDAO<User> {
     return true;
   }
 
-    //InferCreationAttributes is used to infer the attributes needed to create a new UserModel instance
+  //InferCreationAttributes is used to infer the attributes needed to create a new UserModel instance
   async create(data: InferCreationAttributes<User>): Promise<string> {
-/*     const existing_user = await this.getByEmail(data.email);
-
-    if (existing_user) {
-      throw new Error("User with this email already exists");
+  const new_user = await User.create(data);
+  
+  if (!new_user.id){
+      throw new Error("User creation failed");
     }
- */
-    const new_user = await User.create(data);
+    
     return new_user.id; 
   }
 

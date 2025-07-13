@@ -68,6 +68,7 @@ Dataset.init(
     timestamps: true,
     createdAt: "created_at",
     updatedAt: "updated_at",
+    paranoid: true,
     indexes: [
       {
         name: "unique_user_dataset_name",

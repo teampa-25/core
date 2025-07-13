@@ -1,5 +1,5 @@
 import { UserDAO } from "@/dao-bak/user";
-import { UserModel } from "@/models/user";
+import { User } from "@/models/user";
 import { hashPass } from "@/utils/encryption";
 import { Request, Response, NextFunction } from "express";
 
@@ -8,7 +8,7 @@ export class UserController {
   async create(req: Request, res: Response, next: NextFunction): Promise<void> {
     // this REQUIRES admin authorization!
     const dao = new UserDAO()
-    const user = new UserModel()
+    const user = new User()
     let content = req.body
 
     user.email = content.email;

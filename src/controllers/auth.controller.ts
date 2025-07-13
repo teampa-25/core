@@ -1,4 +1,4 @@
-import { UserModel } from "@/models/user";
+import { User } from "@/models/user";
 import { JwtUtils } from "@/utils/jwt";
 import { Request, Response } from "express";
 import { StatusCodes } from "http-status-codes";
@@ -23,14 +23,14 @@ export class AuthController {
     }
 
     try {
-      const exists = await UserModel.findOne({ where: { email } });
+      const exists = await User.findOne({ where: { email } });
       if (exists) {
         return res.status(StatusCodes.CONFLICT).json({
           message: "Email already registered",
         });
       }
 
-      const user = await UserModel.create({
+      const user = await User.create({
         email,
         password: await hashPass(password),
         role,
@@ -62,7 +62,7 @@ export class AuthController {
     }
 
     try {
-      const user = await UserModel.findOne({ where: { email } });
+      const user = await User.findOne({ where: { email } });
       if (!user || !(await comparePass(password, user.password))) {
         return res.status(StatusCodes.UNAUTHORIZED).json({
           message: "Invalid credentials",
