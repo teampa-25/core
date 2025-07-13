@@ -9,9 +9,11 @@ import {
   errorHandler,
 } from "./middlewares/error.middleware";
 import { logger } from "./config/logger";
+import helmet from "helmet";
 
 const app = express();
 
+app.use(helmet());
 app.use(morganMiddleware);
 app.use(express.json());
 
