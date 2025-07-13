@@ -1,5 +1,5 @@
 import { InferCreationAttributes } from "sequelize";
-import { IDAO } from "./interfaces/idao";
+import { IDAO } from "@/dao/interfaces/idao";
 import { Video } from "@/models/video";
 import { ErrorEnum, getError } from "@/utils/api-error";
 

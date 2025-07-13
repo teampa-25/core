@@ -2,7 +2,7 @@ import { StatusCodes } from "http-status-codes";
 
 export enum ErrorEnum {
   GENERIC_ERROR = "GENERIC_ERROR",
-  DB_ERROR = "DB_ERROR",
+  CREATION_ERROR = "CREATION_ERROR",
   NOT_FOUND_ERROR = "NOT_FOUND_ERROR",
   NOT_FOUND_ROUTE_ERROR = "NOT_FOUND_ROUTE_ERROR",
   FORBIDDEN_ERROR = "FORBIDDEN_ERROR",

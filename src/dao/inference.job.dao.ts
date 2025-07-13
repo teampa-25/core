@@ -1,11 +1,8 @@
 import { InferCreationAttributes } from "sequelize";
-import { IDAO } from "./interfaces/idao"
+import { IDAO } from "@/dao/interfaces/idao";
 import { InferenceJob } from "@/models/inference.job";
 
-
-
 export class InferenceJobDAO implements IDAO<InferenceJob> {
-
   async get(id: string): Promise<InferenceJob | null> {
     return InferenceJob.findByPk(id);
   }
@@ -14,7 +11,10 @@ export class InferenceJobDAO implements IDAO<InferenceJob> {
     return InferenceJob.findAll();
   }
 
-  async update(id: string, data: Partial<InferenceJob>): Promise< InferenceJob | null> {
+  async update(
+    id: string,
+    data: Partial<InferenceJob>,
+  ): Promise<InferenceJob | null> {
     const update_inference_job = await this.get(id);
 
     if (!update_inference_job) {
@@ -35,12 +35,12 @@ export class InferenceJobDAO implements IDAO<InferenceJob> {
   }
 
   async create(data: InferCreationAttributes<InferenceJob>): Promise<string> {
-  const new_inference_job = await InferenceJob.create(data);
-  
-  if (!new_inference_job.id){
+    const new_inference_job = await InferenceJob.create(data);
+
+    if (!new_inference_job.id) {
       throw new Error("Inference Job creation failed");
     }
-    
-    return new_inference_job.id; 
+
+    return new_inference_job.id;
   }
 }
