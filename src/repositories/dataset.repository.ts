@@ -1,6 +1,5 @@
 import { Dataset } from "@/models/dataset";
 import { DatasetDAO } from "@/dao/dataset.dao";
-import { Op, WhereOptions } from "sequelize";
 
 export class DatasetRepository {
   private datasetDAO: DatasetDAO;
@@ -23,7 +22,7 @@ export class DatasetRepository {
       user_id: datasetData.user_id,
       name: datasetData.name,
       tags: datasetData.tags || [],
-    } as any);
+    } as Dataset);
   }
 
   /**

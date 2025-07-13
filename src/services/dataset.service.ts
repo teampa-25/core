@@ -1,11 +1,19 @@
 import { DatasetRepository } from "@/repositories/dataset.repository";
+import { VideoRepository } from "@/repositories/video.repository";
+import { UserRepository } from "@/repositories/user.repository";
 import { Dataset } from "@/models/dataset";
+import { ErrorEnum, getError } from "@/utils/api-error";
+import { VideoAnalyzer } from "@/utils/video-analyzer";
 
 export class DatasetService {
   private datasetRepository: DatasetRepository;
+  private videoRepository: VideoRepository;
+  private userRepository: UserRepository;
 
   constructor() {
     this.datasetRepository = new DatasetRepository();
+    this.videoRepository = new VideoRepository();
+    this.userRepository = new UserRepository();
   }
 
   /**
@@ -28,7 +36,7 @@ export class DatasetService {
     );
 
     if (exists) {
-      throw new Error("Un dataset con questo nome esiste già");
+      throw getError(ErrorEnum.DATASET_NAME_CONFLICT_ERROR);
     }
 
     const datasetId = await this.datasetRepository.create({
@@ -40,7 +48,7 @@ export class DatasetService {
     // Retrieves the created dataset to return it
     const createdDataset = await this.datasetRepository.findById(datasetId);
     if (!createdDataset) {
-      throw new Error("Errore nella creazione del dataset");
+      throw getError(ErrorEnum.DATASET_CREATION_ERROR);
     }
 
     return createdDataset;
@@ -98,7 +106,7 @@ export class DatasetService {
       userId,
     );
     if (!dataset) {
-      throw new Error("Dataset non trovato");
+      throw getError(ErrorEnum.DATASET_NOT_FOUND_ERROR);
     }
 
     // If updating the name, check for uniqueness
@@ -110,7 +118,7 @@ export class DatasetService {
       );
 
       if (exists) {
-        throw new Error("Un dataset con questo nome esiste già");
+        throw getError(ErrorEnum.DATASET_NAME_CONFLICT_ERROR);
       }
     }
 
@@ -134,7 +142,7 @@ export class DatasetService {
       userId,
     );
     if (!dataset) {
-      throw new Error("Dataset non trovato");
+      throw getError(ErrorEnum.DATASET_NOT_FOUND_ERROR);
     }
 
     return await this.datasetRepository.softDelete(datasetId);
@@ -144,8 +152,8 @@ export class DatasetService {
    * Adds videos to a dataset
    * @param datasetId
    * @param userId
-   * @param videos
-   * @returns a Promise that resolves to the updated dataset or null if not found
+   * @param videos Array of video files or single video file
+   * @returns a Promise that resolves with the result of the operation
    */
   async addVideosToDataset(
     datasetId: string,
@@ -158,15 +166,111 @@ export class DatasetService {
       userId,
     );
     if (!dataset) {
-      throw new Error("Dataset non trovato");
+      throw getError(ErrorEnum.NOT_FOUND_ERROR);
     }
 
-    // TODO: Implement video addition logic
-    // - Validate video format
-    // - Check user credits (0.001 per frame)
-    // - Save video to dataset
-    // - Update user credits
+    // Validate input videos
+    if (!videos || (!Array.isArray(videos) && !videos.mimetype)) {
+      throw getError(ErrorEnum.ZERO_VIDEOS_FOUND_ERROR);
+    }
 
-    return { message: "Funzionalità in fase di implementazione" };
+    // Since in projects assignment there's no refs to video formats, then we assumed that those below are the supported formats
+    const supportedFormats = [
+      "video/mp4",
+      "video/avi",
+      "video/mov",
+      "video/mkv",
+      "video/webm",
+    ];
+    const costPerFrame = 0.001; // Defined into projects assignment
+    const videoFiles = Array.isArray(videos) ? videos : [videos];
+
+    // Filter and validate video files
+    const validVideos = videoFiles.filter((file: any) => {
+      if (!file.mimetype) return false;
+
+      // Check if it's a supported video format
+      if (supportedFormats.includes(file.mimetype)) {
+        return true;
+      }
+
+      // Check if it's a zip file (I thinks that's better to build an utility for this - Gabs)
+      if (file.mimetype === "application/zip") {
+        // TODO: ZIP handler
+        throw getError(ErrorEnum.NOT_IMPLEMENTED_ERROR);
+        // return false;
+      }
+
+      return false;
+    });
+
+    if (validVideos.length === 0) {
+      throw getError(ErrorEnum.ZERO_VIDEOS_FOUND_ERROR);
+    }
+
+    // Calculate total cost for all videos
+    let totalFrames = 0;
+    const processedVideos = [];
+
+    for (const video of validVideos) {
+      // Extract frame count from video using VideoAnalyzer
+      const frameCount = await VideoAnalyzer.extractFrameCount(
+        video.buffer,
+        video.originalname || video.name,
+      );
+      totalFrames += frameCount;
+
+      processedVideos.push({
+        name: video.originalname || video.name,
+        file: video.buffer,
+        frameCount: frameCount,
+        size: video.size,
+      });
+    }
+
+    const totalCost = totalFrames * costPerFrame;
+
+    // Check if user has enough credits
+    const hasEnoughCredits = await this.userRepository.hasEnoughCredits(
+      userId,
+      totalCost,
+    );
+    if (!hasEnoughCredits) {
+      throw getError(ErrorEnum.INSUFFICIENT_CREDITS_ERROR);
+    }
+
+    // Deduct credits from user
+    await this.userRepository.deductCredits(userId, totalCost);
+
+    // Save videos to dataset
+    const savedVideoIds = [];
+    for (const video of processedVideos) {
+      try {
+        const videoId = await this.videoRepository.create({
+          dataset_id: datasetId,
+          file: video.file,
+          name: video.name,
+          frame_count: video.frameCount,
+        });
+        savedVideoIds.push(videoId);
+      } catch (error) {
+        // If saving fails, rollback credits
+        await this.userRepository.updateCredits(
+          userId,
+          (await this.userRepository.findById(userId))!.credit! + totalCost,
+        );
+        throw getError(ErrorEnum.VIDEO_SAVE_ERROR);
+      }
+    }
+
+    // TODO: hey mate, this is a placeholder, actually it's late and i need to sleep, tomorrow we discuss about this
+    return {
+      message: "Video aggiunti con successo al dataset",
+      datasetId,
+      videosAdded: savedVideoIds.length,
+      totalFrames,
+      costDeducted: totalCost,
+      videoIds: savedVideoIds,
+    };
   }
 }

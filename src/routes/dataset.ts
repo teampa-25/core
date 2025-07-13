@@ -1,6 +1,6 @@
 import { Router } from "express";
 import * as DatasetController from "@/controllers/dataset.controller";
-import authenticate from "@/middlewares/authenticate.middleware";
+import { authenticate } from "@/middlewares/authenticate.middleware";
 
 const router = Router();
 

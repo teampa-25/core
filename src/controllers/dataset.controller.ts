@@ -5,7 +5,12 @@ import { DatasetService } from "@/services/dataset.service";
 
 const datasetService = new DatasetService();
 
-// Crea un nuovo dataset
+/**
+ * Creates a new dataset
+ * @param req
+ * @param res
+ * @returns a response with the created dataset or an error
+ */
 export const createDataset = async (req: Request, res: Response) => {
   try {
     const userId = req.user?.id;
@@ -29,7 +34,12 @@ export const createDataset = async (req: Request, res: Response) => {
   }
 };
 
-// Cancella logicamente un dataset
+/**
+ * Deletes a dataset
+ * @param req
+ * @param res
+ * @returns a response indicating success or failure
+ */
 export const deleteDataset = async (req: Request, res: Response) => {
   try {
     const userId = req.user?.id;
@@ -58,7 +68,12 @@ export const deleteDataset = async (req: Request, res: Response) => {
   }
 };
 
-// Ottieni la lista dei dataset (con filtro per tag)
+/**
+ * Gets the list of datasets for the authenticated user
+ * @param req
+ * @param res
+ * @returns a response with the list of datasets
+ */
 export const getDatasets = async (req: Request, res: Response) => {
   try {
     const userId = req.user?.id;
@@ -83,7 +98,12 @@ export const getDatasets = async (req: Request, res: Response) => {
   }
 };
 
-// Aggiorna un dataset
+/**
+ * Updates a dataset
+ * @param req
+ * @param res
+ * @returns a response with the updated dataset or an error
+ */
 export const updateDataset = async (req: Request, res: Response) => {
   try {
     const userId = req.user?.id;
@@ -112,7 +132,12 @@ export const updateDataset = async (req: Request, res: Response) => {
   }
 };
 
-// Aggiungi video o zip di video al dataset
+/**
+ * Adds videos to a dataset
+ * @param req
+ * @param res
+ * @returns a response with the updated dataset or an error
+ */
 export const addVideosToDataset = async (req: Request, res: Response) => {
   try {
     const userId = req.user?.id;
@@ -135,7 +160,12 @@ export const addVideosToDataset = async (req: Request, res: Response) => {
   }
 };
 
-// Ottieni un dataset per id (già presente)
+/**
+ * Gets a dataset by ID
+ * @param req
+ * @param res
+ * @returns a response with the dataset or an error
+ */
 export const getDatasetById = async (req: Request, res: Response) => {
   const { id } = req.params;
   try {
