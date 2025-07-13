@@ -2,7 +2,7 @@ import { Router } from "express";
 // import { DatasetController } from "@/controllers/dataset.controller";
 
 const router = Router();
-const dataset = new DatasetController();
+// const dataset = new DatasetController();
 
 // router.route("/:id")
 //   .get(dataset.getByFilters)

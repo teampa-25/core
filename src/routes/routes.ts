@@ -1,8 +1,8 @@
 import { Router } from "express";
-import authRoute from "@/routes/auth.route"
-
+import authRoute from "@/routes/auth"
+import healthRoute from "@/routes/health"
+import adminRoute from "@/routes/admin"
 // import docsRoute from "@/routes/docs"
-// import healthRoute from "@/routes/health"
 
 const router = Router()
 
@@ -11,14 +11,14 @@ const defaultRoutes: Array<{ path: string, route: any }> = [
     path: "/auth",
     route: authRoute
   },
-  // {
-  //   path: "/docs",
-  //   route: docsRoute
-  // },
-  // {
-  //   path: "/health",
-  //   route: healthRoute
-  // }
+  {
+    path: "/health",
+    route: healthRoute
+  },
+  {
+    path: "/admin",
+    route: adminRoute
+  },
 ]
 
 defaultRoutes.forEach((route) => {

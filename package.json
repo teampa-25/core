@@ -3,6 +3,8 @@
     "dev": "nodemon --exec ts-node src/app.ts"
   },
   "dependencies": {
+    "@faker-js/faker": "^9.9.0",
+    "bcrypt": "^6.0.0",
     "dotenv": "^16.4.5",
     "express": "^4.19.2",
     "express-validator": "^7.1.0",
