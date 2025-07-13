@@ -1,46 +1,110 @@
 import { InferCreationAttributes } from "sequelize";
-import { IDAO } from "./interfaces/idao"
+import { IDAO } from "./interfaces/idao";
 import { Result } from "@/models/result";
-
-
+import { ErrorEnum, getError } from "@/utils/api-error";
 
 export class ResultDAO implements IDAO<Result> {
-
   async get(id: string): Promise<Result | null> {
-    return Result.findByPk(id);
+    try {
+      return await Result.findByPk(id);
+    } catch (error) {
+      throw getError(ErrorEnum.NOT_FOUND_ERROR)?.getErrorObj();
+    }
   }
 
   async getAll(): Promise<Result[]> {
-    return Result.findAll();
+    try {
+      return await Result.findAll();
+    } catch (error) {
+      throw getError(ErrorEnum.GENERIC_ERROR)?.getErrorObj();
+    }
   }
 
-  async update(id: string, data: Partial<Result>): Promise< Result | null> {
-    const update_result = await this.get(id);
+  async update(id: string, data: Partial<Result>): Promise<Result | null> {
+    try {
+      const update_result = await this.get(id);
 
-    if (!update_result) {
-      return null;
+      if (!update_result) {
+        return null;
+      }
+
+      return await update_result.update(data);
+    } catch (error) {
+      throw getError(ErrorEnum.GENERIC_ERROR)?.getErrorObj();
     }
-
-    return update_result.update(data);
   }
 
   async delete(id: string): Promise<boolean> {
-    const delete_result = await this.get(id);
+    try {
+      const delete_result = await this.get(id);
 
-    if (!delete_result) {
-      return false;
+      if (!delete_result) {
+        return false;
+      }
+
+      await delete_result.destroy();
+      return true;
+    } catch (error) {
+      throw getError(ErrorEnum.NOT_FOUND_ERROR)?.getErrorObj();
     }
-    await delete_result.destroy();
-    return true;
   }
 
   async create(data: InferCreationAttributes<Result>): Promise<string> {
-  const new_result = await Result.create(data);
-  
-  if (!new_result.id){
-      throw new Error("Result creation failed");
+    try {
+      const new_result = await Result.create(data);
+
+      if (!new_result.id) {
+        throw getError(ErrorEnum.CREATION_ERROR)?.getErrorObj();
+      }
+
+      return new_result.id;
+    } catch (error) {
+      throw getError(ErrorEnum.GENERIC_ERROR)?.getErrorObj();
     }
-    
-    return new_result.id; 
   }
 }
+
+// import { InferCreationAttributes } from "sequelize";
+// import { IDAO } from "./interfaces/idao"
+// import { Result } from "@/models/result";
+
+// export class ResultDAO implements IDAO<Result> {
+
+//   async get(id: string): Promise<Result | null> {
+//     return Result.findByPk(id);
+//   }
+
+//   async getAll(): Promise<Result[]> {
+//     return Result.findAll();
+//   }
+
+//   async update(id: string, data: Partial<Result>): Promise< Result | null> {
+//     const update_result = await this.get(id);
+
+//     if (!update_result) {
+//       return null;
+//     }
+
+//     return update_result.update(data);
+//   }
+
+//   async delete(id: string): Promise<boolean> {
+//     const delete_result = await this.get(id);
+
+//     if (!delete_result) {
+//       return false;
+//     }
+//     await delete_result.destroy();
+//     return true;
+//   }
+
+//   async create(data: InferCreationAttributes<Result>): Promise<string> {
+//   const new_result = await Result.create(data);
+
+//   if (!new_result.id){
+//       throw new Error("Result creation failed");
+//     }
+
+//     return new_result.id;
+//   }
+// }
