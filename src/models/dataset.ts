@@ -1,16 +1,26 @@
 import { Database } from "@/database/database";
-import { DataTypes, Model, CreationOptional, InferAttributes, InferCreationAttributes, ForeignKey } from "sequelize";
-import { UserModel } from "@/models/user";
+import {
+  DataTypes,
+  Model,
+  CreationOptional,
+  InferAttributes,
+  InferCreationAttributes,
+  ForeignKey,
+} from "sequelize";
+import { User } from "@/models/user";
 
 const sequelize = Database.getInstance();
 
 /**
  * Dataset Model Definition
- * 
+ *
  * @extends Dataset - Sequelize dataset model
-*/
+ */
 
-class Dataset extends Model<InferAttributes<Dataset>, InferCreationAttributes<Dataset>> {
+class Dataset extends Model<
+  InferAttributes<Dataset>,
+  InferCreationAttributes<Dataset>
+> {
   declare id: string;
   declare user_id: ForeignKey<string>;
   declare name: string;
@@ -79,8 +89,7 @@ Dataset.init(
         },
       },
     ],
-  }
+  },
 );
 
 export { Dataset };
-

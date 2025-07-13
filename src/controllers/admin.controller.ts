@@ -1,4 +1,3 @@
-import { UserModel } from "@/models/user";
+import { User } from "@/models/user";
 
-export class AdminController {
-}
+export class AdminController {}

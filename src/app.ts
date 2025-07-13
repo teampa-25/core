@@ -17,7 +17,7 @@ app.use(helmet());
 app.use(morganMiddleware);
 app.use(express.json());
 
-app.use("/", routes);
+app.use("/api", routes);
 
 app.use(notFoundHandler);
 app.use(errorConverter);

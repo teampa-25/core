@@ -1,20 +1,18 @@
-import { Sequelize } from 'sequelize';
-import enviroment from '@/config/enviroment';
+import { Sequelize } from "sequelize";
+import enviroment from "@/config/enviroment";
 /**
  * Database connection
- * 
+ *
  * @class Database
  * @property {Sequelize} sequelize - The Sequelize instance managing the database connection.
  */
 
 export class Database {
-
   private static instance: Database;
   private readonly sequelize: Sequelize;
 
   private constructor() {
-
-    // NOTE: false fallback value is used to ensure that if one of them 
+    // NOTE: false fallback value is used to ensure that if one of them
     // is missing, the following if statement will throw an error
     // (i dont like undefined values honestly, hard to understand why they exist)
     // -beg
@@ -35,7 +33,7 @@ export class Database {
     this.sequelize = new Sequelize(db_name, db_user, db_password, {
       host: db_host,
       port: Number(db_port),
-      dialect: 'postgres',
+      dialect: "postgres",
       //logging: db_logging,
     });
   }

@@ -1,16 +1,17 @@
-import config from "@/config/config";
+import enviroment from "@/config/enviroment";
+import config from "@/config/enviroment";
 
 export const swaggerDef = {
   myapi: "3.0.0",
   info: {
     title: "InferNode API",
-    version: config.apiVersion || "v1",
+    version: "v1",
     description:
       "A REST API built with Node.js, TypeScript, Express, and PostgreSQL",
   },
   servers: [
     {
-      url: `http://localhost:${config.port}`,
+      url: `http://localhost:${enviroment.apiPort}`,
       description: "Development server",
     },
   ],

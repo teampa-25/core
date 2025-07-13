@@ -1,4 +1,4 @@
-require('dotenv').config();
+require("dotenv").config();
 
 // sequelize specific configuration
 export const development = {
