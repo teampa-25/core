@@ -7,20 +7,21 @@ export class JwtUtils {
   private static privateKeyPath = enviroment.jwtPrivateKeyPath;
   private static publicKeyPath = enviroment.jwtPublicKeyPath;
   private static expiresIn = enviroment.jwtExpiresIn;
+  private static algorithm = enviroment.jwtAlgorithm  as jwt.Algorithm;
 
   private static privateKey = fs.readFileSync(JwtUtils.privateKeyPath, "utf8");
   private static publicKey = fs.readFileSync(JwtUtils.publicKeyPath, "utf8");
 
   static generateToken(payload: object): string {
     return jwt.sign(payload, JwtUtils.privateKey, {
-      algorithm: "RS256",
+      algorithm: JwtUtils.algorithm,
       expiresIn: JwtUtils.expiresIn,
     });
   }
 
   static verifyToken(token: string): JwtPayload | string  {
     return jwt.verify(token, JwtUtils.publicKey, {
-      algorithms: ["RS256"],
+      algorithms: [JwtUtils.algorithm],
     });
   }
 }
