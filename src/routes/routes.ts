@@ -1,5 +1,6 @@
 import { Router } from "express";
-import authRoute from "@/routes/auth"
+import authRoute from "@/routes/auth.route"
+
 // import docsRoute from "@/routes/docs"
 // import healthRoute from "@/routes/health"
 
