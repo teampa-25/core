@@ -16,7 +16,8 @@ interface Enviroment{
     jwtPrivateKeyPath: string;
     jwtPublicKeyPath: string;
     jwtExpiresIn: string;
-    jwtSaltRounds: number;
+    jwtAlgorithm: string;
+    saltRounds: number;
     maxConcurrentJobs: number;
 }
 
@@ -31,11 +32,12 @@ const enviroment: Enviroment = {
     postgresUser: process.env.POSTGRES_USER || "admin",
     postgresPassword: process.env.POSTGRES_PASSWORD || "admin",
     postgresDB: process.env.POSTGRES_DB || "db",
-    jwtPrivateKeyPath: process.env.JWT_PRIVATE_KEY_PATH || "../keys/private.key",
-    jwtPublicKeyPath: process.env.JWT_PUBLIC_KEY_PATH || "../keys/public.key",
+    jwtPrivateKeyPath: process.env.JWT_PRIVATE_KEY_PATH || "../../keys/private.key",
+    jwtPublicKeyPath: process.env.JWT_PUBLIC_KEY_PATH || "../../keys/public.key",
     jwtExpiresIn: process.env.JWT_EXPIRES_IN || "1h",
-    jwtSaltRounds: Number(process.env.JWT_SALT_ROUNDS) || 10,
-    maxConcurrentJobs: Number(process.env.MAX_CONCURRENT_JOBS) || 2
+    jwtAlgorithm: (process.env.JWT_ALGORITHM || "RS256"),
+    saltRounds: Number(process.env.JWT_SALT_ROUNDS) || 10,
+    maxConcurrentJobs: Number(process.env.MAX_CONCURRENT_JOBS) || 2,
 };
 
 export default enviroment;
