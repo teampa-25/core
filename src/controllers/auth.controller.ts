@@ -1,9 +1,9 @@
-import bcrypt from "bcrypt";
 import { UserModel } from "@/models/user";
 import { JwtUtils } from "@/utils/jwt";
 import { Request, Response } from "express";
 import { StatusCodes } from "http-status-codes";
 import { UserRole } from "@/models/enums/user.role";
+import { hashPass, comparePass } from "@/utils/encryption";
 
 
 export class AuthController {
@@ -32,7 +32,7 @@ export class AuthController {
 
       const user = await UserModel.create({
         email,
-        password: await bcrypt.hash(password, 10),
+        password: await hashPass(password),
         role,
       });
 
@@ -63,7 +63,7 @@ export class AuthController {
 
     try {
       const user = await UserModel.findOne({ where: { email } });
-      if (!user || !(await bcrypt.compare(password, user.password))) {
+      if (!user || !(await comparePass(password, user.password))) {
         return res.status(StatusCodes.UNAUTHORIZED).json({
           message: "Invalid credentials",
         });
