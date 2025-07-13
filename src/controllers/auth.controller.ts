@@ -1,5 +1,5 @@
 import bcrypt from "bcrypt";
-import { User } from "@/models/user";
+import { UserModel } from "@/models/user";
 import { JwtUtils } from "@/utils/jwt";
 import { Request, Response } from "express";
 import { StatusCodes } from "http-status-codes";
@@ -23,14 +23,14 @@ export class AuthController {
     }
 
     try {
-      const exists = await User.findOne({ where: { email } });
+      const exists = await UserModel.findOne({ where: { email } });
       if (exists) {
         return res.status(StatusCodes.CONFLICT).json({
           message: "Email already registered",
         });
       }
 
-      const user = await User.create({
+      const user = await UserModel.create({
         email,
         password: await bcrypt.hash(password, 10),
         role,
@@ -62,7 +62,7 @@ export class AuthController {
     }
 
     try {
-      const user = await User.findOne({ where: { email } });
+      const user = await UserModel.findOne({ where: { email } });
       if (!user || !(await bcrypt.compare(password, user.password))) {
         return res.status(StatusCodes.UNAUTHORIZED).json({
           message: "Invalid credentials",
