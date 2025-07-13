@@ -1,23 +1,85 @@
-import jwt from "jsonwebtoken";
-import fs from "fs"
-import { StatusCodes } from "http-status-codes";
+import { UserModel } from "@/models/user";
+import { JwtUtils } from "@/utils/jwt";
 import { Request, Response } from "express";
-import { Database } from "@/database/database";
+import { StatusCodes } from "http-status-codes";
+import { UserRole } from "@/models/enums/user.role";
+import { hashPass, comparePass } from "@/utils/encryption";
+
 
 export class AuthController {
+  static async register(req: Request, res: Response):Promise<Response> {
+    const { email, password, role } = req.body;
 
-  async login(req: Request, res: Response): Promise<void> {
-    const { email, password } = req.body;
+    if (!email || !password || !role) {
+      return res.status(StatusCodes.BAD_REQUEST).json({
+        message: "Missing required fields",
+      });
+    }
 
-    //Change once the JWT private key is set -cate
-    res.status(StatusCodes.OK).json({ message: "Login successful", email });
+    if (!Object.values(UserRole).includes(role)) {
+      return res.status(StatusCodes.BAD_REQUEST).json({
+        message: "Invalid role",
+      });
+    }
+
+    try {
+      const exists = await UserModel.findOne({ where: { email } });
+      if (exists) {
+        return res.status(StatusCodes.CONFLICT).json({
+          message: "Email already registered",
+        });
+      }
+
+      const user = await UserModel.create({
+        email,
+        password: await hashPass(password),
+        role,
+      });
+
+      return res.status(StatusCodes.CREATED).json({
+        message: "User registered successfully",
+        user: {
+          id: user.id,
+          email: user.email,
+          role: user.role,
+        },
+      });
+    } catch (err) {
+      console.error("Register error:", err);
+      return res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
+        message: "Internal server error",
+      });
+    }
   }
 
-  async register(req: Request, res: Response): Promise<void> {
+  static async login(req: Request, res: Response):Promise<Response> {
     const { email, password } = req.body;
 
-    //Change once the JWT private key is set -cate
-    res.status(StatusCodes.OK).json({ message: "Registration successful", email });
+    if (!email || !password) {
+      return res.status(StatusCodes.BAD_REQUEST).json({
+        message: "Missing email or password",
+      });
+    }
+
+    try {
+      const user = await UserModel.findOne({ where: { email } });
+      if (!user || !(await comparePass(password, user.password))) {
+        return res.status(StatusCodes.UNAUTHORIZED).json({
+          message: "Invalid credentials",
+        });
+      }
+
+      const token = JwtUtils.generateToken({ id: user.id, email: user.email, role: user.role });
+
+      return res.status(StatusCodes.OK).json({
+        message: "Login successful",
+        token,
+      });
+    } catch (err) {
+      console.error("Login error:", err);
+      return res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
+        message: "Internal server error",
+      });
+    }
   }
 }
-

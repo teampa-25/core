@@ -8,7 +8,7 @@ const sequelize = Database.getInstance();
 /**
  * User Model Definition
  * 
- * @exports User - Sequelize user model
+ * @exports UserModel - Sequelize user model
 */
 
 // inferattributes automatically infers what attributes the UserModel has
