@@ -1,23 +1,7 @@
 import { Request, Response, NextFunction } from "express";
 import { JwtUtils } from "@/utils/jwt";
 import { ErrorEnum, getError } from "@/utils/api-error";
-import { th } from "@faker-js/faker/.";
-
-
-interface UserPayload{
-  id: string,
-  email: string,
-  role: string
-}
-
-declare global {
-  namespace Express {
-    interface Request {
-      user: UserPayload; 
-    }
-  }
-}
-
+import { UserPayload } from "@/@types/UserPayload";
 
 export function authenticate(req: Request, res: Response, next: NextFunction) {
   const authHeader = req.headers.authorization;
@@ -39,7 +23,6 @@ export function authenticate(req: Request, res: Response, next: NextFunction) {
 
   next();
 }
-
 
 export function authenticate2(req: Request, res: Response, next: NextFunction){
   try {
