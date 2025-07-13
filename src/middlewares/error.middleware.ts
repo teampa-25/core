@@ -25,6 +25,8 @@ export const notFoundHandler = (
  */
 export const errorConverter = (
   err: any,
+  req: Request,
+  res: Response,
   next: NextFunction,
 ): void => {
   if (err && typeof err.getErrorObj === "function") {
@@ -62,4 +64,3 @@ export const errorHandler = (
     });
   }
 };
-

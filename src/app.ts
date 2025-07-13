@@ -1,13 +1,32 @@
-import express from 'express';
-import "tsconfig-paths/register"            // required for path aliases like @/*
-import router from '@/routes/routes'
-import enviroment from './config/enviroment';
+import express from "express";
+import "tsconfig-paths/register"; // required for path aliases like @/*
+import routes from "@/routes/routes";
+import enviroment from "./config/enviroment";
+import { morganMiddleware } from "./config/morgan";
+import {
+  notFoundHandler,
+  errorConverter,
+  errorHandler,
+} from "./middlewares/error.middleware";
+import { logger } from "./config/logger";
+
 const app = express();
-const API_PORT = enviroment.apiPort;
 
-app.use(express.json()) // used for parsing incoming requests with JSON payload
-app.use("/", router)
+app.use(morganMiddleware);
+app.use(express.json());
 
-app.listen(API_PORT, () => {
-  console.log(`Server running at http://localhost:${API_PORT}`);
+app.use("/", routes);
+
+app.use(notFoundHandler);
+app.use(errorConverter);
+app.use(errorHandler);
+
+app.listen(enviroment.apiPort, () => {
+  logger.info(`Server running on port ${enviroment.apiPort}`);
+  logger.info(
+    `API Documentation: http://localhost:${enviroment.apiPort}/api/docs`,
+  );
+  logger.info(
+    `Health Check: http://localhost:${enviroment.apiPort}/api/health`,
+  );
 });
