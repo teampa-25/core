@@ -1,6 +1,6 @@
 import { Database } from "@/database/database";
 import { DataTypes, Model, CreationOptional, InferAttributes, InferCreationAttributes, ForeignKey } from "sequelize";
-import { User } from "@/models/user";
+import { UserModel } from "@/models/user";
 
 const sequelize = Database.getInstance();
 
@@ -68,6 +68,7 @@ Dataset.init(
     timestamps: true,
     createdAt: "created_at",
     updatedAt: "updated_at",
+    paranoid: true,
     indexes: [
       {
         name: "unique_user_dataset_name",

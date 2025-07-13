@@ -4,6 +4,7 @@ import { StatusCodes } from "http-status-codes";
 export enum ErrorEnum {
   GENERIC_ERROR = "GENERIC_ERROR",
   NOT_FOUND_ERROR = "NOT_FOUND_ERROR",
+  NOT_FOUND_ROUTE_ERROR = "NOT_FOUND_ROUTE_ERROR",
   FORBIDDEN_ERROR = "FORBIDDEN_ERROR",
   UNAUTHORIZED_ERROR = "UNAUTHORIZED_ERROR",
   BAD_REQUEST_ERROR = "BAD_REQUEST_ERROR",
@@ -31,11 +32,20 @@ class GenericError implements ErrorObj {
   }
 }
 
-class NotFoundError implements ErrorObj {
+class NotFoundRouteError implements ErrorObj {
   getErrorObj(): { status: number; msg: string } {
     return {
       status: StatusCodes.NOT_FOUND,
       msg: "Route not found. Please check the URL and try again.",
+    };
+  }
+}
+
+class NotFoundError implements ErrorObj {
+  getErrorObj(): { status: number; msg: string } {
+    return {
+      status: StatusCodes.NOT_FOUND,
+      msg: "Object not found. Please check the params and try again.",
     };
   }
 }
@@ -111,6 +121,9 @@ export function getError(type: ErrorEnum): ErrorObj | null {
       break;
     case ErrorEnum.NOT_FOUND_ERROR:
       retval = new NotFoundError();
+      break;
+    case ErrorEnum.NOT_FOUND_ROUTE_ERROR:
+      retval = new NotFoundRouteError();
       break;
     case ErrorEnum.FORBIDDEN_ERROR:
       retval = new ForbiddenError();
