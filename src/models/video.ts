@@ -1,7 +1,7 @@
-import { SingletonDBConnection } from "../database/dbConnection";
+import { Database } from "../database/database";
 import { DataTypes, Model, InferAttributes, InferCreationAttributes, ForeignKey } from "sequelize";
 
-const sequelize = SingletonDBConnection.getInstance();
+const sequelize = Database.getInstance();
 
 /**
  * Video Model Definition

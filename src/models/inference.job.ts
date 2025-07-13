@@ -1,8 +1,8 @@
-import { SingletonDBConnection } from "@/database/database";
+import { Database } from "@/database/database";
 import { DataTypes, Model, InferAttributes, InferCreationAttributes, ForeignKey } from "sequelize";
 import { InferenceJobStatus } from "./enums/inference.job.status";
 
-const sequelize = SingletonDBConnection.getInstance();
+const sequelize = Database.getInstance();
 
 /**
  * InferenceJob Model Definition

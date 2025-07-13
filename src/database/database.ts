@@ -24,7 +24,7 @@ export class Database {
     const db_name = process.env.POSTGRES_DB || false;
     const db_host = process.env.POSTGRES_HOST || false;
     const db_port = process.env.POSTGRES_PORT || false;
-    const db_logging = process.env.POSTGRES_LOGGING || false;
+    //const db_logging = process.env.POSTGRES_LOGGING || false;
 
     if (!db_user || !db_password || !db_name || !db_host || !db_port) {
       throw new Error("Missing required environment variables");
@@ -38,7 +38,7 @@ export class Database {
       host: db_host,
       port: Number(db_port),
       dialect: 'postgres',
-      logging: db_logging,
+      //logging: db_logging,
     });
   }
 
