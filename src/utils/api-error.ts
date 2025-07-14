@@ -77,15 +77,6 @@ class BadRequestError implements ErrorObj {
   }
 }
 
-class InsufficientCreditsError implements ErrorObj {
-  getErrorObj(): { status: number; msg: string } {
-    return {
-      status: StatusCodes.PAYMENT_REQUIRED,
-      msg: "Insufficient credits to perform this operation.",
-    };
-  }
-}
-
 class DatasetNameConflictError implements ErrorObj {
   getErrorObj(): { status: number; msg: string } {
     return {
@@ -151,6 +142,11 @@ export function getError(type: ErrorEnum): ErrorObj {
       break;
     case ErrorEnum.INVALID_JWT_FORMAT:
       retval = new InvalidJWTFormat();
+      break;
+
+    default:
+      retval = new GenericError();
+      break;
   }
 
   return retval;
