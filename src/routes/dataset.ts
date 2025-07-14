@@ -4,22 +4,22 @@ import { authenticate } from "@/middlewares/authenticate.middleware";
 
 const router = Router();
 
-// Crea un nuovo dataset
+// Create a new dataset
 router.post("/", authenticate, DatasetController.createDataset);
 
-// Cancella logicamente un dataset
+// Logically delete a dataset
 router.delete("/:id", authenticate, DatasetController.deleteDataset);
 
-// Ottieni la lista dei dataset (con filtro per tag)
+// Get the list of datasets (with tag filtering)
 router.get("/", authenticate, DatasetController.getDatasets);
 
-// Aggiorna un dataset
+// Update a dataset
 router.put("/:id", authenticate, DatasetController.updateDataset);
 
-// Aggiungi video o zip di video al dataset
+// Add videos or zip files to the dataset
 router.post("/:id/videos", authenticate, DatasetController.addVideosToDataset);
 
-// Ottieni un dataset per id (già presente)
+// Get a dataset by id (already present)
 router.get("/:id", authenticate, DatasetController.getDatasetById);
 
 export default router;

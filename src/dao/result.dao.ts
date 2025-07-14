@@ -54,7 +54,7 @@ export class ResultDAO implements IDAO<Result> {
       const new_result = await Result.create(data);
 
       if (!new_result.id) {
-        throw getError(ErrorEnum.CREATION_ERROR)?.getErrorObj();
+        throw getError(ErrorEnum.GENERIC_ERROR)?.getErrorObj();
       }
 
       return new_result.id;

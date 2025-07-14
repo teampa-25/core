@@ -1,6 +1,10 @@
 import { Dataset } from "@/models/dataset";
 import { DatasetDAO } from "@/dao/dataset.dao";
 
+/**
+ * DatasetRepository is responsible for managing dataset data.
+ * It provides methods to create, find, update, and delete datasets.
+ */
 export class DatasetRepository {
   private datasetDAO: DatasetDAO;
 

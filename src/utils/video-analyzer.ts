@@ -87,9 +87,7 @@ export class VideoAnalyzer {
         frameRate,
       };
     } catch (error) {
-      throw new Error(
-        `Error analyzing video: ${error instanceof Error ? error.message : "Unknown error"}`,
-      );
+      throw getError(ErrorEnum.GENERIC_ERROR).getErrorObj();
     } finally {
       // Clean up temporary file
       if (tempFilePath) {
@@ -125,7 +123,7 @@ export class VideoAnalyzer {
     try {
       await fs.promises.unlink(filePath);
     } catch (error) {
-      throw getError(ErrorEnum.CLEANUP_ERROR);
+      throw getError(ErrorEnum.GENERIC_ERROR).getErrorObj();
     }
   }
 

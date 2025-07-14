@@ -73,7 +73,7 @@ export class UserRepository {
     }
 
     if (user.credit < creditsToDeduct) {
-      throw getError(ErrorEnum.NO_CREDIT);
+      throw getError(ErrorEnum.UNAUTHORIZED_ERROR).getErrorObj();
     }
 
     const newCreditAmount = user.credit - creditsToDeduct;
