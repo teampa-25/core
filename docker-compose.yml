@@ -3,7 +3,7 @@ services:
     build: .
     container_name: infernode-app
     ports:
-      - "${API_HOST:-3000}:3000"
+      - "${API_PORT:-3000}:3000"
     env_file: .env
     environment:
       - NODE_ENV=${NODE_ENV}
