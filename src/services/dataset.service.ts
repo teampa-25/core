@@ -20,15 +20,53 @@ export class DatasetService {
   }
 
   /**
+   * extract frame count from video
+   */
+  private async calcFreameCount(
+    videoName: string,
+    video: Buffer,
+  ): Promise<number> {
+    return await VideoAnalyzer.extractFrameCount(video, videoName);
+  }
+
+  /**
+   * add video to repo
+   */
+  private async addVideoToRepo(
+    videoName: string,
+    video: Buffer,
+    datasetId: string,
+    frame_count: number,
+  ): Promise<string> {
+    const videoId = await this.videoRepository.create({
+      dataset_id: datasetId,
+      name: videoName,
+      file: video,
+      frame_count: frame_count,
+    });
+
+    return videoId;
+  }
+
+  /**
+   * Calulcate the cost of upload
+   */
+  private async calculateCost(frame_count: number): Promise<number> {
+    // TODO: this should be moved to a config file or constants file
+    const framecost = 0.001;
+    return frame_count * framecost;
+  }
+
+  /**
    * Create a new dataset
-   * @param userId
-   * @param datasetData
    * @returns a Promise that resolves to the created dataset
    */
   async createDataset(
     userId: string,
     datasetData: { name: string; tags?: string[] },
   ): Promise<Dataset> {
+    // should datasetData be declared somewhere else?
+
     const exists = await this.datasetRepository.existsByNameAndUserId(
       datasetData.name,
       userId,
@@ -53,7 +91,6 @@ export class DatasetService {
 
   /**
    * Returns the list of datasets for a certain user
-   * @param userId
    * @param filters filter bucket (really helpful) DO NOT REMOVE
    * @returns a Promise that resolves to an array of datasets
    */
@@ -66,39 +103,30 @@ export class DatasetService {
 
   /**
    * Returns a dataset by its ID
-   * @param datasetId
-   * @param userId
    * @returns a Promise that resolves to the dataset or null if not found
    */
   async getDatasetById(datasetId: string): Promise<Dataset | null> {
-    // if (!userId) throw getError();
-    // return await this.datasetRepository.findByIdAndUserId(datasetId, userId);
     return await this.datasetRepository.findById(datasetId);
   }
 
   /**
    * Updates a dataset
-   * @param datasetId
-   * @param userId
-   * @param updateData
+   * @param datasetId dataset id
+   * @param userId user id
+   * @param updateData name and tags to be updated
    * @returns a Promise that resolves to the updated dataset or null if not found
    */
   async updateDataset(
     datasetId: string,
     userId: string,
-    updateData: {
-      name?: string;
-      tags?: string[];
-    },
+    updateData: { name?: string; tags?: string[] },
   ): Promise<Dataset | null> {
     // Checks if the dataset belongs to the user
     const dataset = await this.datasetRepository.findByIdAndUserId(
       datasetId,
       userId,
     );
-    if (!dataset) {
-      throw getError(ErrorEnum.NOT_FOUND_ERROR).getErrorObj();
-    }
+    if (!dataset) throw getError(ErrorEnum.NOT_FOUND_ERROR).getErrorObj();
 
     // If updating the name, check for uniqueness
     if (updateData.name && updateData.name !== dataset.name) {
@@ -107,10 +135,8 @@ export class DatasetService {
         userId,
         datasetId,
       );
-
-      if (exists) {
+      if (exists)
         throw getError(ErrorEnum.DATASET_NAME_CONFLICT_ERROR).getErrorObj();
-      }
     }
 
     const updatedDataset = await this.datasetRepository.update(
@@ -122,8 +148,8 @@ export class DatasetService {
 
   /**
    * Soft deletes a dataset
-   * @param datasetId
-   * @param userId
+   * @param datasetId dataset id
+   * @param userId user id
    * @returns a Promise that resolves to true if the dataset was deleted, false otherwise
    */
   async deleteDataset(datasetId: string, userId: string): Promise<boolean> {
@@ -132,37 +158,9 @@ export class DatasetService {
       datasetId,
       userId,
     );
-    if (!dataset) {
-      throw getError(ErrorEnum.NOT_FOUND_ERROR).getErrorObj();
-    }
+    if (!dataset) throw getError(ErrorEnum.NOT_FOUND_ERROR).getErrorObj();
 
     return await this.datasetRepository.softDelete(datasetId);
-  }
-
-  private async calcFreameCount(videoName: string, video: Buffer) {
-    return await VideoAnalyzer.extractFrameCount(video, videoName);
-  }
-
-  private async addVideoToRepo(
-    videoName: string,
-    video: Buffer,
-    datasetId: string,
-    frame_count: number,
-  ): Promise<string> {
-    const videoId = await this.videoRepository.create({
-      dataset_id: datasetId,
-      name: videoName,
-      file: video,
-      frame_count: frame_count,
-    });
-
-    return videoId;
-  }
-
-  private async calculateCost(frame_count: number): Promise<number> {
-    // TODO: this should be moved to a config file or constants file
-    const framecost = 0.001;
-    return frame_count * framecost;
   }
 
   /**

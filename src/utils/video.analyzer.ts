@@ -19,6 +19,9 @@ interface VideoInfo {
  * Extracts frame count and other informations from a video file buffer
  */
 export class VideoAnalyzer {
+  static ffprobe_command: string =
+    "ffprobe -v quiet -select_streams v:0 -count_frames -show_entries stream=nb_read_frames,duration,width,height,avg_frame_rate -print_format json";
+
   /**
    * Extract frame count from video buffer
    * @param videoBuffer - The video file as Buffer
@@ -49,38 +52,42 @@ export class VideoAnalyzer {
       // Create temporary file
       tempFilePath = await this.createTempFile(videoBuffer, filename);
 
-      // TODO: checks if this command is correct
-      const command = `ffprobe -v quiet -select_streams v:0 -count_frames -show_entries stream=nb_read_frames,duration,width,height,avg_frame_rate -of csv=p=0 "${tempFilePath}"`;
+      const command = `${this.ffprobe_command} "${tempFilePath}"`;
+      /* OUTPUT FOR REFERENCE
+       *  {
+       *    "programs": [],
+       *    "stream_groups": [],
+       *    "streams": [{
+       *          "width": 640,
+       *          "height": 480,
+       *          "avg_frame_rate": "10/1",
+       *          "duration": "10.000000",
+       *          "nb_read_frames": "100"
+       *        }]
+       *  }
+       */
 
       const { stdout } = await execAsync(command);
+      if (!stdout) throw new Error("No ffprobe output");
 
-      // Parse ffprobe output
-      const lines = stdout.trim().split("\n");
-      if (lines.length === 0) {
-        throw new Error("No video stream found");
-      }
+      const json = JSON.parse(stdout);
 
-      const data = lines[0].split(",");
+      const stream = json.streams?.[0];
+      if (!stream) throw new Error("No video stream found");
 
-      if (data.length < 5) {
-        throw new Error("Invalid ffprobe output format");
-      }
+      const frameCount = parseInt(stream.nb_read_frames) || 0;
+      const duration = parseFloat(stream.duration) || 0;
+      const width = parseInt(stream.width) || 0;
+      const height = parseInt(stream.height) || 0;
 
-      const frameCount = parseInt(data[0]) || 0;
-      const duration = parseFloat(data[1]) || 0;
-      const width = parseInt(data[2]) || 0;
-      const height = parseInt(data[3]) || 0;
-
-      // Parse frame rate (format: num/den)
-      const frameRateStr = data[4];
+      const frameRateStr = stream.avg_frame_rate || "0/1";
       const frameRate = this.parseFrameRate(frameRateStr);
 
-      // Validate frame count => if ffprobe couldn't count frames, estimate from duration and frame rate
-      const finalFrameCount =
-        frameCount > 0 ? frameCount : Math.floor(duration * frameRate);
+      // dont need this i think, its a redundant calculation, we already have that value from nb_read_frames
+      // const finalFrameCount = frameCount > 0 ? frameCount : Math.floor(duration * frameRate);
 
       return {
-        frameCount: finalFrameCount,
+        frameCount,
         duration,
         width,
         height,
