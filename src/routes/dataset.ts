@@ -37,8 +37,8 @@ router.put(
 router.post(
   "/:id/videos",
   validate(IdSchema, "params"),
-  validate(DatasetSchema.addVideoArray, "body"),
-  datasetController.addVideoArray,
+  validate(DatasetSchema.uploadVideo, "body"),
+  datasetController.uploadVideo,
 );
 
 // Get a dataset by id (already present)
