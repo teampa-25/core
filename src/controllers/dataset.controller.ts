@@ -109,16 +109,16 @@ export class DatasetController {
     const { id } = req.params;
     const content: Buffer = req.body.content;
     const type: string = req.body.type;
+    const name: string = req.body.name;
 
     const result = await this.datasetService.uploadVideo(
       id,
       userId,
       content,
+      name,
       type,
     );
 
-    // TODO: before sending ok check that all is good -beg
-    //
     return res.status(StatusCodes.OK).json(result);
   });
 
