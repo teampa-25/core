@@ -19,12 +19,11 @@ services:
       - /app/keys
       - ./tsconfig.json:/app/tsconfig.json
 
-
   # ask for port configuration to Sir. Adriano
   redis:
     image: redis:latest
     ports:
-      - "${REDIS_PORT}:${REDIS_PORT}"
+      - "${REDIS_PORT:-6379}:6379"
 
   postgres:
     image: postgres:latest

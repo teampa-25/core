@@ -4,6 +4,7 @@ import { authenticate } from "@/middlewares/authenticate.middleware";
 import { validate } from "@/middlewares/validate.middleware";
 import { DatasetSchema, IdSchema } from "@/utils/validation-schema";
 import { param } from "express-validator";
+import { authorize } from "@/middlewares/authorize.middleware";
 
 const router = Router();
 const datasetController = new DatasetController();
@@ -11,28 +12,28 @@ const datasetController = new DatasetController();
 router.use(authenticate); // Apply authentication middleware to all routes in this router
 
 // Create a new dataset
-router.post(
-  "/",
-  validate(DatasetSchema.create),
-  datasetController.createDataset,
-);
+router.post("/", validate(DatasetSchema.create), datasetController.create);
 
 // Logically delete a dataset
 router.delete(
   "/:id",
   validate(IdSchema, "params"),
-  datasetController.deleteDataset,
+  // AUTHOROIZE
+  datasetController.delete,
 );
 
-// Get the list of datasets (with tag filtering)
-router.get("/", datasetController.getDatasets);
+// Get the list of all datasets
+router.get("/", datasetController.getAll);
+
+// what type of filters??
+router.get("/:filters", datasetController.where);
 
 // Update a dataset
 router.put(
   "/:id",
   validate(IdSchema, "params"),
   validate(DatasetSchema.update),
-  datasetController.updateDataset,
+  datasetController.update,
 );
 
 // Add videos or zip files to the dataset
@@ -40,14 +41,10 @@ router.post(
   "/:id/videos",
   validate(IdSchema, "params"),
   validate(DatasetSchema.addVideos),
-  datasetController.addVideosToDataset,
+  datasetController.addVideoArray,
 );
 
 // Get a dataset by id (already present)
-router.get(
-  "/:id",
-  validate(IdSchema, "params"),
-  datasetController.getDatasetById,
-);
+router.get("/:id", validate(IdSchema, "params"), datasetController.getById);
 
 export default router;

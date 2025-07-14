@@ -9,8 +9,8 @@ export const UserSchema = {
   register: Joi.object({
     email: Joi.string().email().required(),
     password: Joi.string().required(),
-    credits: Joi.number().min(0).required(),
-    role: Joi.string().equal(UserRole).required(),
+    // credits: Joi.number().min(0).required(),
+    // role: Joi.string().equal(UserRole).required(),
   }),
 
   login: Joi.object({
@@ -44,5 +44,29 @@ export const DatasetSchema = {
         }),
       )
       .required(),
+  }),
+
+  removeVideo: Joi.object({
+    videos: Joi.array()
+      .items(
+        Joi.object({
+          id: Joi.string().required(),
+        }),
+      )
+      .required(),
+  }),
+};
+
+export const InferenceSchema = {
+  create: Joi.object({
+    datasetId: Joi.string().uuid().required(),
+    modelId: Joi.string().required(),
+    parameters: Joi.object({
+      startFrame: Joi.number().integer().min(0).optional(),
+      endFrame: Joi.number().integer().min(0).optional(),
+      frameStep: Joi.number().integer().min(1).default(1),
+      detector: Joi.string().valid("AKAZE", "SIFT", "ORB").default("AKAZE"),
+      useDevice: Joi.boolean().default(false),
+    }).required(),
   }),
 };
