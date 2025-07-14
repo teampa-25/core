@@ -5,9 +5,19 @@ import { User } from "@/models/user";
 import { UserRole } from "@/models/enums/user.role";
 import { UserRepository } from "@/repositories/user.repository";
 
+/**
+ * UserService is responsible for managing user data.
+ * It provides methods to create and authenticate users.
+ */
 export class UserService {
   private userRepo = new UserRepository();
 
+  /**
+   * Creates a new user
+   * @param email - The email of the user
+   * @param password - The password of the user
+   * @returns The created user or an error message
+   */
   async create(email: string, password: string): Promise<User | string> {
     const user: InferCreationAttributes<User> = {
       email: email,
@@ -18,6 +28,12 @@ export class UserService {
     return await this.userRepo.createUser(user);
   }
 
+  /**
+   * Logs in a user
+   * @param email - The email of the user
+   * @param password - The password of the user
+   * @returns A JWT token if login is successful, null otherwise
+   */
   async login(email: string, password: string): Promise<string | null> {
     const foundUser = await this.userRepo.findByEmail(email);
 
