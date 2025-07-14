@@ -1,26 +1,35 @@
-import { UserDAO } from "@/dao/user.dao";
-import { User } from "@/models/user";
-import { hashPass } from "@/utils/encryption";
-import { Request, Response, NextFunction } from "express";
+import { Request, Response } from "express";
+import { StatusCodes } from "http-status-codes";
+import { UserService } from "@/services/user.service";
 
 export class UserController {
-  async create(req: Request, res: Response, next: NextFunction): Promise<void> {
+  private userService = new UserService();
+
+  register = async (req: Request, res: Response) => {
     const { email, password, role } = req.body;
-    const createdUser = this.userService.createUser(req.body);
-    res.status(201).json(createdUser.id);
 
-    // // this REQUIRES admin authorization!
-    // const dao = new UserDAO();
-    // const user = new User();
-    // let content = req.body;
+    const user = await this.userService.createUser(email, password, role);
 
-    // user.email = content.email;
-    // // honestly, user should encrypt password from its side, not here
-    // user.password = await hashPass(content.password);
-    // user.role = content.role;
-    // user.credit = content.credit;
+    return res.status(StatusCodes.CREATED).json({
+      message: "User registered successfully",
+      user: user,
+    });
+  };
 
-    // //dao.create(user)
-    // next();
-  }
+  login = async (req: Request, res: Response) => {
+    try {
+      const { email, password } = req.body;
+      const token = await this.userService.loginUser(email, password);
+
+      return res.status(StatusCodes.OK).json({
+        message: "Login successful",
+        token,
+      });
+    } catch (err: unknown) {
+      console.error("Login error:", err);
+      return res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
+        message: "Internal server error",
+      });
+    }
+  };
 }

@@ -1,11 +1,8 @@
 import { InferCreationAttributes } from "sequelize";
-import { IDAO } from "./interfaces/idao"
+import { IDAO } from "./interfaces/idao";
 import { User } from "@/models/user";
 
-
-
 export class UserDAO implements IDAO<User> {
-
   //await is not necessary here because the methods return promises
   async get(id: string): Promise<User | null> {
     return User.findByPk(id);
@@ -15,7 +12,7 @@ export class UserDAO implements IDAO<User> {
     return User.findAll();
   }
 
-  async update(id: string, data: Partial<User>): Promise< User | null> {
+  async update(id: string, data: Partial<User>): Promise<User | null> {
     const update_user = await this.get(id);
 
     if (!update_user) {
@@ -36,17 +33,17 @@ export class UserDAO implements IDAO<User> {
   }
 
   //InferCreationAttributes is used to infer the attributes needed to create a new UserModel instance
-  async create(data: InferCreationAttributes<User>): Promise<string> {
-  const new_user = await User.create(data);
-  
-  if (!new_user.id){
-      throw new Error("User creation failed");
+  async create(data: InferCreationAttributes<User>): Promise<User | null> {
+    const new_user = await User.create(data);
+
+    if (!new_user) {
+      return null;
     }
-    
-    return new_user.id; 
+
+    return new_user;
   }
 
   async getByEmail(email: string): Promise<User | null> {
-    return User.findOne({where: { email }});
+    return User.findOne({ where: { email } });
   }
 }
