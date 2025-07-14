@@ -29,7 +29,17 @@ module.exports = {
         onUpdate: "CASCADE",
         onDelete: "CASCADE",
       },
-      video_id: {
+      goal_id: {
+        type: Sequelize.UUID,
+        allowNull: false,
+        references: {
+          model: "Video",
+          key: "id",
+        },
+        onUpdate: "CASCADE",
+        onDelete: "CASCADE",
+      },
+      current_id: {
         type: Sequelize.UUID,
         allowNull: false,
         references: {
