@@ -229,15 +229,20 @@ export class DatasetService {
       if (!hasEnoughCredits)
         throw getError(ErrorEnum.UNAUTHORIZED_ERROR).getErrorObj();
       else {
-        await this.addVideoToRepo(name, content, datasetId, frame_count);
+        const r = await this.addVideoToRepo(
+          name,
+          content,
+          datasetId,
+          frame_count,
+        );
         await this.userRepository.deductCredits(userId, cost);
+
+        return {
+          message: `${name} video added`,
+          datasetId,
+          costDeducted: cost,
+        };
       }
     }
-
-    return {
-      message: `${name} video added`,
-      datasetId,
-      costDeducted: cost,
-    };
   }
 }
