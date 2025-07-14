@@ -15,6 +15,7 @@ export async function unzipBuffer(
   const id = faker.string.alphanumeric(10);
   const tmpname = `${name}-${id}`;
   const tmpDir = path.join("/tmp/", tmpname);
+
   // TODO: check better solution to not overload RAM
   const files = await decompress(buf, tmpDir);
   return files;

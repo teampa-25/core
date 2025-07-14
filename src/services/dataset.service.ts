@@ -26,7 +26,7 @@ export class DatasetService {
     videoName: string,
     video: Buffer,
   ): Promise<number> {
-    return await VideoAnalyzer.extractFrameCount(video, videoName);
+    return await VideoAnalyzer.frameCount(video, videoName);
   }
 
   /**

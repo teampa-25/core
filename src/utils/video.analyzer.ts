@@ -28,7 +28,7 @@ export class VideoAnalyzer {
    * @param filename - Original filename for temporary file creation
    * @returns Promise<number> - Number of frames in the video
    */
-  static async extractFrameCount(
+  static async frameCount(
     videoBuffer: Buffer,
     filename: string,
   ): Promise<number> {
