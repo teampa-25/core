@@ -5,4 +5,4 @@ const router = Router();
 
 const inferenceJobController = new InferenceJobController();
 
-router.post("/inference", inferenceJobController.createInference);
+router.post("/", inferenceJobController.createInference);
