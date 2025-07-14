@@ -9,6 +9,6 @@ const userController = new UserController();
 // router.get("/init", databaseController.create);
 // router.put("/:id", datasetController.updateById);
 // router.delete("/:id", datasetController.deleteById);
-router.post("/recharge", authorize(UserRole.ADMIN), userController.create);
+//router.post("/recharge", authorize(UserRole.ADMIN), userController.create);
 
 export default router;
