@@ -122,8 +122,8 @@ export class ResultRepository {
    * @param id - The ID of the result
    * @returns A Promise that resolves to the JSON result data or null if not found
    */
-  async getJsonResult(id: string): Promise<object | null> {
-    const result = await this.resultDAO.get(id);
+  async getJsonResult(jobId: string): Promise<object | null> {
+    const result = await this.resultDAO.get(jobId);
     return result ? result.json_res : null;
   }
 

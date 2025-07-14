@@ -7,7 +7,6 @@ import {
   InferCreationAttributes,
   ForeignKey,
 } from "sequelize";
-import { User } from "@/models/user";
 
 const sequelize = Database.getInstance();
 

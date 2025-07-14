@@ -2,9 +2,12 @@ import { InferenceJobStatus } from "@/models/enums/inference.job.status";
 import { Result } from "@/models/result";
 import { inferenceQueue } from "@/queue/queue";
 import { DatasetRepository } from "@/repositories/dataset.repository";
+import { InferenceJobRepository } from "@/repositories/inference.job.repository";
+import { ResultRepository } from "@/repositories/result.repository";
 import { UserRepository } from "@/repositories/user.repository";
 import { ErrorEnum, getError } from "@/utils/api-error";
 import { INFERENCE } from "@/utils/const";
+import { th } from "@faker-js/faker/.";
 
 enum Detector {
   akaze = "AKAZE",
@@ -21,29 +24,40 @@ interface InferenceParameters {
 }
 
 export class InferenceJobService {
-  // private inferenceRepository: InferenceRepository;
+  private inferenceRepository: InferenceJobRepository;
   private datasetRepository: DatasetRepository;
   private userRepository: UserRepository;
+  private resultRepository: ResultRepository;
   // private wsService: WebSocketService;
 
   constructor() {
-    //     this.inferenceRepository = new InferenceRepository();
+    this.inferenceRepository = new InferenceJobRepository();
     this.datasetRepository = new DatasetRepository();
     this.userRepository = new UserRepository();
+    this.resultRepository = new ResultRepository();
     //     this.wsService = WebSocketService.getInstance();
   }
 
   getInferenceStatus = async (jobId: string): Promise<InferenceJobStatus> => {
-    //return await this.repo
-    return InferenceJobStatus.ABORTED;
+    const status = await this.inferenceRepository
+      .findById(jobId)
+      .then((inference) => {
+        if (!inference) throw getError(ErrorEnum.NOT_FOUND_ERROR).getErrorObj();
+        return inference.status;
+      });
+    return status;
   };
 
-  getInferenceJSONResults = async (jobId: string): Promise<void> => {
-    //return await this.repo
+  getInferenceJSONResults = async (jobId: string): Promise<object> => {
+    const results = await this.resultRepository.getJsonResult(jobId);
+    if (!results) throw getError(ErrorEnum.NOT_FOUND_ERROR).getErrorObj();
+    return results;
   };
 
-  getInferenceZIPResults = async (jobId: string): Promise<void> => {
-    //return await this.repo
+  getInferenceZIPResults = async (jobId: string): Promise<Buffer> => {
+    const results = await this.resultRepository.getImageZip(jobId);
+    if (!results) throw getError(ErrorEnum.NOT_FOUND_ERROR).getErrorObj();
+    return results;
   };
 
   enqueueJob = async (
