@@ -1,4 +1,3 @@
-import { UserController } from "@/controllers/user.controller";
 import { authenticate } from "@/middlewares/authenticate.middleware";
 import { authorize } from "@/middlewares/authorize.middleware";
 import { validate } from "@/middlewares/validate.middleware";
