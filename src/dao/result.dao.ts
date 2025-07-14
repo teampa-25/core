@@ -1,6 +1,6 @@
 import { InferCreationAttributes } from "sequelize";
-import { IDAO } from "@/dao/interfaces/idao";
-import { Result } from "@/models/result";
+import { IDAO } from "./interfaces/idao";
+import { Result } from "@/models";
 import { ErrorEnum, getError } from "@/utils/api-error";
 
 export class ResultDAO implements IDAO<Result> {

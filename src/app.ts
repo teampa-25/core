@@ -1,5 +1,6 @@
 import express from "express";
 import "tsconfig-paths/register"; // required for path aliases like @/*
+import "@/models"; // Initialize models and associations
 import routes from "@/routes/routes";
 import enviroment from "@/config/enviroment";
 import { morganMiddleware } from "@/config/morgan";

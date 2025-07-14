@@ -1,7 +1,7 @@
 import { DatasetRepository } from "@/repositories/dataset.repository";
 import { VideoRepository } from "@/repositories/video.repository";
 import { UserRepository } from "@/repositories/user.repository";
-import { Dataset } from "@/models/dataset";
+import { Dataset } from "@/models";
 import { ErrorEnum, getError } from "@/utils/api-error";
 import { VideoAnalyzer } from "@/utils/video-analyzer";
 

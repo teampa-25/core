@@ -1,6 +1,6 @@
 import { InferCreationAttributes } from "sequelize";
-import { IDAO } from "@/dao/interfaces/idao";
-import { Video } from "@/models/video";
+import { IDAO } from "./interfaces/idao";
+import { Video } from "@/models";
 import { ErrorEnum, getError } from "@/utils/api-error";
 
 export class VideoDAO implements IDAO<Video> {
