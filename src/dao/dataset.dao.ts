@@ -1,6 +1,6 @@
 import { Dataset } from "@/models/dataset";
 import { IDAO } from "@/dao/interfaces/idao";
-import { ErrorEnum, getError } from "@/utils/api-error";
+import { ErrorEnum, getError } from "@/utils/api.error";
 import { Op, InferCreationAttributes } from "sequelize";
 
 /**

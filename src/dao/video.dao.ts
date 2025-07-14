@@ -1,7 +1,7 @@
 import { InferCreationAttributes } from "sequelize";
 import { IDAO } from "@/dao/interfaces/idao";
 import { Video } from "@/models/video";
-import { ErrorEnum, getError } from "@/utils/api-error";
+import { ErrorEnum, getError } from "@/utils/api.error";
 
 export class VideoDAO implements IDAO<Video> {
   async get(id: string): Promise<Video | null> {

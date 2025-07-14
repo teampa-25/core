@@ -1,6 +1,6 @@
 import { User } from "@/models/user";
 import { UserDAO } from "@/dao/user.dao";
-import { ErrorEnum, getError } from "@/utils/api-error";
+import { ErrorEnum, getError } from "@/utils/api.error";
 import { InferCreationAttributes } from "sequelize";
 
 export class UserRepository {

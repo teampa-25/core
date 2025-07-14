@@ -1,5 +1,5 @@
 import { Job } from "bullmq";
-import { InferenceJobService } from "../services/inference-job.service";
+import { InferenceJobService } from "@/services/inference-job.service";
 import { InferenceJobStatus } from "@/models/enums/inference.job.status";
 
 export class InferenceJobProcessor {

@@ -2,7 +2,7 @@ import { Router } from "express";
 import { DatasetController } from "@/controllers/dataset.controller";
 import { authenticate } from "@/middlewares/authenticate.middleware";
 import { validate } from "@/middlewares/validate.middleware";
-import { DatasetSchema, IdSchema } from "@/utils/validation-schema";
+import { DatasetSchema, IdSchema, UserSchema } from "@/utils/validation.schema";
 import { param } from "express-validator";
 import { authorize } from "@/middlewares/authorize.middleware";
 
@@ -22,11 +22,8 @@ router.delete(
   datasetController.delete,
 );
 
-// Get the list of all datasets
-router.get("/", datasetController.getAll);
-
-// what type of filters??
-router.get("/:filters", datasetController.where);
+// Get the list of all datasets or filtered
+router.get("/", validate(DatasetSchema.get), datasetController.getAll);
 
 // Update a dataset
 router.put(
@@ -40,7 +37,7 @@ router.put(
 router.post(
   "/:id/videos",
   validate(IdSchema, "params"),
-  validate(DatasetSchema.addVideos),
+  validate(DatasetSchema.addVideoArray, "body"),
   datasetController.addVideoArray,
 );
 

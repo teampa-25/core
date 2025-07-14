@@ -1,5 +1,5 @@
 import { Response, Request, NextFunction } from "express";
-import { ErrorObj, getError, ErrorEnum } from "@/utils/api-error";
+import { ErrorObj, getError, ErrorEnum } from "@/utils/api.error";
 //import { logger } from "../config/logger";
 
 /**

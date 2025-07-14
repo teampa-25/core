@@ -20,6 +20,9 @@ export const UserSchema = {
 };
 
 export const DatasetSchema = {
+  get: Joi.object({
+    tags: Joi.array().items(Joi.string()).optional(),
+  }),
   create: Joi.object({
     name: Joi.string().required(),
     tags: Joi.array().items(Joi.string()).required(),
@@ -30,15 +33,10 @@ export const DatasetSchema = {
     tags: Joi.array().items(Joi.string()).optional(),
   }),
 
-  addVideos: Joi.object({
-    videos: Joi.array()
-      .items(
-        Joi.object({
-          id: Joi.string().required(),
-          type: Joi.string().valid("video", "zip").required(),
-        }),
-      )
-      .required(),
+  uploadVideo: Joi.object({
+    type: Joi.string().valid("video", "zip").required(),
+    content: Joi.binary().required(),
+    name: Joi.string().required(),
   }),
 
   removeVideo: Joi.object({

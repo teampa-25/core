@@ -2,8 +2,11 @@ import { DatasetRepository } from "@/repositories/dataset.repository";
 import { VideoRepository } from "@/repositories/video.repository";
 import { UserRepository } from "@/repositories/user.repository";
 import { Dataset } from "@/models/dataset";
-import { ErrorEnum, getError } from "@/utils/api-error";
-import { VideoAnalyzer } from "@/utils/video-analyzer";
+import { ErrorEnum, getError } from "@/utils/api.error";
+import { VideoAnalyzer } from "@/utils/video.analyzer";
+import { unzipBuffer } from "@/utils/unzip";
+import { faker } from "@faker-js/faker/.";
+import { File } from "decompress";
 
 export class DatasetService {
   private datasetRepository: DatasetRepository;
@@ -24,32 +27,26 @@ export class DatasetService {
    */
   async createDataset(
     userId: string,
-    datasetData: {
-      name: string;
-      tags?: string[];
-    },
+    datasetData: { name: string; tags?: string[] },
   ): Promise<Dataset> {
-    // Check
     const exists = await this.datasetRepository.existsByNameAndUserId(
       datasetData.name,
       userId,
     );
-
-    if (exists) {
+    if (exists)
       throw getError(ErrorEnum.DATASET_NAME_CONFLICT_ERROR).getErrorObj();
-    }
 
-    const datasetId = await this.datasetRepository.create({
+    const datasetCreate = {
       user_id: userId,
       name: datasetData.name,
       tags: datasetData.tags || [],
-    });
+    };
+
+    const datasetId = await this.datasetRepository.create(datasetCreate);
 
     // Retrieves the created dataset to return it
     const createdDataset = await this.datasetRepository.findById(datasetId);
-    if (!createdDataset) {
-      throw getError(ErrorEnum.GENERIC_ERROR).getErrorObj();
-    }
+    if (!createdDataset) throw getError(ErrorEnum.GENERIC_ERROR).getErrorObj();
 
     return createdDataset;
   }
@@ -62,9 +59,7 @@ export class DatasetService {
    */
   async getDatasets(
     userId: string,
-    filters?: {
-      tags?: string[];
-    },
+    filters?: { tags?: string[] },
   ): Promise<Dataset[]> {
     return await this.datasetRepository.findByUserId(userId, filters);
   }
@@ -75,13 +70,9 @@ export class DatasetService {
    * @param userId
    * @returns a Promise that resolves to the dataset or null if not found
    */
-  async getDatasetById(
-    datasetId: string,
-    userId?: string,
-  ): Promise<Dataset | null> {
-    if (userId) {
-      return await this.datasetRepository.findByIdAndUserId(datasetId, userId);
-    }
+  async getDatasetById(datasetId: string): Promise<Dataset | null> {
+    // if (!userId) throw getError();
+    // return await this.datasetRepository.findByIdAndUserId(datasetId, userId);
     return await this.datasetRepository.findById(datasetId);
   }
 
@@ -148,128 +139,112 @@ export class DatasetService {
     return await this.datasetRepository.softDelete(datasetId);
   }
 
+  private async calcFreameCount(videoName: string, video: Buffer) {
+    return await VideoAnalyzer.extractFrameCount(video, videoName);
+  }
+
+  private async addVideoToRepo(
+    videoName: string,
+    video: Buffer,
+    datasetId: string,
+    frame_count: number,
+  ): Promise<string> {
+    const videoId = await this.videoRepository.create({
+      dataset_id: datasetId,
+      name: videoName,
+      file: video,
+      frame_count: frame_count,
+    });
+
+    return videoId;
+  }
+
+  private async calculateCost(frame_count: number): Promise<number> {
+    // TODO: this should be moved to a config file or constants file
+    const framecost = 0.001;
+    return frame_count * framecost;
+  }
+
   /**
    * Adds videos to a dataset
-   * @param datasetId
-   * @param userId
-   * @param videos Array of video files or single video file
+   * @param datasetId id of the dataset where to put the video
+   * @param userId the user requesting the insertion
+   * @param content Array of video files or single video file
    * @returns a Promise that resolves with the result of the operation
    */
-  async addVideosToDataset(
+  async uploadVideo(
     datasetId: string,
     userId: string,
-    videos: any,
-  ): Promise<any> {
-    // Checks if the dataset belongs to the user ----------- authorize....
+    content: Buffer,
+    name: string,
+    type: string,
+  ): Promise<boolean> {
+    // const supportedFormats = ["video/mp4"]; // better somewhere else, i think -beg
+
     const dataset = await this.datasetRepository.findByIdAndUserId(
       datasetId,
       userId,
     );
+    if (!dataset) throw getError(ErrorEnum.NOT_FOUND_ERROR).getErrorObj();
 
-    if (!dataset) {
-      throw getError(ErrorEnum.NOT_FOUND_ERROR);
-    }
+    if (type === "zip") {
+      const files = await unzipBuffer(content, name);
+      let total_frames = 0;
 
-    // Validate input videos - what is exactly validating???
-    if (!videos || (!Array.isArray(videos) && !videos.mimetype)) {
-      throw getError(ErrorEnum.GENERIC_ERROR).getErrorObj();
-    }
-    //// -------------------------------------------------
-
-    // Since in projects assignment there's no refs to video formats, then we assumed that those below are the supported formats
-    // TODO: this should be moved to a config file or constants file
-    const supportedFormats = ["video/mp4"];
-    const costPerFrame = 0.001; // Defined into projects assignment
-    const videoFiles = Array.isArray(videos) ? videos : [videos];
-
-    // Filter and validate video files
-    const validVideos = videoFiles.filter((file: any) => {
-      if (!file.mimetype) return false;
-
-      // Check if it's a supported video format
-      if (supportedFormats.includes(file.mimetype)) {
-        return true;
-      }
-
-      // Check if it's a zip file (I thinks that's better to build an utility for this - Gabs  i agree - beg)
-      if (file.mimetype === "application/zip") {
-        // TODO: ZIP handler
-        throw getError(ErrorEnum.NOT_IMPLEMENTED_ERROR).getErrorObj();
-        // return false;
-      }
-
-      return false;
-    });
-
-    if (validVideos.length === 0) {
-      throw getError(ErrorEnum.GENERIC_ERROR).getErrorObj();
-    }
-
-    // NOTE: why here? we should calculate it based on how many frames will be used based on the skip frame parameter -beg
-    //
-    // Calculate total cost for all videos
-    let totalFrames = 0;
-    const processedVideos = [];
-
-    for (const video of validVideos) {
-      // Extract frame count from video using VideoAnalyzer
-      const frameCount = await VideoAnalyzer.extractFrameCount(
-        video.buffer,
-        video.originalname || video.name,
-      );
-      totalFrames += frameCount;
-
-      processedVideos.push({
-        name: video.originalname || video.name,
-        file: video.buffer,
-        frameCount: frameCount,
-        size: video.size,
-      });
-    }
-
-    const totalCost = totalFrames * costPerFrame;
-
-    // Check if user has enough credits (NOTE: to do what? to add a video???)
-    const hasEnoughCredits = await this.userRepository.hasEnoughCredits(
-      userId,
-      totalCost,
-    );
-    if (!hasEnoughCredits) {
-      throw getError(ErrorEnum.UNAUTHORIZED_ERROR).getErrorObj();
-    }
-
-    // Deduct credits from user
-    await this.userRepository.deductCredits(userId, totalCost);
-
-    // Save videos to dataset
-    const savedVideoIds = [];
-    for (const video of processedVideos) {
-      try {
-        const videoId = await this.videoRepository.create({
-          dataset_id: datasetId,
-          file: video.file,
-          name: video.name,
-          frame_count: video.frameCount,
-        });
-        savedVideoIds.push(videoId);
-      } catch (error) {
-        // If saving fails, rollback credits
-        await this.userRepository.updateCredits(
-          userId,
-          (await this.userRepository.findById(userId))!.credit! + totalCost,
+      // TODO: NEEEDS REFACTORING AND CHECKING FOR FILETYPES !!!!!!
+      for (const file in files) {
+        const frame_count = await this.calcFreameCount(
+          `${name}-${faker.string.alphanumeric(10)}`,
+          files[file].data,
         );
-        throw getError(ErrorEnum.GENERIC_ERROR).getErrorObj();
+        total_frames = total_frames + frame_count;
+      }
+
+      const cost = await this.calculateCost(total_frames);
+
+      const hasEnoughCredits = await this.userRepository.hasEnoughCredits(
+        userId,
+        cost,
+      );
+      if (!hasEnoughCredits)
+        throw getError(ErrorEnum.UNAUTHORIZED_ERROR).getErrorObj();
+      else {
+        for (const file in files) {
+          const frame_count = await this.calcFreameCount(
+            `${name}-${faker.string.alphanumeric(10)}`,
+            files[file].data,
+          );
+          await this.addVideoToRepo(name, content, datasetId, frame_count);
+        }
+        await this.userRepository.deductCredits(userId, cost);
+      }
+    } else if (type === "video") {
+      // THIS IS ONLY FOR SINGLE VIDEO repeat all of this
+      const frame_count = await this.calcFreameCount(name, content);
+      const cost = await this.calculateCost(frame_count);
+      const hasEnoughCredits = await this.userRepository.hasEnoughCredits(
+        userId,
+        cost,
+      );
+
+      if (!hasEnoughCredits)
+        throw getError(ErrorEnum.UNAUTHORIZED_ERROR).getErrorObj();
+      else {
+        await this.addVideoToRepo(name, content, datasetId, frame_count);
+        await this.userRepository.deductCredits(userId, cost);
       }
     }
 
-    // TODO: hey mate, this is a placeholder, actually it's late and i need to sleep, tomorrow we discuss about this
-    return {
-      message: "Video aggiunti con successo al dataset",
-      datasetId,
-      videosAdded: savedVideoIds.length,
-      totalFrames,
-      costDeducted: totalCost,
-      videoIds: savedVideoIds,
-    };
+    return false;
+
+    // // TODO: hey mate, this is a placeholder, actually it's late and i need to sleep, tomorrow we discuss about this
+    // return {
+    //   message: "Video aggiunti con successo al dataset",
+    //   datasetId,
+    //   videosAdded: savedVideoIds.length,
+    //   totalFrames,
+    //   costDeducted: totalCost,
+    //   videoIds: savedVideoIds,
+    // };
   }
 }

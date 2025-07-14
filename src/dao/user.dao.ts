@@ -1,7 +1,7 @@
 import { InferCreationAttributes } from "sequelize";
 import { IDAO } from "@/dao/interfaces/idao";
 import { User } from "@/models/user";
-import { ErrorEnum, getError } from "@/utils/api-error";
+import { ErrorEnum, getError } from "@/utils/api.error";
 
 export class UserDAO implements IDAO<User> {
   //await is not necessary here because the methods return promises

@@ -1,6 +1,6 @@
 import { Request, Response, NextFunction } from "express";
 import { JwtUtils } from "@/utils/jwt";
-import { ErrorEnum, getError } from "@/utils/api-error";
+import { ErrorEnum, getError } from "@/utils/api.error";
 import { UserPayload } from "@/@types/UserPayload";
 
 export function authenticate(req: Request, res: Response, next: NextFunction) {

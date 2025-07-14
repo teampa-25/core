@@ -6,3 +6,5 @@ const router = Router();
 const inferenceJobController = new InferenceJobController();
 
 router.post("/", inferenceJobController.createInference);
+
+export default router;
