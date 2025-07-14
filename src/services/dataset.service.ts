@@ -6,7 +6,6 @@ import { ErrorEnum, getError } from "@/utils/api.error";
 import { VideoAnalyzer } from "@/utils/video.analyzer";
 import { unzipBuffer } from "@/utils/unzip";
 import { faker } from "@faker-js/faker";
-import { File } from "decompress";
 
 export class DatasetService {
   private datasetRepository: DatasetRepository;
@@ -105,8 +104,11 @@ export class DatasetService {
    * Returns a dataset by its ID
    * @returns a Promise that resolves to the dataset or null if not found
    */
-  async getDatasetById(datasetId: string): Promise<Dataset | null> {
-    return await this.datasetRepository.findById(datasetId);
+  async getDatasetById(
+    datasetId: string,
+    userId: string,
+  ): Promise<Dataset | null> {
+    return await this.datasetRepository.findByIdAndUserId(datasetId, userId);
   }
 
   /**
