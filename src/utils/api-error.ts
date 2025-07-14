@@ -1,6 +1,5 @@
 import { StatusCodes } from "http-status-codes";
 
-
 export enum ErrorEnum {
   GENERIC_ERROR = "GENERIC_ERROR",
   NOT_FOUND_ERROR = "NOT_FOUND_ERROR",
@@ -8,10 +7,10 @@ export enum ErrorEnum {
   FORBIDDEN_ERROR = "FORBIDDEN_ERROR",
   UNAUTHORIZED_ERROR = "UNAUTHORIZED_ERROR",
   BAD_REQUEST_ERROR = "BAD_REQUEST_ERROR",
-  INSUFFICIENT_CREDITS_ERROR = "INSUFFICIENT_CREDITS_ERROR",
   DATASET_NAME_CONFLICT_ERROR = "DATASET_NAME_CONFLICT_ERROR",
   INVALID_FILE_FORMAT_ERROR = "INVALID_FILE_FORMAT_ERROR",
-  INVALID_JWT_FORMAT = "INVALID_JWT_FORMAT"
+  INVALID_JWT_FORMAT = "INVALID_JWT_FORMAT",
+  NOT_IMPLEMENTED_ERROR = "NOT_IMPLEMENTED_ERROR",
 }
 
 /**
@@ -143,9 +142,6 @@ export function getError(type: ErrorEnum): ErrorObj {
       break;
     case ErrorEnum.BAD_REQUEST_ERROR:
       retval = new BadRequestError();
-      break;
-    case ErrorEnum.INSUFFICIENT_CREDITS_ERROR:
-      retval = new InsufficientCreditsError();
       break;
     case ErrorEnum.DATASET_NAME_CONFLICT_ERROR:
       retval = new DatasetNameConflictError();
