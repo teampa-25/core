@@ -107,9 +107,9 @@ export class DatasetController {
     if (!userId) throw getError(ErrorEnum.UNAUTHORIZED_ERROR);
 
     const { id } = req.params;
-    const content: Buffer = req.body.content;
-    const type: string = req.body.type;
-    const name: string = req.body.name;
+    const content: Buffer = req.body?.content;
+    const type: string = req.body?.type;
+    const name: string = req.body?.name;
 
     const result = await this.datasetService.uploadVideo(
       id,

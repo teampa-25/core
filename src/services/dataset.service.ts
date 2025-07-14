@@ -5,7 +5,7 @@ import { Dataset } from "@/models/dataset";
 import { ErrorEnum, getError } from "@/utils/api.error";
 import { VideoAnalyzer } from "@/utils/video.analyzer";
 import { unzipBuffer } from "@/utils/unzip";
-import { faker } from "@faker-js/faker/.";
+import { faker } from "@faker-js/faker";
 import { File } from "decompress";
 
 export class DatasetService {

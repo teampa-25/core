@@ -30,7 +30,7 @@ export const DatasetSchema = {
   }),
   create: Joi.object({
     name: Joi.string().required(),
-    tags: Joi.array().items(Joi.string()).required(),
+    tags: Joi.array().items(Joi.string()).optional(),
   }),
 
   update: Joi.object({
