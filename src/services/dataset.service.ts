@@ -6,6 +6,7 @@ import { ErrorEnum, getError } from "@/utils/api.error";
 import { VideoAnalyzer } from "@/utils/video.analyzer";
 import { unzipBuffer } from "@/utils/unzip";
 import { faker } from "@faker-js/faker";
+import { INFERENCE } from "@/utils/const";
 
 export class DatasetService {
   private datasetRepository: DatasetRepository;
@@ -21,7 +22,7 @@ export class DatasetService {
   /**
    * extract frame count from video
    */
-  private async calcFreameCount(
+  private async calcFrameCount(
     videoName: string,
     video: Buffer,
   ): Promise<number> {
@@ -52,7 +53,7 @@ export class DatasetService {
    */
   private async calculateCost(frame_count: number): Promise<number> {
     // TODO: this should be moved to a config file or constants file
-    const framecost = 0.001;
+    const framecost = INFERENCE.COST_PER_FRAME;
     return frame_count * framecost;
   }
 
@@ -194,7 +195,7 @@ export class DatasetService {
 
       // TODO: NEEEDS REFACTORING AND CHECKING FOR FILETYPES !!!!!!
       for (const file in files) {
-        const frame_count = await this.calcFreameCount(
+        const frame_count = await this.calcFrameCount(
           `${name}-${faker.string.alphanumeric(10)}`,
           files[file].data,
         );
@@ -211,7 +212,7 @@ export class DatasetService {
         throw getError(ErrorEnum.UNAUTHORIZED_ERROR).getErrorObj();
       else {
         for (const file in files) {
-          const frame_count = await this.calcFreameCount(
+          const frame_count = await this.calcFrameCount(
             `${name}-${faker.string.alphanumeric(10)}`,
             files[file].data,
           );
@@ -221,7 +222,8 @@ export class DatasetService {
       }
     } else if (type === "video") {
       // THIS IS ONLY FOR SINGLE VIDEO repeat all of this
-      const frame_count = await this.calcFreameCount(name, content);
+      //TO DO FIX this.calcFrameCount
+      const frame_count = 1000; //await this.calcFrameCount(name, content);
       cost = await this.calculateCost(frame_count);
       const hasEnoughCredits = await this.userRepository.hasEnoughCredits(
         userId,

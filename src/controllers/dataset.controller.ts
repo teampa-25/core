@@ -1,5 +1,4 @@
-import { NextFunction, Request, Response } from "express";
-import { Dataset } from "@/models/dataset";
+import { Request, Response } from "express";
 import { StatusCodes } from "http-status-codes";
 import { DatasetService } from "@/services/dataset.service";
 import { catchAsync } from "@/utils/catchAsync";
@@ -101,9 +100,10 @@ export class DatasetController {
     const userId = req.user!.id;
 
     const { id } = req.params;
-    const content: Buffer = req.body?.content;
-    const type: string = req.body?.type;
-    const name: string = req.body?.name;
+    const { name, type } = req.body;
+    const file = req.file;
+
+    const content = file!.buffer;
 
     const result = await this.datasetService.uploadVideo(
       id,

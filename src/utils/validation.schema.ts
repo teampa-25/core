@@ -40,7 +40,6 @@ export const DatasetSchema = {
 
   uploadVideo: Joi.object({
     type: Joi.string().valid("video", "zip").required(),
-    content: Joi.binary().required(),
     name: Joi.string().required(),
   }),
 

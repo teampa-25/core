@@ -1,6 +1,7 @@
 import { authorize } from "@/middlewares/authorize.middleware";
 import { authenticate } from "@/middlewares/authenticate.middleware";
 import { validate } from "@/middlewares/validate.middleware";
+import { upload } from "../middlewares/multer.middleware";
 import { UserRole } from "@/models/enums/user.role";
 import { Router } from "express";
 import { DatasetController } from "@/controllers/dataset.controller";
@@ -36,8 +37,9 @@ router.put(
 // Add videos or zip files to the dataset
 router.post(
   "/:id/videos",
+  upload.single("content"),
   validate(IdSchema, "params"),
-  validate(DatasetSchema.uploadVideo, "body"),
+  validate(DatasetSchema.uploadVideo),
   datasetController.uploadVideo,
 );
 
