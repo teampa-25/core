@@ -176,7 +176,7 @@ export class DatasetService {
     content: Buffer,
     name: string,
     type: string,
-  ): Promise<boolean> {
+  ): Promise<any> {
     // const supportedFormats = ["video/mp4"]; // better somewhere else, i think -beg
 
     const dataset = await this.datasetRepository.findByIdAndUserId(
@@ -184,6 +184,7 @@ export class DatasetService {
       userId,
     );
     if (!dataset) throw getError(ErrorEnum.NOT_FOUND_ERROR).getErrorObj();
+    let cost = 0;
 
     if (type === "zip") {
       const files = await unzipBuffer(content, name);
@@ -198,7 +199,7 @@ export class DatasetService {
         total_frames = total_frames + frame_count;
       }
 
-      const cost = await this.calculateCost(total_frames);
+      cost = await this.calculateCost(total_frames);
 
       const hasEnoughCredits = await this.userRepository.hasEnoughCredits(
         userId,
@@ -219,7 +220,7 @@ export class DatasetService {
     } else if (type === "video") {
       // THIS IS ONLY FOR SINGLE VIDEO repeat all of this
       const frame_count = await this.calcFreameCount(name, content);
-      const cost = await this.calculateCost(frame_count);
+      cost = await this.calculateCost(frame_count);
       const hasEnoughCredits = await this.userRepository.hasEnoughCredits(
         userId,
         cost,
@@ -233,16 +234,10 @@ export class DatasetService {
       }
     }
 
-    return false;
-
-    // // TODO: hey mate, this is a placeholder, actually it's late and i need to sleep, tomorrow we discuss about this
-    // return {
-    //   message: "Video aggiunti con successo al dataset",
-    //   datasetId,
-    //   videosAdded: savedVideoIds.length,
-    //   totalFrames,
-    //   costDeducted: totalCost,
-    //   videoIds: savedVideoIds,
-    // };
+    return {
+      message: `${name} video added`,
+      datasetId,
+      costDeducted: cost,
+    };
   }
 }
