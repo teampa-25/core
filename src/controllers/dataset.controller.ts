@@ -1,4 +1,4 @@
-import { Request, Response } from "express";
+import { NextFunction, Request, Response } from "express";
 import { Dataset } from "@/models/dataset";
 import { StatusCodes } from "http-status-codes";
 import { DatasetService } from "@/services/dataset.service";
@@ -116,22 +116,6 @@ export class DatasetController {
       userId,
       videos,
     );
-
-    return res.status(StatusCodes.OK).json(result);
-  });
-
-  /**
-   * Remove videos from a dataset
-   * @param req
-   * @param res
-   * @returns a response with the updated dataset or an error
-   */
-  removeVideoArray = catchAsync(async (req: Request, res: Response) => {
-    const userId = req.user?.id;
-    const { id } = req.params;
-    const videos = req.body.videos;
-
-    const result = await this.datasetService.removeVideo(id, userId, videos);
 
     return res.status(StatusCodes.OK).json(result);
   });

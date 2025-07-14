@@ -1,7 +1,5 @@
-
 import winston, { format, transports } from "winston";
 import DailyRotateFile from "winston-daily-rotate-file";
-import appRoot from "app-root-path";
 import enviroment from "./enviroment";
 
 /**
@@ -31,7 +29,7 @@ export const logger = winston.createLogger({
   transports: [
     new transports.Console({ format: consoleFormat }),
     new DailyRotateFile({
-      dirname: `${appRoot}/logs`,
+      dirname: "@/logs",
       filename: "app-%DATE%.log",
       datePattern: "YYYY-MM-DD",
       maxFiles: "14d",
