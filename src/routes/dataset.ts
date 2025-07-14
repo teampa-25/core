@@ -9,7 +9,7 @@ import { DatasetSchema, IdSchema } from "@/utils/validation.schema";
 const router = Router();
 const datasetController = new DatasetController();
 
-router.use(authenticate, authorize(UserRole.USER)); // Apply authentication middleware to all routes in this router
+router.use(authenticate, authorize(UserRole.USER, UserRole.ADMIN)); // Apply authentication middleware to all routes in this router
 
 // Create a new dataset
 router.post("/", validate(DatasetSchema.create), datasetController.create);
