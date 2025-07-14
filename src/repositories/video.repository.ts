@@ -41,6 +41,14 @@ export class VideoRepository {
     return allVideos.filter((video) => video.dataset_id === datasetId);
   }
 
+  async findByRange(
+    datasetId: string,
+    offset: number,
+    limit: number,
+  ): Promise<Video[]> {
+    return await this.videoDAO.getByRange(datasetId, offset, limit);
+  }
+
   /**
    * Finds a video by ID
    * @param id

@@ -5,6 +5,7 @@ import {
   InferCreationAttributes,
   ForeignKey,
   Sequelize,
+  CreationOptional,
 } from "sequelize";
 import { InferenceJobStatus } from "./enums/inference.job.status";
 
@@ -18,15 +19,16 @@ export class InferenceJob extends Model<
   InferAttributes<InferenceJob>,
   InferCreationAttributes<InferenceJob>
 > {
-  declare id: string;
+  declare id: CreationOptional<string>;
   declare dataset_id: ForeignKey<string>;
   declare user_id: ForeignKey<string>;
-  declare video_id: ForeignKey<string>;
-  declare status: InferenceJobStatus;
+  declare goal_id: ForeignKey<string>;
+  declare current_id: ForeignKey<string>;
+  declare status: CreationOptional<InferenceJobStatus>;
   declare params: object;
-  declare carbon_footprint: number;
-  declare created_at: Date;
-  declare updated_at: Date;
+  declare carbon_footprint: CreationOptional<number>;
+  declare created_at: CreationOptional<Date>;
+  declare updated_at: CreationOptional<Date>;
 
   static initModel(sequelize: Sequelize) {
     InferenceJob.init(
@@ -52,7 +54,15 @@ export class InferenceJob extends Model<
             key: "id",
           },
         },
-        video_id: {
+        goal_id: {
+          type: DataTypes.UUID,
+          allowNull: false,
+          references: {
+            model: "Video",
+            key: "id",
+          },
+        },
+        current_id: {
           type: DataTypes.UUID,
           allowNull: false,
           references: {

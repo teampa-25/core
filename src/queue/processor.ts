@@ -1,6 +1,20 @@
 import { Job } from "bullmq";
-import { InferenceJobService } from "../services/inference.service";
+import {
+  InferenceJobService,
+  InferenceParameters,
+} from "../services/inference.service";
 import { InferenceJobStatus } from "@/models/enums/inference.job.status";
+import axios from "axios";
+import FormData from "form-data";
+import enviroment from "@/config/enviroment";
+
+interface CNSResponse {
+  requestId: string;
+  velocity: number[][];
+  carbon_footprint: number;
+  download_url: string;
+  message: string;
+}
 
 export class InferenceJobProcessor {
   private inferenceJobService: InferenceJobService;
@@ -10,7 +24,7 @@ export class InferenceJobProcessor {
   }
 
   async processInference(job: Job): Promise<void> {
-    const { inferenceId, userId, datasetId, modaelId, parameters, videos } =
+    const { inferenceId, parameters, goalVideoBuffer, currentVideoBuffer } =
       job.data;
 
     try {
@@ -20,8 +34,15 @@ export class InferenceJobProcessor {
       );
 
       //do inference
-      //const resultJson = axios.post("http://localhost:8000/analyze");
-      //const resultZip = axios.get(resultJson.zipDownload);
+      const resultJson = await this.sendToFastAPI(
+        inferenceId,
+        parameters,
+        goalVideoBuffer,
+        currentVideoBuffer,
+      );
+      const resultZip = await this.downloadResultZip(resultJson.download_url);
+
+      //TODO: Save results into DB
 
       await this.inferenceJobService.updateInferenceStatus(
         inferenceId,
@@ -37,5 +58,45 @@ export class InferenceJobProcessor {
 
       throw error;
     }
+  }
+
+  private async sendToFastAPI(
+    inferenceId: string,
+    parameters: InferenceParameters,
+    goalVideoBuffer: ArrayBuffer,
+    currentVideoBuffer: ArrayBuffer,
+  ): Promise<CNSResponse> {
+    const form = new FormData();
+    form.append("jobId", inferenceId);
+    form.append("device", parameters.useGpus ? "cuda:0" : "cpu");
+    form.append("detector", parameters.detector);
+    form.append("goal_video", goalVideoBuffer, { filename: "goal.mp4" });
+    form.append("current_video", currentVideoBuffer, {
+      filename: "current.mp4",
+    });
+    form.append("goal_frame_idx", parameters.goalFrameId);
+    form.append("frame_step", parameters.frameStep);
+    form.append("start_frame", parameters.startFrame);
+    form.append("end_frame", parameters.endFrame);
+
+    const res = await axios.post<CNSResponse>(
+      `http://${enviroment.fastApiHost}:${enviroment.fastApiPort}/analyze`,
+      form,
+      {
+        headers: form.getHeaders(),
+        maxBodyLength: Infinity,
+        maxContentLength: Infinity,
+      },
+    );
+
+    return res.data;
+  }
+
+  private async downloadResultZip(download_url: string): Promise<Buffer> {
+    const response = await axios.get<ArrayBuffer>(
+      `http://${enviroment.fastApiHost}:${enviroment.fastApiPort}${download_url}`,
+      { responseType: "arraybuffer" },
+    );
+    return Buffer.from(response.data);
   }
 }

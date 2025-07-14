@@ -51,3 +51,20 @@ export const DatasetSchema = {
       .required(),
   }),
 };
+
+export const InferenceSchema = {
+  create: Joi.object({
+    userId: Joi.string().uuid().required(),
+    datasetId: Joi.string().uuid().required(),
+    parameters: Joi.object({
+      startFrame: Joi.number().integer().min(0).required(),
+      endFrame: Joi.number().integer().min(0).required(),
+      frameStep: Joi.number().integer().min(1).required(),
+      detector: Joi.string().valid("AKAZE", "SIFT", "ORB").required(),
+      useDevice: Joi.boolean().required(),
+    }).required(),
+    range: Joi.string()
+      .pattern(/^all$|^\d+-\d+$/)
+      .required(),
+  }),
+};

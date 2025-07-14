@@ -20,6 +20,25 @@ export class VideoDAO implements IDAO<Video> {
     }
   }
 
+  async getByRange(
+    datasetId: string,
+    offset: number,
+    limit: number,
+  ): Promise<Video[]> {
+    try {
+      return await Video.findAll({
+        where: {
+          dataset_id: datasetId,
+        },
+        offset,
+        limit,
+        order: [["created_at", "ASC"]],
+      });
+    } catch (error) {
+      throw getError(ErrorEnum.GENERIC_ERROR)?.getErrorObj();
+    }
+  }
+
   async update(id: string, data: Partial<Video>): Promise<Video | null> {
     try {
       const update_video = await this.get(id);

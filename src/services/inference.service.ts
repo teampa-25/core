@@ -1,6 +1,7 @@
+import { Video } from "@/models";
 import { InferenceJobStatus } from "@/models/enums/inference.job.status";
-import { InferenceJob } from "@/models/inference.job";
-import { Result } from "@/models/result";
+import { InferenceJob } from "@/models";
+import { Result } from "@/models";
 import { inferenceQueue } from "@/queue/queue";
 import { DatasetRepository } from "@/repositories/dataset.repository";
 import { InferenceJobRepository } from "@/repositories/inference.job.repository";
@@ -10,6 +11,7 @@ import { VideoRepository } from "@/repositories/video.repository";
 import { ErrorEnum, getError } from "@/utils/api-error";
 import { INFERENCE } from "@/utils/const";
 import { th } from "@faker-js/faker/.";
+import { InferCreationAttributes } from "sequelize";
 
 enum Detector {
   akaze = "AKAZE",
@@ -17,12 +19,13 @@ enum Detector {
   orb = "ORB",
 }
 
-interface InferenceParameters {
+export interface InferenceParameters {
   startFrame: number;
   endFrame: number;
   frameStep: number;
+  goalFrameId: number;
   detector: Detector;
-  useDevice: boolean;
+  useGpus: boolean;
 }
 
 export class InferenceJobService {
@@ -42,61 +45,85 @@ export class InferenceJobService {
     //     this.wsService = WebSocketService.getInstance();
   }
 
-  enqueueJob = async (
+  public enqueueJob = async (
     userId: string,
     datasetId: string,
     parameters: InferenceParameters,
     range: string,
-  ): Promise<string> => {
+  ): Promise<string[]> => {
     const dataset = await this.datasetRepository.findByIdAndUserId(
       datasetId,
       userId,
     );
     if (!dataset) throw getError(ErrorEnum.NOT_FOUND_ERROR).getErrorObj();
 
-    // const requiredCredits = totalFrames * INFERENCE.COST_OF_INFERENCE;
-    // const userCredits = await this.userRepository.hasEnoughCredits(userId, );)
-    //calculate inferenc cost and update user credits
-    //this.wsService.notifyUser(userId, {
-    //     type: 'INFERENCE_STATUS_UPDATE',
-    //     data: {
-    //         inferenceId: inference.id,
-    //         status: InferenceJobStatus.ABORTED,
-    //         message: 'Inferenza aggiunta alla coda'
-    //     },
-    //     timestamp: new Date()
-    // });
+    const videos =
+      range === "all"
+        ? await this.videoRepository.findByDatasetId(datasetId)
+        : await this.getVideosByRange(datasetId, range);
 
-    //const videos = await this.videoRepository.
+    if (!videos || videos.length === 0) {
+      throw getError(ErrorEnum.BAD_REQUEST_ERROR).getErrorObj();
+    }
 
-    //create inferenceJob
-    //range: "all | 0-1 | 12-30";
-    const inferenceObject = {
-      dataset_id: datasetId,
-      user_id: userId,
-      video_id,
-      status: InferenceJobStatus.PENDING,
-      carbon_footprint: 0,
-      params: parameters,
-    };
-    const inference =
-      await this.inferenceRepository.createInferenceJob(inferenceObject);
+    const sorted = videos.sort(
+      (a: Video, b: Video) =>
+        new Date(a.created_at).getTime() - new Date(b.created_at).getTime(),
+    );
 
-    //await inferenceQueue.add('inference', { //data to be passed to the worker}, {options});
+    const createdJobIds: string[] = [];
 
-    // Notifica via WebSocket
-    // this.wsService.notifyUser(userId, {
-    //     type: 'INFERENCE_STATUS_UPDATE',
-    //     data: {
-    //         inferenceId: inference.id,
-    //         status: InferenceJobStatus.PENDING,
-    //         message: 'Inferenza aggiunta alla coda'
-    //     },
-    //     timestamp: new Date()
-    // });
+    // if only one video selected then targer == current
+    if (sorted.length === 1) {
+      const video = sorted[0];
+      const jobData = {
+        dataset_id: datasetId,
+        user_id: userId,
+        goal_id: video.id,
+        current_id: video.id,
+        params: parameters,
+      } as InferCreationAttributes<InferenceJob>;
 
-    // return inference;
-    return "HI";
+      const inferenceId =
+        await this.inferenceRepository.createInferenceJob(jobData);
+      createdJobIds.push(inferenceId);
+
+      await inferenceQueue.add("run", {
+        inferenceId: inferenceId,
+        goalVideoBuffer: video.file,
+        currentVideoBuffer: video.file,
+        params: parameters,
+      });
+
+      return createdJobIds;
+    }
+
+    // Otherwise creates multiple jobs with coupled videos
+    for (let i = 0; i < sorted.length - 1; i++) {
+      const target = sorted[i];
+      const current = sorted[i + 1];
+
+      const jobData = {
+        dataset_id: datasetId,
+        user_id: userId,
+        goal_id: target.id,
+        current_id: current.id,
+        params: parameters,
+      } as InferCreationAttributes<InferenceJob>;
+
+      const inferenceId =
+        await this.inferenceRepository.createInferenceJob(jobData);
+      createdJobIds.push(inferenceId);
+
+      await inferenceQueue.add("run", {
+        inferenceId: inferenceId,
+        goalVideoBuffer: target.file,
+        currentVideoBuffer: current.file,
+        params: parameters,
+      });
+    }
+
+    return createdJobIds;
   };
 
   getInferenceStatus = async (jobId: string): Promise<InferenceJobStatus> => {
@@ -145,4 +172,22 @@ export class InferenceJobService {
     //     timestamp: new Date()
     // });
   }
+
+  private getVideosByRange = async (
+    datasetId: string,
+    range: string,
+  ): Promise<Video[]> => {
+    const [startStr, endStr] = range.split("-");
+    const start = parseInt(startStr, 10);
+    const end = parseInt(endStr, 10);
+
+    if (end < start) {
+      throw getError(ErrorEnum.BAD_REQUEST_ERROR).getErrorObj();
+    }
+
+    const limit = end - start + 1;
+    const offset = start;
+
+    return await this.videoRepository.findByRange(datasetId, offset, limit);
+  };
 }
