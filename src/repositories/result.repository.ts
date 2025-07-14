@@ -123,7 +123,7 @@ export class ResultRepository {
    * @returns A Promise that resolves to the JSON result data or null if not found
    */
   async getJsonResult(jobId: string): Promise<object | null> {
-    const result = await this.resultDAO.get(jobId);
+    const result = await this.resultDAO.getByInferenceJobId(jobId);
     return result ? result.json_res : null;
   }
 
