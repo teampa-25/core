@@ -51,7 +51,7 @@ export class UserDAO implements IDAO<User> {
   }
 
   //InferCreationAttributes is used to infer the attributes needed to create a new UserModel instance
-  async create(data: InferCreationAttributes<User>): Promise<string> {
+  async create(data: InferCreationAttributes<User>): Promise<User | string> {
     try {
       const new_user = await User.create(data);
 
@@ -59,7 +59,7 @@ export class UserDAO implements IDAO<User> {
         throw getError(ErrorEnum.GENERIC_ERROR)?.getErrorObj();
       }
 
-      return new_user.id;
+      return new_user;
     } catch (error) {
       throw getError(ErrorEnum.GENERIC_ERROR)?.getErrorObj();
     }

@@ -1,12 +1,24 @@
 import { User } from "@/models/user";
 import { UserDAO } from "@/dao/user.dao";
 import { ErrorEnum, getError } from "@/utils/api-error";
+import { InferCreationAttributes } from "sequelize";
 
 export class UserRepository {
   private userDAO: UserDAO;
 
   constructor() {
     this.userDAO = new UserDAO();
+  }
+
+  /**
+   * Creates a new user
+   * @param email, password, role
+   * @returns A Promise that resolves to the user or a string if not found
+   */
+  async createUser(
+    user: InferCreationAttributes<User>,
+  ): Promise<User | string> {
+    return await this.userDAO.create(user);
   }
 
   /**
