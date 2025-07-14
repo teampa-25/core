@@ -1,5 +1,5 @@
 import { InferenceJobStatus } from "@/models/enums/inference.job.status";
-import { Result } from "@/models/result";
+import { Result } from "@/models";
 import { inferenceQueue } from "@/queue/queue";
 import { DatasetRepository } from "@/repositories/dataset.repository";
 import { InferenceJobRepository } from "@/repositories/inference.job.repository";

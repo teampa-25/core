@@ -1,5 +1,5 @@
 import { NextFunction, Request, Response } from "express";
-import { Dataset } from "@/models/dataset";
+import { Dataset } from "@/models";
 import { StatusCodes } from "http-status-codes";
 import { DatasetService } from "@/services/dataset.service";
 import { catchAsync } from "@/utils/catchAsync";
@@ -23,7 +23,7 @@ export class DatasetController {
    * @returns a response with the created dataset or an error
    */
   create = catchAsync(async (req: Request, res: Response) => {
-    const userId = req.user?.id;
+    const userId = req.user!.id;
 
     const { name, tags } = req.body;
     const dataset = await this.datasetService.createDataset(userId, {
@@ -44,7 +44,7 @@ export class DatasetController {
    * @returns a response indicating success or failure
    */
   delete = catchAsync(async (req: Request, res: Response) => {
-    const userId = req.user?.id;
+    const userId = req.user!.id;
 
     const { id } = req.params;
     const deleted = await this.datasetService.deleteDataset(id, userId);
@@ -67,6 +67,7 @@ export class DatasetController {
    */
   getAll = catchAsync(async (req: Request, res: Response) => {
     const tags = req.query.tags;
+    const userId = req.user!.id;
     const filters = tags
       ? { tags: Array.isArray(tags) ? (tags as string[]) : [tags as string] }
       : undefined;
@@ -83,7 +84,7 @@ export class DatasetController {
    * @returns a response with the updated dataset or an error
    */
   update = catchAsync(async (req: Request, res: Response) => {
-    const userId = req.user?.id;
+    const userId = req.user!.id;
 
     const { id } = req.params;
     const { name, tags } = req.body;
@@ -106,7 +107,7 @@ export class DatasetController {
    * @returns a response with the updated dataset or an error
    */
   addVideoArray = catchAsync(async (req: Request, res: Response) => {
-    const userId = req.user?.id;
+    const userId = req.user!.id;
 
     const { id } = req.params;
     const videos = req.body.videos;

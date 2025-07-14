@@ -1,6 +1,6 @@
 import { InferCreationAttributes } from "sequelize";
-import { IDAO } from "@/dao/interfaces/idao";
-import { InferenceJob } from "@/models/inference.job";
+import { IDAO } from "./interfaces/idao";
+import { InferenceJob } from "@/models";
 import { ErrorCode } from "bullmq";
 import { ErrorEnum, getError } from "@/utils/api-error";
 

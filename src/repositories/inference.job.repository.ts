@@ -1,4 +1,4 @@
-import { InferenceJob } from "@/models/inference.job";
+import { InferenceJob } from "@/models";
 import { InferenceJobDAO } from "@/dao/inference.job.dao";
 import { InferenceJobStatus } from "@/models/enums/inference.job.status";
 import { InferCreationAttributes } from "sequelize";

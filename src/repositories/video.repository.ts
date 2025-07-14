@@ -1,4 +1,4 @@
-import { Video } from "@/models/video";
+import { Video } from "@/models";
 import { VideoDAO } from "@/dao/video.dao";
 
 /**

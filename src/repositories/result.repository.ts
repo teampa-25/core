@@ -1,4 +1,4 @@
-import { Result } from "@/models/result";
+import { Result } from "@/models";
 import { ResultDAO } from "@/dao/result.dao";
 import { ErrorEnum, getError } from "@/utils/api-error";
 import { InferCreationAttributes } from "sequelize";
