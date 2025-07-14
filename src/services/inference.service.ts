@@ -1,10 +1,12 @@
 import { InferenceJobStatus } from "@/models/enums/inference.job.status";
+import { InferenceJob } from "@/models/inference.job";
 import { Result } from "@/models/result";
 import { inferenceQueue } from "@/queue/queue";
 import { DatasetRepository } from "@/repositories/dataset.repository";
 import { InferenceJobRepository } from "@/repositories/inference.job.repository";
 import { ResultRepository } from "@/repositories/result.repository";
 import { UserRepository } from "@/repositories/user.repository";
+import { VideoRepository } from "@/repositories/video.repository";
 import { ErrorEnum, getError } from "@/utils/api-error";
 import { INFERENCE } from "@/utils/const";
 import { th } from "@faker-js/faker/.";
@@ -27,6 +29,7 @@ export class InferenceJobService {
   private inferenceRepository: InferenceJobRepository;
   private datasetRepository: DatasetRepository;
   private userRepository: UserRepository;
+  private videoRepository: VideoRepository;
   private resultRepository: ResultRepository;
   // private wsService: WebSocketService;
 
@@ -34,9 +37,67 @@ export class InferenceJobService {
     this.inferenceRepository = new InferenceJobRepository();
     this.datasetRepository = new DatasetRepository();
     this.userRepository = new UserRepository();
+    this.videoRepository = new VideoRepository();
     this.resultRepository = new ResultRepository();
     //     this.wsService = WebSocketService.getInstance();
   }
+
+  enqueueJob = async (
+    userId: string,
+    datasetId: string,
+    parameters: InferenceParameters,
+    range: string,
+  ): Promise<string> => {
+    const dataset = await this.datasetRepository.findByIdAndUserId(
+      datasetId,
+      userId,
+    );
+    if (!dataset) throw getError(ErrorEnum.NOT_FOUND_ERROR).getErrorObj();
+
+    // const requiredCredits = totalFrames * INFERENCE.COST_OF_INFERENCE;
+    // const userCredits = await this.userRepository.hasEnoughCredits(userId, );)
+    //calculate inferenc cost and update user credits
+    //this.wsService.notifyUser(userId, {
+    //     type: 'INFERENCE_STATUS_UPDATE',
+    //     data: {
+    //         inferenceId: inference.id,
+    //         status: InferenceJobStatus.ABORTED,
+    //         message: 'Inferenza aggiunta alla coda'
+    //     },
+    //     timestamp: new Date()
+    // });
+
+    //const videos = await this.videoRepository.
+
+    //create inferenceJob
+    //range: "all | 0-1 | 12-30";
+    const inferenceObject = {
+      dataset_id: datasetId,
+      user_id: userId,
+      video_id,
+      status: InferenceJobStatus.PENDING,
+      carbon_footprint: 0,
+      params: parameters,
+    };
+    const inference =
+      await this.inferenceRepository.createInferenceJob(inferenceObject);
+
+    //await inferenceQueue.add('inference', { //data to be passed to the worker}, {options});
+
+    // Notifica via WebSocket
+    // this.wsService.notifyUser(userId, {
+    //     type: 'INFERENCE_STATUS_UPDATE',
+    //     data: {
+    //         inferenceId: inference.id,
+    //         status: InferenceJobStatus.PENDING,
+    //         message: 'Inferenza aggiunta alla coda'
+    //     },
+    //     timestamp: new Date()
+    // });
+
+    // return inference;
+    return "HI";
+  };
 
   getInferenceStatus = async (jobId: string): Promise<InferenceJobStatus> => {
     const status = await this.inferenceRepository
@@ -58,60 +119,6 @@ export class InferenceJobService {
     const results = await this.resultRepository.getImageZip(jobId);
     if (!results) throw getError(ErrorEnum.NOT_FOUND_ERROR).getErrorObj();
     return results;
-  };
-
-  enqueueJob = async (
-    userId: string,
-    datasetId: string,
-    parameters: InferenceParameters,
-  ): Promise<string> => {
-    const dataset = await this.datasetRepository.findByIdAndUserId(
-      datasetId,
-      userId,
-    );
-    if (!dataset) throw getError(ErrorEnum.NOT_FOUND_ERROR).getErrorObj();
-
-    // const requiredCredits = totalFrames * INFERENCE.COST_OF_INFERENCE;
-    // const userCredits = await this.userRepository.hasEnoughCredits(userId, );)
-    //calculate inferenc cost and update user credits
-    //this.wsService.notifyUser(userId, {
-    //     type: 'INFERENCE_STATUS_UPDATE',
-    //     data: {
-    //         inferenceId: inference.id,
-    //         status: InferenceJobStatus.ABORTED,
-    //         message: 'Inferenza aggiunta alla coda'
-    //     },
-    //     timestamp: new Date()
-    // });
-
-    //create inferenceJob
-
-    // const inference = await this.inferenceRepository.create({
-    //     id: uuidv4(),
-    //     userId,
-    //     datasetId,
-    //     videoId,
-    //     status: InferenceJobStatus.PENDING,
-    //     parameters,
-    //     createdAt: new Date(),
-    //     updatedAt: new Date()
-    // });
-
-    //await inferenceQueue.add('inference', { //data to be passed to the worker}, {options});
-
-    // Notifica via WebSocket
-    // this.wsService.notifyUser(userId, {
-    //     type: 'INFERENCE_STATUS_UPDATE',
-    //     data: {
-    //         inferenceId: inference.id,
-    //         status: InferenceJobStatus.PENDING,
-    //         message: 'Inferenza aggiunta alla coda'
-    //     },
-    //     timestamp: new Date()
-    // });
-
-    // return inference;
-    return "HI";
   };
 
   /**
