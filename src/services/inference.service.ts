@@ -1,5 +1,10 @@
 import { InferenceJobStatus } from "@/models/enums/inference.job.status";
+import { Result } from "@/models/result";
 import { inferenceQueue } from "@/queue/queue";
+import { DatasetRepository } from "@/repositories/dataset.repository";
+import { UserRepository } from "@/repositories/user.repository";
+import { ErrorEnum, getError } from "@/utils/api-error";
+import { INFERENCE } from "@/utils/const";
 
 enum Detector {
   akaze = "AKAZE",
@@ -17,27 +22,43 @@ interface InferenceParameters {
 
 export class InferenceJobService {
   // private inferenceRepository: InferenceRepository;
-  // private datasetRepository: DatasetRepository;
-  // private userRepository: UserRepository;
+  private datasetRepository: DatasetRepository;
+  private userRepository: UserRepository;
   // private wsService: WebSocketService;
 
-  // constructor() {
-  //     this.inferenceRepository = new InferenceRepository();
-  //     this.datasetRepository = new DatasetRepository();
-  //     this.userRepository = new UserRepository();
-  //     this.wsService = WebSocketService.getInstance();
-  // }
+  constructor() {
+    //     this.inferenceRepository = new InferenceRepository();
+    this.datasetRepository = new DatasetRepository();
+    this.userRepository = new UserRepository();
+    //     this.wsService = WebSocketService.getInstance();
+  }
+
+  getInferenceStatus = async (jobId: string): Promise<InferenceJobStatus> => {
+    //return await this.repo
+    return InferenceJobStatus.ABORTED;
+  };
+
+  getInferenceJSONResults = async (jobId: string): Promise<void> => {
+    //return await this.repo
+  };
+
+  getInferenceZIPResults = async (jobId: string): Promise<void> => {
+    //return await this.repo
+  };
 
   enqueueJob = async (
     userId: string,
     datasetId: string,
-    modelId: string,
     parameters: InferenceParameters,
   ): Promise<string> => {
-    //check datasetid calling dataset repo
+    const dataset = await this.datasetRepository.findByIdAndUserId(
+      datasetId,
+      userId,
+    );
+    if (!dataset) throw getError(ErrorEnum.NOT_FOUND_ERROR).getErrorObj();
 
-    //check userid calling user repo
-
+    // const requiredCredits = totalFrames * INFERENCE.COST_OF_INFERENCE;
+    // const userCredits = await this.userRepository.hasEnoughCredits(userId, );)
     //calculate inferenc cost and update user credits
     //this.wsService.notifyUser(userId, {
     //     type: 'INFERENCE_STATUS_UPDATE',
