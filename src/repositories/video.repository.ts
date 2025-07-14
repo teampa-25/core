@@ -1,6 +1,10 @@
 import { Video } from "@/models/video";
 import { VideoDAO } from "@/dao/video.dao";
 
+/**
+ * VideoRepository is responsible for managing video data in the dataset.
+ * It provides methods to create, find, update, and delete videos.
+ */
 export class VideoRepository {
   private videoDAO: VideoDAO;
 

@@ -56,7 +56,7 @@ export class UserDAO implements IDAO<User> {
       const new_user = await User.create(data);
 
       if (!new_user.id) {
-        throw getError(ErrorEnum.CREATION_ERROR)?.getErrorObj();
+        throw getError(ErrorEnum.GENERIC_ERROR)?.getErrorObj();
       }
 
       return new_user.id;

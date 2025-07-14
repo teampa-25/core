@@ -36,7 +36,7 @@ export class DatasetService {
     );
 
     if (exists) {
-      throw getError(ErrorEnum.DATASET_NAME_CONFLICT_ERROR);
+      throw getError(ErrorEnum.DATASET_NAME_CONFLICT_ERROR).getErrorObj();
     }
 
     const datasetId = await this.datasetRepository.create({
@@ -48,7 +48,7 @@ export class DatasetService {
     // Retrieves the created dataset to return it
     const createdDataset = await this.datasetRepository.findById(datasetId);
     if (!createdDataset) {
-      throw getError(ErrorEnum.DATASET_CREATION_ERROR);
+      throw getError(ErrorEnum.GENERIC_ERROR).getErrorObj();
     }
 
     return createdDataset;
@@ -106,7 +106,7 @@ export class DatasetService {
       userId,
     );
     if (!dataset) {
-      throw getError(ErrorEnum.DATASET_NOT_FOUND_ERROR);
+      throw getError(ErrorEnum.NOT_FOUND_ERROR).getErrorObj();
     }
 
     // If updating the name, check for uniqueness
@@ -118,7 +118,7 @@ export class DatasetService {
       );
 
       if (exists) {
-        throw getError(ErrorEnum.DATASET_NAME_CONFLICT_ERROR);
+        throw getError(ErrorEnum.DATASET_NAME_CONFLICT_ERROR).getErrorObj();
       }
     }
 
@@ -142,7 +142,7 @@ export class DatasetService {
       userId,
     );
     if (!dataset) {
-      throw getError(ErrorEnum.DATASET_NOT_FOUND_ERROR);
+      throw getError(ErrorEnum.NOT_FOUND_ERROR).getErrorObj();
     }
 
     return await this.datasetRepository.softDelete(datasetId);
@@ -171,17 +171,12 @@ export class DatasetService {
 
     // Validate input videos
     if (!videos || (!Array.isArray(videos) && !videos.mimetype)) {
-      throw getError(ErrorEnum.ZERO_VIDEOS_FOUND_ERROR);
+      throw getError(ErrorEnum.GENERIC_ERROR).getErrorObj();
     }
 
     // Since in projects assignment there's no refs to video formats, then we assumed that those below are the supported formats
-    const supportedFormats = [
-      "video/mp4",
-      "video/avi",
-      "video/mov",
-      "video/mkv",
-      "video/webm",
-    ];
+    // TODO: this should be moved to a config file or constants file
+    const supportedFormats = ["video/mp4"];
     const costPerFrame = 0.001; // Defined into projects assignment
     const videoFiles = Array.isArray(videos) ? videos : [videos];
 
@@ -197,7 +192,7 @@ export class DatasetService {
       // Check if it's a zip file (I thinks that's better to build an utility for this - Gabs)
       if (file.mimetype === "application/zip") {
         // TODO: ZIP handler
-        throw getError(ErrorEnum.NOT_IMPLEMENTED_ERROR);
+        throw getError(ErrorEnum.NOT_IMPLEMENTED_ERROR).getErrorObj();
         // return false;
       }
 
@@ -205,7 +200,7 @@ export class DatasetService {
     });
 
     if (validVideos.length === 0) {
-      throw getError(ErrorEnum.ZERO_VIDEOS_FOUND_ERROR);
+      throw getError(ErrorEnum.GENERIC_ERROR).getErrorObj();
     }
 
     // Calculate total cost for all videos
@@ -236,7 +231,7 @@ export class DatasetService {
       totalCost,
     );
     if (!hasEnoughCredits) {
-      throw getError(ErrorEnum.INSUFFICIENT_CREDITS_ERROR);
+      throw getError(ErrorEnum.UNAUTHORIZED_ERROR).getErrorObj();
     }
 
     // Deduct credits from user
@@ -259,7 +254,7 @@ export class DatasetService {
           userId,
           (await this.userRepository.findById(userId))!.credit! + totalCost,
         );
-        throw getError(ErrorEnum.VIDEO_SAVE_ERROR);
+        throw getError(ErrorEnum.GENERIC_ERROR).getErrorObj();
       }
     }
 

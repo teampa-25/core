@@ -3,6 +3,10 @@ import { IDAO } from "@/dao/interfaces/idao";
 import { ErrorEnum, getError } from "@/utils/api-error";
 import { Op, InferCreationAttributes } from "sequelize";
 
+/**
+ * DatasetDAO class implements IDAO interface for Dataset model
+ * Provides methods to create, retrieve, update, and delete datasets
+ */
 export class DatasetDAO implements IDAO<Dataset> {
   async create(data: InferCreationAttributes<Dataset>): Promise<string> {
     try {
@@ -13,6 +17,11 @@ export class DatasetDAO implements IDAO<Dataset> {
     }
   }
 
+  /**
+   * Filters datasets by tags
+   * @param tags - Array of tags to filter by
+   * @returns Promise<Dataset[]> - Array of datasets matching the tags
+   */
   async filterByTags(tags: string[]): Promise<Dataset[]> {
     try {
       const datasets = await Dataset.findAll({
@@ -29,6 +38,11 @@ export class DatasetDAO implements IDAO<Dataset> {
     }
   }
 
+  /**
+   * Retrieves a dataset by its ID
+   * @param id - The ID of the dataset to retrieve
+   * @returns Promise<Dataset | null> - The dataset if found, null otherwise
+   */
   async get(id: string): Promise<Dataset | null> {
     try {
       const dataset = await Dataset.findOne({
@@ -43,6 +57,10 @@ export class DatasetDAO implements IDAO<Dataset> {
     }
   }
 
+  /**
+   * Retrieves all datasets
+   * @returns Promise<Dataset[]> - Array of all datasets
+   */
   async getAll(): Promise<Dataset[]> {
     try {
       const datasets = await Dataset.findAll({
@@ -56,6 +74,12 @@ export class DatasetDAO implements IDAO<Dataset> {
     }
   }
 
+  /**
+   * Updates a dataset by its ID
+   * @param id - The ID of the dataset to update
+   * @param data - The new data for the dataset
+   * @returns Promise<Dataset | null> - The updated dataset if found, null otherwise
+   */
   async update(id: string, data: Partial<Dataset>): Promise<Dataset | null> {
     try {
       const dataset = await this.get(id);
@@ -70,6 +94,11 @@ export class DatasetDAO implements IDAO<Dataset> {
     }
   }
 
+  /**
+   * Deletes a dataset by its ID
+   * @param id - The ID of the dataset to delete
+   * @returns Promise<boolean> - True if the dataset was deleted, false otherwise
+   */
   async delete(id: string): Promise<boolean> {
     try {
       const [updatedRowsCount] = await Dataset.update(

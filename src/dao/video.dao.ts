@@ -54,7 +54,7 @@ export class VideoDAO implements IDAO<Video> {
       const new_video = await Video.create(data);
 
       if (!new_video.id) {
-        throw getError(ErrorEnum.CREATION_ERROR)?.getErrorObj();
+        throw getError(ErrorEnum.GENERIC_ERROR)?.getErrorObj();
       }
 
       return new_video.id;
