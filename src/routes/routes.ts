@@ -3,7 +3,9 @@ import authRoute from "@/routes/auth";
 import healthRoute from "@/routes/health";
 import adminRoute from "@/routes/admin";
 import datasetRoute from "@/routes/dataset";
-import inferenceRoute from "@/routes/inference";
+import userRoute from "@/routes/user";
+//import inferenceRoute from "@/routes/inference";
+//import resultRoute from "@/routes/result";
 // import docsRoute from "@/routes/docs"
 
 const router = Router();
@@ -13,10 +15,10 @@ const defaultRoutes: Array<{ path: string; route: any }> = [
     path: "/auth",
     route: authRoute,
   },
-  {
-    path: "/inference",
-    route: inferenceRoute,
-  },
+  // {
+  //   path: "/inference",
+  //   route: inferenceRoute,
+  // },
   {
     path: "/health",
     route: healthRoute,
@@ -29,6 +31,14 @@ const defaultRoutes: Array<{ path: string; route: any }> = [
     path: "/dataset",
     route: datasetRoute,
   },
+  {
+    path: "/user",
+    route: userRoute,
+  },
+  /* {
+    path: "/result",
+    route: resultRoute,
+  }, */
 ];
 
 defaultRoutes.forEach((route) => {

@@ -17,6 +17,11 @@ export const UserSchema = {
     email: Joi.string().email().required(),
     password: Joi.string().required(),
   }),
+
+  recharge: Joi.object({
+    email: Joi.string().email().required(),
+    credits: Joi.number().min(0).required(),
+  }),
 };
 
 export const DatasetSchema = {
@@ -47,5 +52,19 @@ export const DatasetSchema = {
         }),
       )
       .required(),
+  }),
+};
+
+export const InferenceSchema = {
+  create: Joi.object({
+    datasetId: Joi.string().uuid().required(),
+    modelId: Joi.string().required(),
+    parameters: Joi.object({
+      startFrame: Joi.number().integer().min(0).optional(),
+      endFrame: Joi.number().integer().min(0).optional(),
+      frameStep: Joi.number().integer().min(1).default(1),
+      detector: Joi.string().valid("AKAZE", "SIFT", "ORB").default("AKAZE"),
+      useDevice: Joi.boolean().default(false),
+    }).required(),
   }),
 };
