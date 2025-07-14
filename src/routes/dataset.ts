@@ -1,15 +1,15 @@
-import { Router } from "express";
-import { DatasetController } from "@/controllers/dataset.controller";
+import { authorize } from "@/middlewares/authorize.middleware";
 import { authenticate } from "@/middlewares/authenticate.middleware";
 import { validate } from "@/middlewares/validate.middleware";
-import { DatasetSchema, IdSchema, UserSchema } from "@/utils/validation.schema";
-import { param } from "express-validator";
-import { authorize } from "@/middlewares/authorize.middleware";
+import { UserRole } from "@/models/enums/user.role";
+import { Router } from "express";
+import { DatasetController } from "@/controllers/dataset.controller";
+import { DatasetSchema, IdSchema } from "@/utils/validation.schema";
 
 const router = Router();
 const datasetController = new DatasetController();
 
-router.use(authenticate); // Apply authentication middleware to all routes in this router
+router.use(authenticate, authorize(UserRole.USER, UserRole.ADMIN)); // Apply authentication middleware to all routes in this router
 
 // Create a new dataset
 router.post("/", validate(DatasetSchema.create), datasetController.create);
@@ -18,7 +18,7 @@ router.post("/", validate(DatasetSchema.create), datasetController.create);
 router.delete(
   "/:id",
   validate(IdSchema, "params"),
-  // AUTHOROIZE
+  // AUTHORIZE
   datasetController.delete,
 );
 
@@ -41,7 +41,7 @@ router.post(
   datasetController.uploadVideo,
 );
 
-// Get a dataset by id (already present)
+// Get a single dataset by id (already present)
 router.get("/:id", validate(IdSchema, "params"), datasetController.getById);
 
 export default router;

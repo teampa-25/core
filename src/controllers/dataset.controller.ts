@@ -21,8 +21,7 @@ export class DatasetController {
    * @returns a response with the created dataset or an error
    */
   create = catchAsync(async (req: Request, res: Response) => {
-    const userId = req.user?.id;
-    if (!userId) throw getError(ErrorEnum.UNAUTHORIZED_ERROR);
+    const userId = req.user!.id;
 
     const { name, tags } = req.body;
     const dataset = await this.datasetService.createDataset(userId, {
@@ -31,7 +30,7 @@ export class DatasetController {
     });
 
     return res.status(StatusCodes.CREATED).json({
-      message: "Dataset creato con successo",
+      message: "Dataset created successfully",
       dataset,
     });
   });
@@ -41,9 +40,7 @@ export class DatasetController {
    * @returns a response indicating success or failure
    */
   delete = catchAsync(async (req: Request, res: Response) => {
-    // could validation be better? - beg
-    const userId = req.user?.id;
-    if (!userId) throw getError(ErrorEnum.UNAUTHORIZED_ERROR);
+    const userId = req.user!.id;
 
     const { id } = req.params;
     const deleted = await this.datasetService.deleteDataset(id, userId);
@@ -55,7 +52,7 @@ export class DatasetController {
 
     return res
       .status(StatusCodes.OK)
-      .json({ message: "Dataset cancellato con successo" });
+      .json({ message: "Dataset deleted successfully" });
   });
 
   /**
@@ -63,10 +60,9 @@ export class DatasetController {
    * @returns a response with the list of datasets
    */
   getAll = catchAsync(async (req: Request, res: Response) => {
-    const userId = req.user?.id;
-    if (!userId) throw getError(ErrorEnum.UNAUTHORIZED_ERROR);
+    const userId = req.user!.id;
 
-    const tags = req.query.tags;
+    const { tags } = req.body;
     const filters = tags
       ? { tags: Array.isArray(tags) ? (tags as string[]) : [tags as string] }
       : undefined;
@@ -81,8 +77,7 @@ export class DatasetController {
    * @returns a response with the updated dataset or an error
    */
   update = catchAsync(async (req: Request, res: Response) => {
-    const userId = req.user?.id;
-    if (!userId) throw getError(ErrorEnum.UNAUTHORIZED_ERROR);
+    const userId = req.user!.id;
 
     const { id } = req.params;
     const { name, tags } = req.body;
@@ -103,13 +98,12 @@ export class DatasetController {
    * @returns a response with the updated dataset or an error
    */
   uploadVideo = catchAsync(async (req: Request, res: Response) => {
-    const userId = req.user?.id;
-    if (!userId) throw getError(ErrorEnum.UNAUTHORIZED_ERROR);
+    const userId = req.user!.id;
 
     const { id } = req.params;
-    const content: Buffer = req.body.content;
-    const type: string = req.body.type;
-    const name: string = req.body.name;
+    const content: Buffer = req.body?.content;
+    const type: string = req.body?.type;
+    const name: string = req.body?.name;
 
     const result = await this.datasetService.uploadVideo(
       id,
@@ -127,8 +121,10 @@ export class DatasetController {
    * @returns a response with the dataset or an error
    */
   getById = catchAsync(async (req: Request, res: Response) => {
+    const userId = req.user!.id;
     const { id } = req.params;
-    const dataset = await this.datasetService.getDatasetById(id);
+
+    const dataset = await this.datasetService.getDatasetById(id, userId);
     if (!dataset) {
       const error = getError(ErrorEnum.NOT_FOUND_ERROR).getErrorObj();
       return res.status(error.status).json({ message: error.msg });
