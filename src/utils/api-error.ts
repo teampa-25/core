@@ -122,7 +122,7 @@ class InvalidJWTFormat implements ErrorObj {
  * @returns An object implementing the ErrorObj interface, or null if the type is None.
  */
 export function getError(type: ErrorEnum): ErrorObj {
-  let retval: ErrorObj;
+  let retval: ErrorObj = new GenericError();
 
   switch (type) {
     case ErrorEnum.GENERIC_ERROR:
@@ -151,6 +151,7 @@ export function getError(type: ErrorEnum): ErrorObj {
       break;
     case ErrorEnum.INVALID_JWT_FORMAT:
       retval = new InvalidJWTFormat();
+      break;
   }
 
   return retval;
