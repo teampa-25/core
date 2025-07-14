@@ -1,14 +1,19 @@
-import { UserController } from "@/controllers/user.controller";
+import { authenticate } from "@/middlewares/authenticate.middleware";
 import { authorize } from "@/middlewares/authorize.middleware";
+import { validate } from "@/middlewares/validate.middleware";
+import { UserController } from "@/controllers/user.controller";
 import { UserRole } from "@/models/enums/user.role";
+import { UserSchema } from "@/utils/validation-schema";
 import { Router } from "express";
 
 const router = Router();
 const userController = new UserController();
 
-// router.get("/init", databaseController.create);
-// router.put("/:id", datasetController.updateById);
-// router.delete("/:id", datasetController.deleteById);
-//router.post("/recharge", authorize(UserRole.ADMIN), userController.create);
+router.use(authenticate, authorize(UserRole.ADMIN));
+router.post(
+  "/recharge",
+  validate(UserSchema.recharge),
+  userController.recharge,
+);
 
 export default router;

@@ -3,6 +3,7 @@ import authRoute from "@/routes/auth";
 import healthRoute from "@/routes/health";
 import adminRoute from "@/routes/admin";
 import datasetRoute from "@/routes/dataset";
+import userRoute from "@/routes/user";
 // import docsRoute from "@/routes/docs"
 
 const router = Router();
@@ -23,6 +24,10 @@ const defaultRoutes: Array<{ path: string; route: any }> = [
   {
     path: "/datasets",
     route: datasetRoute,
+  },
+  {
+    path: "/user",
+    route: userRoute,
   },
 ];
 

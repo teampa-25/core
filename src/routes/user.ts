@@ -1,26 +1,13 @@
 import { Router } from "express";
-// import { DatasetController } from "@/controllers/dataset.controller";
+import { UserController } from "@/controllers/user.controller";
+import { authenticate } from "@/middlewares/authenticate.middleware";
+import { authorize } from "@/middlewares/authorize.middleware";
+import { UserRole } from "@/models/enums/user.role";
 
 const router = Router();
-// const dataset = new DatasetController();
+const userController = new UserController();
 
-// router.route("/:id")
-//   .get(dataset.getByFilters)
-//   .post(dataset.create)
-//   .put(dataset.updateById)
-//   .delete(dataset.deleteById)
-
-// router.get("/:id", datasetController.getByFilters);
-// router.post("/", datasetController.create);
-// router.put("/:id", datasetController.updateById);
-// router.delete("/:id", datasetController.deleteById);
-
-// router.get("/stats", datasetController.getUserDatasetStats);
-// router.get("/search", datasetController.searchDatasets);
-// router.get("/:id", datasetController.getDatasetById);
-// router.put("/:id", datasetController.updateDataset);
-// router.patch("/:id/tags", datasetController.updateDatasetTags);
-// router.delete("/:id", datasetController.deleteDataset);
-// router.post("/:id/restore", datasetController.restoreDataset);
+router.use(authenticate, authorize(UserRole.USER, UserRole.ADMIN));
+router.get("/credits", userController.credits);
 
 export default router;

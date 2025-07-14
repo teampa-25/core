@@ -41,4 +41,32 @@ export class UserService {
       role: foundUser.role,
     });
   }
+
+  async getCreditsByUserId(id: string): Promise<number | null> {
+    const foundUser = await this.userRepo.findById(id);
+
+    if (!foundUser || !foundUser.credit) {
+      return null;
+    }
+
+    return foundUser.credit;
+  }
+
+  async addCreditsByUserEmail(
+    email: string,
+    credits: number,
+  ): Promise<number | null> {
+    const foundUser = await this.userRepo.findByEmail(email);
+
+    if (!foundUser || !foundUser.id || !foundUser.credit) {
+      return null;
+    }
+
+    const updatedUser = await this.userRepo.updateCredits(
+      foundUser.id,
+      foundUser.credit + credits,
+    );
+
+    return updatedUser?.credit!;
+  }
 }

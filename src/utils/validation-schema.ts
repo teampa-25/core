@@ -17,6 +17,11 @@ export const UserSchema = {
     email: Joi.string().email().required(),
     password: Joi.string().required(),
   }),
+
+  recharge: Joi.object({
+    email: Joi.string().email().required(),
+    credits: Joi.number().min(0).required(),
+  }),
 };
 
 export const DatasetSchema = {
