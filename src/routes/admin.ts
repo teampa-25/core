@@ -3,7 +3,7 @@ import { authorize } from "@/middlewares/authorize.middleware";
 import { validate } from "@/middlewares/validate.middleware";
 import { UserController } from "@/controllers/user.controller";
 import { UserRole } from "@/models/enums/user.role";
-import { UserSchema } from "@/utils/validation-schema";
+import { UserSchema } from "@/utils/validation.schema";
 import { Router } from "express";
 
 const router = Router();
