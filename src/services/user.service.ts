@@ -8,23 +8,17 @@ import { UserRepository } from "@/repositories/user.repository";
 export class UserService {
   private userRepo = new UserRepository();
 
-  async createUser(
-    email: string,
-    password: string,
-    role: string,
-  ): Promise<User | string> {
-    const selectedRole =
-      role.toLowerCase() === "admin" ? UserRole.ADMIN : UserRole.USER;
-
+  async create(email: string, password: string): Promise<User | string> {
     const user: InferCreationAttributes<User> = {
       email: email,
       password: await hashPass(password),
-      role: selectedRole,
+      role: UserRole.USER,
     };
+
     return await this.userRepo.createUser(user);
   }
 
-  async loginUser(email: string, password: string): Promise<string | null> {
+  async login(email: string, password: string): Promise<string | null> {
     const foundUser = await this.userRepo.findByEmail(email);
 
     if (

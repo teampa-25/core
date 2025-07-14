@@ -9,8 +9,8 @@ export const UserSchema = {
   register: Joi.object({
     email: Joi.string().email().required(),
     password: Joi.string().required(),
-    credits: Joi.number().min(0).required(),
-    role: Joi.string().equal(UserRole).required(),
+    // credits: Joi.number().min(0).required(),
+    // role: Joi.string().equal(UserRole).required(),
   }),
 
   login: Joi.object({
@@ -36,6 +36,16 @@ export const DatasetSchema = {
         Joi.object({
           id: Joi.string().required(),
           type: Joi.string().valid("video", "zip").required(),
+        }),
+      )
+      .required(),
+  }),
+
+  removeVideo: Joi.object({
+    videos: Joi.array()
+      .items(
+        Joi.object({
+          id: Joi.string().required(),
         }),
       )
       .required(),

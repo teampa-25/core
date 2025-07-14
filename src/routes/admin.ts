@@ -1,4 +1,5 @@
 import { UserController } from "@/controllers/user.controller";
+import { authenticate } from "@/middlewares/authenticate.middleware";
 import { authorize } from "@/middlewares/authorize.middleware";
 import { UserRole } from "@/models/enums/user.role";
 import { Router } from "express";
@@ -6,9 +7,9 @@ import { Router } from "express";
 const router = Router();
 const userController = new UserController();
 
-// router.get("/init", databaseController.create);
-// router.put("/:id", datasetController.updateById);
-// router.delete("/:id", datasetController.deleteById);
-//router.post("/recharge", authorize(UserRole.ADMIN), userController.create);
+router.use(authenticate(req, res, next));
+router.use(authorize(UserRole.ADMIN));
+
+router.post("/recharge", userController.create);
 
 export default router;

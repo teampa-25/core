@@ -22,12 +22,8 @@ export class DatasetController {
    * @param res
    * @returns a response with the created dataset or an error
    */
-  createDataset = catchAsync(async (req: Request, res: Response) => {
+  create = catchAsync(async (req: Request, res: Response) => {
     const userId = req.user?.id;
-    if (!userId) {
-      const error = getError(ErrorEnum.UNAUTHORIZED_ERROR).getErrorObj();
-      return res.status(error.status).json({ message: error.msg });
-    }
 
     const { name, tags } = req.body;
     const dataset = await this.datasetService.createDataset(userId, {
@@ -47,12 +43,8 @@ export class DatasetController {
    * @param res
    * @returns a response indicating success or failure
    */
-  deleteDataset = catchAsync(async (req: Request, res: Response) => {
+  delete = catchAsync(async (req: Request, res: Response) => {
     const userId = req.user?.id;
-    if (!userId) {
-      const error = getError(ErrorEnum.UNAUTHORIZED_ERROR).getErrorObj();
-      return res.status(error.status).json({ message: error.msg });
-    }
 
     const { id } = req.params;
     const deleted = await this.datasetService.deleteDataset(id, userId);
@@ -73,13 +65,7 @@ export class DatasetController {
    * @param res
    * @returns a response with the list of datasets
    */
-  getDatasets = catchAsync(async (req: Request, res: Response) => {
-    const userId = req.user?.id;
-    if (!userId) {
-      const error = getError(ErrorEnum.UNAUTHORIZED_ERROR).getErrorObj();
-      return res.status(error.status).json({ message: error.msg });
-    }
-
+  getAll = catchAsync(async (req: Request, res: Response) => {
     const tags = req.query.tags;
     const filters = tags
       ? { tags: Array.isArray(tags) ? (tags as string[]) : [tags as string] }
@@ -96,12 +82,8 @@ export class DatasetController {
    * @param res
    * @returns a response with the updated dataset or an error
    */
-  updateDataset = catchAsync(async (req: Request, res: Response) => {
+  update = catchAsync(async (req: Request, res: Response) => {
     const userId = req.user?.id;
-    if (!userId) {
-      const error = getError(ErrorEnum.UNAUTHORIZED_ERROR).getErrorObj();
-      return res.status(error.status).json({ message: error.msg });
-    }
 
     const { id } = req.params;
     const { name, tags } = req.body;
@@ -123,12 +105,8 @@ export class DatasetController {
    * @param res
    * @returns a response with the updated dataset or an error
    */
-  addVideosToDataset = catchAsync(async (req: Request, res: Response) => {
+  addVideoArray = catchAsync(async (req: Request, res: Response) => {
     const userId = req.user?.id;
-    if (!userId) {
-      const error = getError(ErrorEnum.UNAUTHORIZED_ERROR).getErrorObj();
-      return res.status(error.status).json({ message: error.msg });
-    }
 
     const { id } = req.params;
     const videos = req.body.videos;
@@ -143,12 +121,28 @@ export class DatasetController {
   });
 
   /**
+   * Remove videos from a dataset
+   * @param req
+   * @param res
+   * @returns a response with the updated dataset or an error
+   */
+  removeVideoArray = catchAsync(async (req: Request, res: Response) => {
+    const userId = req.user?.id;
+    const { id } = req.params;
+    const videos = req.body.videos;
+
+    const result = await this.datasetService.removeVideo(id, userId, videos);
+
+    return res.status(StatusCodes.OK).json(result);
+  });
+
+  /**
    * Gets a dataset by ID
    * @param req
    * @param res
    * @returns a response with the dataset or an error
    */
-  getDatasetById = catchAsync(async (req: Request, res: Response) => {
+  getById = catchAsync(async (req: Request, res: Response) => {
     const { id } = req.params;
     const dataset = await this.datasetService.getDatasetById(id);
     if (!dataset) {
@@ -157,24 +151,9 @@ export class DatasetController {
     }
     return res.status(StatusCodes.OK).json({ dataset });
   });
+
+  where = catchAsync(async (req: Request, res, Response) => {
+    // TODO: Implement this -beg
+    return res.status(StatusCodes.NOT_IMPLEMENTED);
+  });
 }
-
-// import { Request, Response } from "express";
-// import { Dataset } from "@/models/dataset";
-// import { StatusCodes } from "http-status-codes";
-
-// export const getDatasetById = async (req: Request, res: Response) => {
-//   const { id } = req.params;
-
-//   try {
-//     const dataset = await Dataset.findByPk(id);
-
-//     if (!dataset) {
-//       return res.status(StatusCodes.NOT_FOUND).json({ message: "Dataset not found" });
-//     }
-
-//     return res.status(StatusCodes.OK).json({ dataset });
-//   } catch (error) {
-//     return res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({ message: "Error fetching dataset", error });
-//   }
-// };

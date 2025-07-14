@@ -1,14 +1,16 @@
 import express from "express";
 import "tsconfig-paths/register"; // required for path aliases like @/*
 import routes from "@/routes/routes";
-import enviroment from "./config/enviroment";
-import { morganMiddleware } from "./config/morgan";
+import enviroment from "@/config/enviroment";
+import { morganMiddleware } from "@/config/morgan";
 import {
   notFoundHandler,
   errorConverter,
   errorHandler,
-} from "./middlewares/error.middleware";
-import { logger } from "./config/logger";
+} from "@/middlewares/error.middleware";
+
+import { logger } from "@/config/logger";
+
 import helmet from "helmet";
 
 const app = express();

@@ -21,7 +21,7 @@ const defaultRoutes: Array<{ path: string; route: any }> = [
     route: adminRoute,
   },
   {
-    path: "/datasets",
+    path: "/dataset",
     route: datasetRoute,
   },
 ];

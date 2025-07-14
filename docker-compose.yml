@@ -3,7 +3,7 @@ services:
     build: .
     container_name: infernode-app
     ports:
-      - "${API_HOST:-3000}:3000"
+      - "${API_PORT:-3000}:3000"
     env_file: .env
     environment:
       - NODE_ENV=${NODE_ENV}
@@ -19,12 +19,11 @@ services:
       - /app/keys
       - ./tsconfig.json:/app/tsconfig.json
 
-
   # ask for port configuration to Sir. Adriano
   redis:
     image: redis:latest
     ports:
-      - "${REDIS_PORT}:${REDIS_PORT}"
+      - "${REDIS_PORT:-6379}:6379"
 
   postgres:
     image: postgres:latest

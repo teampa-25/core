@@ -5,21 +5,21 @@ import { UserService } from "@/services/user.service";
 export class UserController {
   private userService = new UserService();
 
-  register = async (req: Request, res: Response) => {
-    const { email, password, role } = req.body;
+  async register(req: Request, res: Response) {
+    const { email, password } = req.body;
 
-    const user = await this.userService.createUser(email, password, role);
+    const user = await this.userService.create(email, password);
 
     return res.status(StatusCodes.CREATED).json({
       message: "User registered successfully",
       user: user,
     });
-  };
+  }
 
-  login = async (req: Request, res: Response) => {
+  async login(req: Request, res: Response) {
     try {
       const { email, password } = req.body;
-      const token = await this.userService.loginUser(email, password);
+      const token = await this.userService.login(email, password);
 
       return res.status(StatusCodes.OK).json({
         message: "Login successful",
@@ -31,5 +31,5 @@ export class UserController {
         message: "Internal server error",
       });
     }
-  };
+  }
 }

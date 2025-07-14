@@ -160,19 +160,21 @@ export class DatasetService {
     userId: string,
     videos: any,
   ): Promise<any> {
-    // Checks if the dataset belongs to the user
+    // Checks if the dataset belongs to the user ----------- authorize....
     const dataset = await this.datasetRepository.findByIdAndUserId(
       datasetId,
       userId,
     );
+
     if (!dataset) {
       throw getError(ErrorEnum.NOT_FOUND_ERROR);
     }
 
-    // Validate input videos
+    // Validate input videos - what is exactly validating???
     if (!videos || (!Array.isArray(videos) && !videos.mimetype)) {
       throw getError(ErrorEnum.GENERIC_ERROR).getErrorObj();
     }
+    //// -------------------------------------------------
 
     // Since in projects assignment there's no refs to video formats, then we assumed that those below are the supported formats
     // TODO: this should be moved to a config file or constants file
@@ -189,7 +191,7 @@ export class DatasetService {
         return true;
       }
 
-      // Check if it's a zip file (I thinks that's better to build an utility for this - Gabs)
+      // Check if it's a zip file (I thinks that's better to build an utility for this - Gabs  i agree - beg)
       if (file.mimetype === "application/zip") {
         // TODO: ZIP handler
         throw getError(ErrorEnum.NOT_IMPLEMENTED_ERROR).getErrorObj();
@@ -203,6 +205,8 @@ export class DatasetService {
       throw getError(ErrorEnum.GENERIC_ERROR).getErrorObj();
     }
 
+    // NOTE: why here? we should calculate it based on how many frames will be used based on the skip frame parameter -beg
+    //
     // Calculate total cost for all videos
     let totalFrames = 0;
     const processedVideos = [];
@@ -225,7 +229,7 @@ export class DatasetService {
 
     const totalCost = totalFrames * costPerFrame;
 
-    // Check if user has enough credits
+    // Check if user has enough credits (NOTE: to do what? to add a video???)
     const hasEnoughCredits = await this.userRepository.hasEnoughCredits(
       userId,
       totalCost,
