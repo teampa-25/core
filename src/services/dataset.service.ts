@@ -285,7 +285,7 @@ export class DatasetService {
           await this.addVideoToRepo(
             userId,
             name,
-            content,
+            files[file].data,
             datasetId,
             frame_count,
           );
