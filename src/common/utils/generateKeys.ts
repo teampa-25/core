@@ -24,6 +24,7 @@ if (args.length > 0) {
   }
 }
 
+// TODO: rimuovere check
 if (existsSync(keysDir)) {
   logger.info("directory already exists - skipping");
   directory_exists = true;

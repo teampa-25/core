@@ -19,7 +19,7 @@ export class Video extends Model<
 > {
   declare id: string;
   declare dataset_id: ForeignKey<string>;
-  declare file: Buffer;
+  declare file: string;
   declare name: string;
   declare frame_count: number;
   declare created_at: Date;
@@ -42,8 +42,8 @@ export class Video extends Model<
           },
         },
         file: {
-          type: DataTypes.BLOB("long"),
-          allowNull: false,
+          type: DataTypes.STRING,
+          allowNull: true,
         },
         name: {
           type: DataTypes.STRING,

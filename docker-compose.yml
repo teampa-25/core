@@ -24,7 +24,6 @@ services:
       - /app/keys
       - ./tsconfig.json:/app/tsconfig.json
 
- 
   redis:
     image: redis:latest
     ports:

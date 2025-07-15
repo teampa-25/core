@@ -20,7 +20,7 @@ module.exports = {
         onDelete: "CASCADE",
       },
       file: {
-        type: Sequelize.BLOB("long"),
+        type: Sequelize.STRING,
         allowNull: false,
       },
       name: {
@@ -44,7 +44,6 @@ module.exports = {
     });
 
     await queryInterface.addIndex("Video", ["dataset_id"]);
-
   },
 
   async down(queryInterface, Sequelize) {
