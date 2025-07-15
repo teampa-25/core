@@ -4,6 +4,7 @@ import healthRoute from "@/routes/health";
 import adminRoute from "@/routes/admin";
 import datasetRoute from "@/routes/dataset";
 import inferenceRoute from "@/routes/inference";
+import websocketRoute from "@/routes/websocket";
 // import docsRoute from "@/routes/docs"
 
 const router = Router();
@@ -28,6 +29,10 @@ const defaultRoutes: Array<{ path: string; route: any }> = [
   {
     path: "/dataset",
     route: datasetRoute,
+  },
+  {
+    path: "/websocket",
+    route: websocketRoute,
   },
 ];
 

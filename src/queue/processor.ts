@@ -21,11 +21,16 @@ export class InferenceJobProcessor {
     this.resultRepository = new ResultRepository();
   }
 
+  /**
+   * Process an inference job.
+   * @param job The job to process.
+   */
   async processInference(job: Job): Promise<void> {
     const { inferenceId, parameters, goalVideoBuffer, currentVideoBuffer } =
       job.data;
 
     try {
+      // Update status to RUNNING and notify via WebSocket
       await this.inferenceJobService.updateInferenceStatus(
         inferenceId,
         InferenceJobStatus.RUNNING,
@@ -43,16 +48,23 @@ export class InferenceJobProcessor {
       // Save results into DB
       await this.saveResultsToDatabase(inferenceId, resultJson, resultZip);
 
+      // Update status to COMPLETED and notify via WebSocket
       await this.inferenceJobService.updateInferenceStatus(
         inferenceId,
         InferenceJobStatus.COMPLETED,
+        resultJson,
+        undefined,
+        resultJson.carbon_footprint,
       );
     } catch (error) {
       console.error(`Errore durante inferenza ${inferenceId}:`, error);
 
+      // Update status to FAILED and notify via WebSocket
       await this.inferenceJobService.updateInferenceStatus(
         inferenceId,
         InferenceJobStatus.FAILED,
+        undefined,
+        error instanceof Error ? error.message : "Unknown error",
       );
 
       throw error;
