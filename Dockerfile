@@ -1,6 +1,6 @@
 FROM node:24-alpine
 
-RUN apk add --no-cache postgresql-client
+RUN apk add --no-cache postgresql-client ffmpeg
 
 
 WORKDIR /app

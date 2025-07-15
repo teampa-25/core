@@ -52,7 +52,6 @@ export class DatasetService {
    * Calulcate the cost of upload
    */
   private async calculateCost(frame_count: number): Promise<number> {
-    // TODO: this should be moved to a config file or constants file
     const framecost = INFERENCE.COST_PER_FRAME;
     return frame_count * framecost;
   }
@@ -223,8 +222,8 @@ export class DatasetService {
     } else if (type === "video") {
       // THIS IS ONLY FOR SINGLE VIDEO repeat all of this
       //TO DO FIX this.calcFrameCount
-      const frame_count = 1000; //await this.calcFrameCount(name, content);
-      cost = await this.calculateCost(frame_count);
+      const frame_count = await this.calcFrameCount(name, content);
+      cost = Math.ceil(await this.calculateCost(frame_count));
       const hasEnoughCredits = await this.userRepository.hasEnoughCredits(
         userId,
         cost,
