@@ -6,10 +6,9 @@ const { v4: uuidv4 } = require("uuid");
 module.exports = {
   async up(qi, _) {
     const { faker } = require("@faker-js/faker");
-    const [results] = await qi.sequelize.query('SELECT id FROM "Dataset"');
 
-    const [user] = await qi.sequelize.query(`
-      SELECT u.id AS user_id, d.id AS dataset_id, v.id AS video_id
+    const [results] = await qi.sequelize.query(`
+      SELECT u.id AS user_id, d.id as dataset_id
       FROM "User" AS u
       JOIN "Dataset" AS d ON u.id = d.user_id
     `);
@@ -19,8 +18,8 @@ module.exports = {
       await qi.bulkInsert("Video", [
         {
           id: video_id,
-          dataset_id: element.id,
-          file: `/files/${user.id}/videos/${video_id}.mp4`,
+          dataset_id: element.dataset_id,
+          file: `/files/${element.user_id}/videos/${video_id}.mp4`,
           name: faker.word.words({ count: 3 }),
           frame_count: 1500,
           created_at: new Date(),
