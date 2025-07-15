@@ -3,17 +3,11 @@ import { promisify } from "util";
 import * as fs from "fs";
 import * as path from "path";
 import * as os from "os";
-import { ErrorEnum, getError } from "./api-error";
+import { getError } from "./api-error";
+import { ErrorEnum } from "@/common/enums";
+import { VideoInfo } from "@/common/types";
 
 const execAsync = promisify(exec);
-
-interface VideoInfo {
-  frameCount: number;
-  duration: number;
-  width: number;
-  height: number;
-  frameRate: number;
-}
 
 /**
  * Extracts frame count and other informations from a video file buffer

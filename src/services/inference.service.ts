@@ -1,5 +1,4 @@
 import { Video } from "@/models";
-import { InferenceJobStatus } from "@/models/enums/inference.job.status";
 import { InferenceJob } from "@/models";
 import { Result } from "@/models";
 import { inferenceQueue } from "@/queue/queue";
@@ -8,25 +7,12 @@ import { InferenceJobRepository } from "@/repositories/inference.job.repository"
 import { ResultRepository } from "@/repositories/result.repository";
 import { UserRepository } from "@/repositories/user.repository";
 import { VideoRepository } from "@/repositories/video.repository";
-import { ErrorEnum, getError } from "@/utils/api-error";
-import { INFERENCE } from "@/utils/const";
+import { getError } from "@/common/utils/api-error";
+import { ErrorEnum, InferenceJobStatus } from "@/common/enums";
+import { INFERENCE } from "@/common/const";
 import { th } from "@faker-js/faker/.";
 import { InferCreationAttributes } from "sequelize";
-
-enum Detector {
-  akaze = "AKAZE",
-  sift = "SIFT",
-  orb = "ORB",
-}
-
-export interface InferenceParameters {
-  startFrame: number;
-  endFrame: number;
-  frameStep: number;
-  goalFrameId: number;
-  detector: Detector;
-  useGpus: boolean;
-}
+import { InferenceParameters } from "@/common/types";
 
 export class InferenceJobService {
   private inferenceRepository: InferenceJobRepository;

@@ -1,20 +1,10 @@
 import { Job } from "bullmq";
-import {
-  InferenceJobService,
-  InferenceParameters,
-} from "../services/inference.service";
-import { InferenceJobStatus } from "@/models/enums/inference.job.status";
+import { InferenceJobService } from "../services/inference.service";
+import { InferenceJobStatus } from "@/common/enums";
+import { CNSResponse, InferenceParameters } from "@/common/types";
 import axios from "axios";
 import FormData from "form-data";
 import enviroment from "@/config/enviroment";
-
-interface CNSResponse {
-  requestId: string;
-  velocity: number[][];
-  carbon_footprint: number;
-  download_url: string;
-  message: string;
-}
 
 export class InferenceJobProcessor {
   private inferenceJobService: InferenceJobService;

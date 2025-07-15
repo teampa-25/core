@@ -1,7 +1,7 @@
 import { NextFunction, Request, Response } from "express";
 import { StatusCodes } from "http-status-codes";
 import { UserService } from "@/services/user.service";
-import { catchAsync } from "@/utils/catchAsync";
+import { catchAsync } from "@/common/utils/catchAsync";
 
 export class UserController {
   private userService = new UserService();

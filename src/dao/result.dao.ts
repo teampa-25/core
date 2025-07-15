@@ -1,7 +1,7 @@
 import { InferCreationAttributes } from "sequelize";
 import { IDAO } from "./interfaces/idao";
 import { Result } from "@/models";
-import { ErrorEnum, getError } from "@/utils/api-error";
+import { ErrorEnum, getError } from "@/common/utils/api-error";
 
 export class ResultDAO implements IDAO<Result> {
   async get(id: string): Promise<Result | null> {

@@ -1,15 +1,15 @@
 import { UserController } from "@/controllers/user.controller";
 import { authenticate } from "@/middlewares/authenticate.middleware";
 import { authorize } from "@/middlewares/authorize.middleware";
-import { UserRole } from "@/models/enums/user.role";
+import { UserRole } from "@/common/enums";
 import { Router } from "express";
 
 const router = Router();
 const userController = new UserController();
 
-router.use(authenticate(req, res, next));
+router.use(authenticate);
 router.use(authorize(UserRole.ADMIN));
 
-router.post("/recharge", userController.create);
+router.post("/recharge");
 
 export default router;

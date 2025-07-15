@@ -1,6 +1,6 @@
 import { InferenceJob } from "@/models";
 import { InferenceJobDAO } from "@/dao/inference.job.dao";
-import { InferenceJobStatus } from "@/models/enums/inference.job.status";
+import { InferenceJobStatus } from "@/common/enums";
 import { InferCreationAttributes } from "sequelize";
 
 /**
@@ -110,16 +110,6 @@ export class InferenceJobRepository {
   async findByDatasetId(datasetId: string): Promise<InferenceJob[]> {
     const allJobs = await this.inferenceJobDAO.getAll();
     return allJobs.filter((job) => job.dataset_id === datasetId);
-  }
-
-  /**
-   * Finds inference jobs by video ID
-   * @param videoId - The video ID
-   * @returns A Promise that resolves to an array of inference jobs for the video
-   */
-  async findByVideoId(videoId: string): Promise<InferenceJob[]> {
-    const allJobs = await this.inferenceJobDAO.getAll();
-    return allJobs.filter((job) => job.video_id === videoId);
   }
 
   /**

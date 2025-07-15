@@ -1,4 +1,4 @@
-import { UserRole } from "@/models/enums/user.role";
+import { UserRole } from "@/common/enums";
 import Joi from "joi";
 
 export const IdSchema = Joi.object({

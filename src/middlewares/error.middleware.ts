@@ -1,6 +1,6 @@
 import { Response, Request, NextFunction } from "express";
-import { ErrorObj, getError, ErrorEnum } from "@/utils/api-error";
-//import { logger } from "../config/logger";
+import { ErrorObj, getError } from "@/common/utils/api-error";
+import { ErrorEnum } from "@/common/enums";
 
 /**
  * Middleware function to handle 404 errors.
@@ -52,8 +52,6 @@ export const errorHandler = (
   res: Response,
   next: NextFunction,
 ): void => {
-  //logger.error(`[ERROR] ${req.method} ${req.url}:`, err);
-
   if (err && typeof err.getErrorObj === "function") {
     const { status, msg } = (err as ErrorObj).getErrorObj();
     res.status(status).json({

@@ -1,7 +1,7 @@
 import { generateKeyPairSync } from "crypto";
 import { writeFileSync, mkdirSync, existsSync } from "fs";
 import { join } from "path";
-import { logger } from "../config/logger";
+import { logger } from "../../config/logger";
 import { exit } from "process";
 
 const keysDir = "./keys";

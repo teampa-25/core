@@ -1,26 +1,7 @@
+import { Enviroment } from "@/common/types";
 import dotenv from "dotenv";
 
 dotenv.config();
-
-interface Enviroment {
-  nodeEnv: string;
-  apiPort: number;
-  redisPort: number;
-  redisHost: string;
-  fastApiPort: number;
-  fastApiHost: string;
-  postgresPort: number;
-  postgresHost: string;
-  postgresUser: string;
-  postgresPassword: string;
-  postgresDB: string;
-  jwtPrivateKeyPath: string;
-  jwtPublicKeyPath: string;
-  jwtExpiresIn: string;
-  jwtAlgorithm: string;
-  saltRounds: number;
-  maxConcurrentJobs: number;
-}
 
 const enviroment: Enviroment = {
   nodeEnv: process.env.NODE_ENV || "development",

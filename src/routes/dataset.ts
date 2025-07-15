@@ -2,7 +2,7 @@ import { Router } from "express";
 import { DatasetController } from "@/controllers/dataset.controller";
 import { authenticate } from "@/middlewares/authenticate.middleware";
 import { validate } from "@/middlewares/validate.middleware";
-import { DatasetSchema, IdSchema } from "@/utils/validation-schema";
+import { DatasetSchema, IdSchema } from "@/common/utils/validation-schema";
 import { param } from "express-validator";
 import { authorize } from "@/middlewares/authorize.middleware";
 

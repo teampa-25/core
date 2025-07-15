@@ -2,8 +2,8 @@ import { InferenceJobController } from "@/controllers/inference.controller";
 import { authenticate } from "@/middlewares/authenticate.middleware";
 import { authorize } from "@/middlewares/authorize.middleware";
 import { validate } from "@/middlewares/validate.middleware";
-import { UserRole } from "@/models/enums/user.role";
-import { IdSchema, InferenceSchema } from "@/utils/validation-schema";
+import { UserRole } from "@/common/enums";
+import { IdSchema, InferenceSchema } from "@/common/utils/validation-schema";
 import { Router } from "express";
 
 const router = Router();
@@ -36,3 +36,5 @@ router.get(
   validate(IdSchema, "params"),
   inferenceJobController.getInferenceZIPResults,
 );
+
+export default router;

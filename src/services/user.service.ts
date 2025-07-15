@@ -1,8 +1,8 @@
 import { InferCreationAttributes } from "sequelize";
-import { JwtUtils } from "@/utils/jwt";
-import { hashPass, comparePass } from "@/utils/encryption";
+import { JwtUtils } from "@/common/utils/jwt";
+import { hashPass, comparePass } from "@/common/utils/encryption";
 import { User } from "@/models";
-import { UserRole } from "@/models/enums/user.role";
+import { UserRole } from "@/common/enums";
 import { UserRepository } from "@/repositories/user.repository";
 
 export class UserService {

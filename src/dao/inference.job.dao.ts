@@ -1,8 +1,8 @@
 import { InferCreationAttributes } from "sequelize";
 import { IDAO } from "./interfaces/idao";
 import { InferenceJob } from "@/models";
-import { ErrorCode } from "bullmq";
-import { ErrorEnum, getError } from "@/utils/api-error";
+import { getError } from "@/common/utils/api-error";
+import { ErrorEnum } from "@/common/enums";
 
 /**
  * InferenceJobDAO class implements IDAO interface for InferenceJob model

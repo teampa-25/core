@@ -2,8 +2,9 @@ import { DatasetRepository } from "@/repositories/dataset.repository";
 import { VideoRepository } from "@/repositories/video.repository";
 import { UserRepository } from "@/repositories/user.repository";
 import { Dataset } from "@/models";
-import { ErrorEnum, getError } from "@/utils/api-error";
-import { VideoAnalyzer } from "@/utils/video-analyzer";
+import { getError } from "@/common/utils/api-error";
+import { ErrorEnum } from "@/common/enums";
+import { VideoAnalyzer } from "@/common/utils/video-analyzer";
 
 export class DatasetService {
   private datasetRepository: DatasetRepository;

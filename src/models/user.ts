@@ -5,7 +5,7 @@ import {
   InferCreationAttributes,
   Sequelize,
 } from "sequelize";
-import { UserRole } from "@/models/enums/user.role";
+import { UserRole } from "@/common/enums";
 
 /**
  * User Model Definition

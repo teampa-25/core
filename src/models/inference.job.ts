@@ -7,7 +7,7 @@ import {
   Sequelize,
   CreationOptional,
 } from "sequelize";
-import { InferenceJobStatus } from "./enums/inference.job.status";
+import { InferenceJobStatus } from "@/common/enums";
 
 /**
  * InferenceJob Model Definition
