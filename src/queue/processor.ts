@@ -4,9 +4,12 @@ import {
   InferenceParameters,
 } from "../services/inference.service";
 import { InferenceJobStatus } from "@/models/enums/inference.job.status";
+import { ResultRepository } from "@/repositories/result.repository";
 import axios from "axios";
 import FormData from "form-data";
 import enviroment from "@/config/enviroment";
+import { get } from "http";
+import { ErrorEnum, getError } from "@/utils/api-error";
 
 interface CNSResponse {
   requestId: string;
@@ -16,11 +19,17 @@ interface CNSResponse {
   message: string;
 }
 
+/**
+ * Class responsible for processing inference jobs.
+ * It handles the lifecycle of an inference job, including sending requests to the FastAPI server.
+ */
 export class InferenceJobProcessor {
   private inferenceJobService: InferenceJobService;
+  private resultRepository: ResultRepository;
 
   constructor() {
     this.inferenceJobService = new InferenceJobService();
+    this.resultRepository = new ResultRepository();
   }
 
   async processInference(job: Job): Promise<void> {
@@ -33,7 +42,7 @@ export class InferenceJobProcessor {
         InferenceJobStatus.RUNNING,
       );
 
-      //do inference
+      // do inference
       const resultJson = await this.sendToFastAPI(
         inferenceId,
         parameters,
@@ -42,7 +51,8 @@ export class InferenceJobProcessor {
       );
       const resultZip = await this.downloadResultZip(resultJson.download_url);
 
-      //TODO: Save results into DB
+      // Save results into DB
+      await this.saveResultsToDatabase(inferenceId, resultJson, resultZip);
 
       await this.inferenceJobService.updateInferenceStatus(
         inferenceId,
@@ -60,6 +70,14 @@ export class InferenceJobProcessor {
     }
   }
 
+  /**
+   * Send inference request to the FastAPI server.
+   * @param inferenceId The ID of the inference job.
+   * @param parameters The parameters for the inference.
+   * @param goalVideoBuffer The buffer containing the goal video.
+   * @param currentVideoBuffer The buffer containing the current video.
+   * @returns A promise that resolves to the CNSResponse from the FastAPI server.
+   */
   private async sendToFastAPI(
     inferenceId: string,
     parameters: InferenceParameters,
@@ -92,11 +110,55 @@ export class InferenceJobProcessor {
     return res.data;
   }
 
+  /**
+   * Download the result ZIP file from the FastAPI server.
+   * @param download_url The URL to download the ZIP file from.
+   * @returns A promise that resolves to a Buffer containing the ZIP file data.
+   */
   private async downloadResultZip(download_url: string): Promise<Buffer> {
     const response = await axios.get<ArrayBuffer>(
       `http://${enviroment.fastApiHost}:${enviroment.fastApiPort}${download_url}`,
       { responseType: "arraybuffer" },
     );
     return Buffer.from(response.data);
+  }
+
+  /**
+   * Save inference results to the database.
+   * @param inferenceId The ID of the inference job.
+   * @param resultJson The JSON result of the inference.
+   * @param resultZip The ZIP file containing the result images.
+   */
+  private async saveResultsToDatabase(
+    inferenceId: string,
+    resultJson: CNSResponse,
+    resultZip: Buffer,
+  ): Promise<void> {
+    try {
+      // Existing result check
+      const existingResult =
+        await this.resultRepository.findByInferenceJobId(inferenceId);
+
+      if (existingResult) {
+        // Update existing result
+        await this.resultRepository.updateJsonResult(
+          existingResult.id,
+          resultJson,
+        );
+        await this.resultRepository.updateImageZip(
+          existingResult.id,
+          resultZip,
+        );
+      } else {
+        // Create new result
+        await this.resultRepository.createResult({
+          inference_job_id: inferenceId,
+          json_res: resultJson,
+          image_zip: resultZip,
+        } as any);
+      }
+    } catch (error) {
+      throw getError(ErrorEnum.GENERIC_ERROR).getErrorObj();
+    }
   }
 }
