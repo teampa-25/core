@@ -1,15 +1,16 @@
-import { Router } from "express";
-import { DatasetController } from "@/controllers/dataset.controller";
+import { authorize } from "@/middlewares/authorize.middleware";
 import { authenticate } from "@/middlewares/authenticate.middleware";
 import { validate } from "@/middlewares/validate.middleware";
+import { upload } from "../middlewares/multer.middleware";
+import { UserRole } from "@/common/enums";
+import { Router } from "express";
+import { DatasetController } from "@/controllers/dataset.controller";
 import { DatasetSchema, IdSchema } from "@/common/utils/validation-schema";
-import { param } from "express-validator";
-import { authorize } from "@/middlewares/authorize.middleware";
 
 const router = Router();
 const datasetController = new DatasetController();
 
-router.use(authenticate); // Apply authentication middleware to all routes in this router
+router.use(authenticate, authorize(UserRole.USER, UserRole.ADMIN)); // Apply authentication middleware to all routes in this router
 
 // Create a new dataset
 router.post("/", validate(DatasetSchema.create), datasetController.create);
@@ -18,15 +19,12 @@ router.post("/", validate(DatasetSchema.create), datasetController.create);
 router.delete(
   "/:id",
   validate(IdSchema, "params"),
-  // AUTHOROIZE
+  // AUTHORIZE
   datasetController.delete,
 );
 
-// Get the list of all datasets
-router.get("/", datasetController.getAll);
-
-// what type of filters??
-router.get("/:filters", datasetController.where);
+// Get the list of all datasets or filtered
+router.get("/", validate(DatasetSchema.get), datasetController.getAll);
 
 // Update a dataset
 router.put(
@@ -39,12 +37,13 @@ router.put(
 // Add videos or zip files to the dataset
 router.post(
   "/:id/videos",
+  upload.single("content"),
   validate(IdSchema, "params"),
-  validate(DatasetSchema.addVideos),
-  datasetController.addVideoArray,
+  validate(DatasetSchema.uploadVideo),
+  datasetController.uploadVideo,
 );
 
-// Get a dataset by id (already present)
+// Get a single dataset by id (already present)
 router.get("/:id", validate(IdSchema, "params"), datasetController.getById);
 
 export default router;

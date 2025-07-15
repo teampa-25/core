@@ -19,8 +19,6 @@ export class DatasetController {
 
   /**
    * Creates a new dataset
-   * @param req
-   * @param res
    * @returns a response with the created dataset or an error
    */
   create = catchAsync(async (req: Request, res: Response) => {
@@ -33,15 +31,13 @@ export class DatasetController {
     });
 
     return res.status(StatusCodes.CREATED).json({
-      message: "Dataset creato con successo",
+      message: "Dataset created successfully",
       dataset,
     });
   });
 
   /**
    * Deletes a dataset
-   * @param req
-   * @param res
    * @returns a response indicating success or failure
    */
   delete = catchAsync(async (req: Request, res: Response) => {
@@ -57,18 +53,16 @@ export class DatasetController {
 
     return res
       .status(StatusCodes.OK)
-      .json({ message: "Dataset cancellato con successo" });
+      .json({ message: "Dataset deleted successfully" });
   });
 
   /**
    * Gets the list of datasets for the authenticated user
-   * @param req
-   * @param res
    * @returns a response with the list of datasets
    */
   getAll = catchAsync(async (req: Request, res: Response) => {
-    const tags = req.query.tags;
     const userId = req.user!.id;
+    const { tags } = req.body;
     const filters = tags
       ? { tags: Array.isArray(tags) ? (tags as string[]) : [tags as string] }
       : undefined;
@@ -80,8 +74,6 @@ export class DatasetController {
 
   /**
    * Updates a dataset
-   * @param req
-   * @param res
    * @returns a response with the updated dataset or an error
    */
   update = catchAsync(async (req: Request, res: Response) => {
@@ -102,21 +94,24 @@ export class DatasetController {
   });
 
   /**
-   * Adds videos to a dataset
-   * @param req
-   * @param res
+   * Upload videos to a dataset
    * @returns a response with the updated dataset or an error
    */
-  addVideoArray = catchAsync(async (req: Request, res: Response) => {
+  uploadVideo = catchAsync(async (req: Request, res: Response) => {
     const userId = req.user!.id;
 
     const { id } = req.params;
-    const videos = req.body.videos;
+    const { name, type } = req.body;
+    const file = req.file;
 
-    const result = await this.datasetService.addVideosToDataset(
+    const content = file!.buffer;
+
+    const result = await this.datasetService.uploadVideo(
       id,
       userId,
-      videos,
+      content,
+      name,
+      type,
     );
 
     return res.status(StatusCodes.OK).json(result);
@@ -124,22 +119,17 @@ export class DatasetController {
 
   /**
    * Gets a dataset by ID
-   * @param req
-   * @param res
    * @returns a response with the dataset or an error
    */
   getById = catchAsync(async (req: Request, res: Response) => {
+    const userId = req.user!.id;
     const { id } = req.params;
-    const dataset = await this.datasetService.getDatasetById(id);
+
+    const dataset = await this.datasetService.getDatasetById(id, userId);
     if (!dataset) {
       const error = getError(ErrorEnum.NOT_FOUND_ERROR).getErrorObj();
       return res.status(error.status).json({ message: error.msg });
     }
     return res.status(StatusCodes.OK).json({ dataset });
-  });
-
-  where = catchAsync(async (req: Request, res, Response) => {
-    // TODO: Implement this -beg
-    return res.status(StatusCodes.NOT_IMPLEMENTED);
   });
 }
