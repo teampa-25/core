@@ -23,6 +23,7 @@ services:
       - ./src/:/app/src
       - /app/keys
       - ./tsconfig.json:/app/tsconfig.json
+      - ./files/:/files
 
   redis:
     image: redis:latest

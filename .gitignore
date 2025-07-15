@@ -259,3 +259,4 @@ dist/
 .env
 db-data/
 keys
+files/
