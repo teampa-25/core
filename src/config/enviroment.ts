@@ -3,6 +3,9 @@ import dotenv from "dotenv";
 
 dotenv.config();
 
+/**
+ * @description Interface for enviroment variables
+ */
 const enviroment: Enviroment = {
   nodeEnv: process.env.NODE_ENV || "development",
   apiPort: Number(process.env.API_PORT) || 3000,

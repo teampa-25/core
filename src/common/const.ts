@@ -1,3 +1,6 @@
+/**
+ * @description Constants for the inference process
+ */
 export const INFERENCE = {
   COST_PER_FRAME: 0.001,
   COST_OF_INFERENCE: 0.002,

@@ -88,7 +88,7 @@ export class VideoAnalyzer {
         frameRate,
       };
     } catch (error) {
-      throw getError(ErrorEnum.GENERIC_ERROR).getErrorObj();
+      throw getError(ErrorEnum.GENERIC_ERROR);
     } finally {
       // Clean up temporary file
       if (tempFilePath) {
@@ -124,7 +124,7 @@ export class VideoAnalyzer {
     try {
       await fs.promises.unlink(filePath);
     } catch (error) {
-      throw getError(ErrorEnum.GENERIC_ERROR).getErrorObj();
+      throw getError(ErrorEnum.GENERIC_ERROR);
     }
   }
 

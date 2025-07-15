@@ -1,5 +1,4 @@
-import { NextFunction, Request, Response } from "express";
-import { Dataset } from "@/models";
+import { Request, Response } from "express";
 import { StatusCodes } from "http-status-codes";
 import { DatasetService } from "@/services/dataset.service";
 import { catchAsync } from "@/common/utils/catchAsync";
@@ -19,6 +18,8 @@ export class DatasetController {
 
   /**
    * Creates a new dataset
+   * @param req Request containing the dataset name and tags
+   * @param res Response object to send back the created dataset
    * @returns a response with the created dataset or an error
    */
   create = catchAsync(async (req: Request, res: Response) => {
@@ -38,6 +39,8 @@ export class DatasetController {
 
   /**
    * Deletes a dataset
+   * @param req Request containing the dataset ID
+   * @param res Response object to send back the deletion status
    * @returns a response indicating success or failure
    */
   delete = catchAsync(async (req: Request, res: Response) => {
@@ -58,6 +61,8 @@ export class DatasetController {
 
   /**
    * Gets the list of datasets for the authenticated user
+   * @param req Request object containing the user ID and tags
+   * @param res Response object to send back the list of datasets
    * @returns a response with the list of datasets
    */
   getAll = catchAsync(async (req: Request, res: Response) => {
@@ -74,6 +79,8 @@ export class DatasetController {
 
   /**
    * Updates a dataset
+   * @param req Request containing the dataset ID and updated name and tags
+   * @param res Response object to send back the updated dataset
    * @returns a response with the updated dataset or an error
    */
   update = catchAsync(async (req: Request, res: Response) => {
@@ -95,6 +102,8 @@ export class DatasetController {
 
   /**
    * Upload videos to a dataset
+   * @param req Request containing the dataset ID and video files
+   * @param res Response object to send back the updated dataset
    * @returns a response with the updated dataset or an error
    */
   uploadVideo = catchAsync(async (req: Request, res: Response) => {
@@ -119,6 +128,8 @@ export class DatasetController {
 
   /**
    * Gets a dataset by ID
+   * @param req Request containing the dataset ID
+   * @param res Response object to send back the dataset
    * @returns a response with the dataset or an error
    */
   getById = catchAsync(async (req: Request, res: Response) => {

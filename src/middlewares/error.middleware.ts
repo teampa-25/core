@@ -4,12 +4,10 @@ import { ErrorEnum } from "@/common/enums";
 
 /**
  * Middleware function to handle 404 errors.
+ * @param req - The request object
+ * @param res - The response object
  */
-export const notFoundHandler = (
-  req: Request,
-  res: Response,
-  next: NextFunction,
-): void => {
+export const notFoundHandler = (req: Request, res: Response): void => {
   const errorObj = getError(ErrorEnum.NOT_FOUND_ERROR)!;
   const { status, msg } = errorObj.getErrorObj();
   res.status(status).json({
@@ -47,7 +45,7 @@ export const errorConverter = (
  * Middleware function to handle errors and send a JSON response.
  */
 export const errorHandler = (
-  err: any,
+  err: ErrorObj,
   req: Request,
   res: Response,
   next: NextFunction,

@@ -5,6 +5,7 @@ import { ErrorEnum } from "@/common/enums";
  * Interface 'ErrorObj'
  *
  * This interface defines the structure of an error object that can be returned in the response body.
+ * This interface is implemented in every class-specific error to return the corrent status code and message
  * @returns object with status code and message
  */
 export interface ErrorObj {

@@ -1,5 +1,5 @@
 /**
- * Enum for ErrorFactory Object
+ * @description Enum for ErrorFactory Object
  */
 enum ErrorEnum {
   GENERIC_ERROR = "GENERIC_ERROR",
@@ -15,7 +15,7 @@ enum ErrorEnum {
 }
 
 /**
- * Enum for detector to use inference-time
+ * @description Enum for detector to use inference-time
  */
 enum Detector {
   AKAZE = "AKAZE",
@@ -24,7 +24,7 @@ enum Detector {
 }
 
 /**
- * Enum for user's role
+ * @description Enum for user's role
  */
 enum UserRole {
   ADMIN = "admin",
@@ -32,7 +32,7 @@ enum UserRole {
 }
 
 /**
- * Enum for inference job status
+ * @description Enum for inference job status
  */
 enum InferenceJobStatus {
   PENDING = "PENDING",
