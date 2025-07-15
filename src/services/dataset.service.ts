@@ -9,6 +9,13 @@ import { unzipBuffer } from "@/common/utils/unzip";
 import { faker } from "@faker-js/faker";
 import { INFERENCE } from "@/common/const";
 
+import { mkdir, writeFile, access } from "fs/promises";
+import { constants } from "fs";
+import { dirname } from "path";
+
+import { logger } from "@/config/logger";
+import decompress from "decompress";
+
 export class DatasetService {
   private datasetRepository: DatasetRepository;
   private videoRepository: VideoRepository;
@@ -30,24 +37,56 @@ export class DatasetService {
     return await VideoAnalyzer.frameCount(video, videoName);
   }
 
+  private async checkUserDirectory(userId: string) {
+    try {
+      const videos = `/files/${userId}/videos`;
+      const results = `/files/${userId}/results`;
+
+      await mkdir(videos, { recursive: true });
+      await mkdir(results, { recursive: true });
+
+      return true;
+    } catch {
+      return false;
+    }
+  }
+
   /**
    * add video to repo
    */
   private async addVideoToRepo(
+    userId: string,
     videoName: string,
     video: Buffer,
     datasetId: string,
     frame_count: number,
   ): Promise<string> {
+    await this.checkUserDirectory(userId);
+
     const videoId = await this.videoRepository.create({
       dataset_id: datasetId,
       name: videoName,
-      file: video,
       frame_count: frame_count,
     });
 
+    const file_name = `/files/${userId}/videos/${videoId}.mp4`;
+
+    await this.videoRepository.update(videoId, { file: file_name });
+
+    try {
+      logger.info("checking if file exists");
+      await access(file_name, constants.F_OK);
+      logger.info("file exists - throwing error");
+      throw getError(ErrorEnum.FORBIDDEN_ERROR); // TODO: find another error to throw that better explains this - this should never happen anyways
+    } catch {
+      await writeFile(file_name, video);
+      logger.info(`written video in ${file_name}`);
+    }
+
     return videoId;
   }
+
+  private async saveToFile(video: Buffer, path: string) {}
 
   /**
    * Calulcate the cost of upload
@@ -181,16 +220,18 @@ export class DatasetService {
     type: string,
   ): Promise<any> {
     // const supportedFormats = ["video/mp4"]; // better somewhere else, i think -beg
-
     const dataset = await this.datasetRepository.findByIdAndUserId(
       datasetId,
       userId,
     );
     if (!dataset) throw getError(ErrorEnum.NOT_FOUND_ERROR).getErrorObj();
+
     let cost = 0;
 
     if (type === "zip") {
-      const files = await unzipBuffer(content, name);
+      // const files = await unzipBuffer(content, name); // ................................................................
+      const files = await decompress(content);
+
       let total_frames = 0;
 
       // TODO: NEEEDS REFACTORING AND CHECKING FOR FILETYPES !!!!!!
@@ -199,6 +240,7 @@ export class DatasetService {
           `${name}-${faker.string.alphanumeric(10)}`,
           files[file].data,
         );
+
         total_frames = total_frames + frame_count;
       }
 
@@ -216,13 +258,22 @@ export class DatasetService {
             `${name}-${faker.string.alphanumeric(10)}`,
             files[file].data,
           );
-          await this.addVideoToRepo(name, content, datasetId, frame_count);
+
+          // TODO: Should make a constructor for this
+          await this.addVideoToRepo(
+            userId,
+            name,
+            content,
+            datasetId,
+            frame_count,
+          );
         }
+
         await this.userRepository.deductCredits(userId, cost);
+        logger.info(`credits deducted ${cost} from ${userId}`);
       }
     } else if (type === "video") {
-      // THIS IS ONLY FOR SINGLE VIDEO repeat all of this
-      //TO DO FIX this.calcFrameCount
+      //TODO: FIX this.calcFrameCount
       const frame_count = await this.calcFrameCount(name, content);
       cost = Math.ceil(await this.calculateCost(frame_count));
       const hasEnoughCredits = await this.userRepository.hasEnoughCredits(
@@ -234,6 +285,7 @@ export class DatasetService {
         throw getError(ErrorEnum.UNAUTHORIZED_ERROR).getErrorObj();
       else {
         const r = await this.addVideoToRepo(
+          userId,
           name,
           content,
           datasetId,
@@ -241,8 +293,10 @@ export class DatasetService {
         );
         await this.userRepository.deductCredits(userId, cost);
 
+        logger.info(`credits deducted ${cost} from ${userId}`);
+
         return {
-          message: `${name} video added`,
+          message: `${name} - ${r} - video added`,
           datasetId,
           costDeducted: cost,
         };

@@ -1,27 +1,24 @@
 "use strict";
 
-const crypt = require("bcrypt");
-const { randomInt } = require("crypto");
 const { v4: uuidv4 } = require("uuid");
 
 /** @type {import("sequelize-cli").Seed} */
 module.exports = {
-  async up(qi, Sequelize) {
+  async up(qi, _) {
     const { faker } = require("@faker-js/faker");
     const [results] = await qi.sequelize.query('SELECT id FROM "Dataset"');
 
-    console.log(results);
-    const videos = [
-      Buffer.from("Fake video data 1"),
-      Buffer.from("Fake video data 2"),
-    ];
+    const user = await qi.sequelize.query(
+      'SELECT u.id FROM "User" as u JOIN "Dataset" as d ON u.id = d.user_id JOIN "Video" as v ON d.id = v.dataset_id',
+    );
 
     for (const element of results) {
+      let video_id = uuidv4();
       await qi.bulkInsert("Video", [
         {
-          id: uuidv4(),
+          id: video_id,
           dataset_id: element.id,
-          file: faker.helpers.arrayElement(videos),
+          file: `/files/${user.id}/videos/${video_is}.mp4`,
           name: faker.word.words({ count: 3 }),
           frame_count: 1500,
           created_at: new Date(),
@@ -31,7 +28,7 @@ module.exports = {
     }
   },
 
-  async down(qi, Sequelize) {
+  async down(qi, _) {
     await qi.bulkDelete("Video", null, {});
   },
 };

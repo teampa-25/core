@@ -1,19 +1,10 @@
-import "dotenv/config";
+export const config = {
+  username: process.env.POSTGRES_USER,
+  password: process.env.POSTGRES_PASSWORD,
+  database: process.env.POSTGRES_DB,
+  host: process.env.POSTGRES_HOST,
+  port: process.env.POSTGRES_PORT,
+  dialect: "postgres",
+};
 
-// sequelize specific configuration
-export const development = {
-  username: process.env.POSTGRES_USER,
-  password: process.env.POSTGRES_PASSWORD,
-  database: process.env.POSTGRES_DB,
-  host: process.env.POSTGRES_HOST,
-  port: process.env.POSTGRES_PORT,
-  dialect: "postgres",
-};
-export const production = {
-  username: process.env.POSTGRES_USER,
-  password: process.env.POSTGRES_PASSWORD,
-  database: process.env.POSTGRES_DB,
-  host: process.env.POSTGRES_HOST,
-  port: process.env.POSTGRES_PORT,
-  dialect: "postgres",
-};
+export default config;

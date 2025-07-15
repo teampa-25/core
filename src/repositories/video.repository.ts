@@ -19,13 +19,11 @@ export class VideoRepository {
    */
   async create(videoData: {
     dataset_id: string;
-    file: Buffer;
     name: string;
     frame_count: number;
   }): Promise<string> {
     return await this.videoDAO.create({
       dataset_id: videoData.dataset_id,
-      file: videoData.file,
       name: videoData.name,
       frame_count: videoData.frame_count,
     } as Video);
@@ -105,6 +103,7 @@ export class VideoRepository {
     updateData: {
       name?: string;
       frame_count?: number;
+      file?: string;
     },
   ): Promise<Video | null> {
     return await this.videoDAO.update(id, updateData);

@@ -10,13 +10,13 @@ export async function unzip(name: string) {
 
 export async function unzipBuffer(
   buf: Buffer,
-  name: string,
+  bufname: string,
 ): Promise<decompress.File[]> {
   const id = faker.string.alphanumeric(10);
-  const tmpname = `${name}-${id}`;
-  const tmpDir = path.join("/tmp/", tmpname);
+  // const tmpDir = path.join("/tmp/", bufname);
 
   // TODO: check better solution to not overload RAM
-  const files = await decompress(buf, tmpDir);
+  const files = await decompress(buf);
+
   return files;
 }

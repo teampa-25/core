@@ -2,8 +2,8 @@
   "scripts": {
     "dev": "nodemon --exec ts-node src/app.ts",
     "prepare": "husky",
-    "keys": "ts-node src/utils/generateKeys.ts",
-    "keys-force": "ts-node src/utils/generateKeys.ts --force"
+    "keys": "ts-node src/common/utils/generateKeys.ts",
+    "keys-force": "ts-node src/common/utils/generateKeys.ts --force"
   },
   "dependencies": {
     "@bull-board/api": "^6.11.0",

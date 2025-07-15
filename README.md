@@ -10,7 +10,7 @@
 
 ## Features
 
-- [ ] : encrypted passwords
+- [x] : encrypted passwords
 
 ## Installation
 
@@ -44,6 +44,12 @@ docker exec -it infernode-app npx sequelize-cli db:seed:all
 docker compose up
 # or
 docker compose up -d
+```
+
+### Generate Keys
+
+```bash
+npm run keys
 ```
 
 # Usage
