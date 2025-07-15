@@ -8,8 +8,8 @@ export class UserController {
 
   register = catchAsync(
     async (req: Request, res: Response, next: NextFunction) => {
-      const { email, password, role } = req.body;
-      const user = await this.userService.createUser(email, password, role);
+      const { email, password } = req.body;
+      const user = await this.userService.create(email, password);
       return res.status(StatusCodes.CREATED).json({
         message: "User registered successfully",
         user: user,
@@ -20,7 +20,7 @@ export class UserController {
   login = catchAsync(
     async (req: Request, res: Response, next: NextFunction) => {
       const { email, password } = req.body;
-      const token = await this.userService.loginUser(email, password);
+      const token = await this.userService.login(email, password);
       return res.status(StatusCodes.OK).json({
         message: "Login successful",
         token,

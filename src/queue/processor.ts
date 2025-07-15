@@ -7,6 +7,7 @@ import FormData from "form-data";
 import enviroment from "@/config/enviroment";
 import { ErrorEnum, InferenceJobStatus } from "@/common/enums";
 import { getError } from "@/common/utils/api-error";
+import { logger } from "@/config/logger";
 
 /**
  * Class responsible for processing inference jobs.
@@ -31,22 +32,27 @@ export class InferenceJobProcessor {
         InferenceJobStatus.RUNNING,
       );
 
-      // do inference
-      const resultJson = await this.sendToFastAPI(
-        inferenceId,
-        parameters,
-        goalVideoBuffer,
-        currentVideoBuffer,
+      const healtCheck = axios.get(
+        `http://${enviroment.fastApiHost}:${enviroment.fastApiPort}/health`,
       );
-      const resultZip = await this.downloadResultZip(resultJson.download_url);
+      logger.info(healtCheck);
+      // // do inference
+      // const resultJson = await this.sendToFastAPI(
+      //   inferenceId,
+      //   parameters,
+      //   goalVideoBuffer,
+      //   currentVideoBuffer,
+      // );
+      // const resultZip = await this.downloadResultZip(resultJson.download_url);
 
-      // Save results into DB
-      await this.saveResultsToDatabase(inferenceId, resultJson, resultZip);
+      // // Save results into DB
+      // await this.saveResultsToDatabase(inferenceId, resultJson, resultZip);
 
-      await this.inferenceJobService.updateInferenceStatus(
-        inferenceId,
-        InferenceJobStatus.COMPLETED,
-      );
+      // await this.inferenceJobService.updateInferenceStatus(
+      //   inferenceId,
+      //   InferenceJobStatus.COMPLETED,
+      //   resultJson,
+      // );
     } catch (error) {
       console.error(`Errore durante inferenza ${inferenceId}:`, error);
 

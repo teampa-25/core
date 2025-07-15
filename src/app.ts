@@ -9,9 +9,7 @@ import {
   errorConverter,
   errorHandler,
 } from "@/middlewares/error.middleware";
-
 import { logger } from "@/config/logger";
-
 import helmet from "helmet";
 
 const app = express();
@@ -25,6 +23,8 @@ app.use("/api", routes);
 app.use(notFoundHandler);
 app.use(errorConverter);
 app.use(errorHandler);
+
+// Initialize WebSocket service
 
 app.listen(enviroment.apiPort, () => {
   logger.info(`Server running on port ${enviroment.apiPort}`);

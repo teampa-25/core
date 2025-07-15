@@ -10,17 +10,19 @@ import { VideoRepository } from "@/repositories/video.repository";
 import { getError } from "@/common/utils/api-error";
 import { ErrorEnum, InferenceJobStatus } from "@/common/enums";
 import { INFERENCE } from "@/common/const";
-import { th } from "@faker-js/faker/.";
 import { InferCreationAttributes } from "sequelize";
-import { InferenceParameters } from "@/common/types";
+import { CNSResponse, InferenceParameters } from "@/common/types";
 
+/**
+ * Class responsible for handling inference jobs.
+ * It provides methods for creating, updating, and managing inference jobs.
+ */
 export class InferenceJobService {
   private inferenceRepository: InferenceJobRepository;
   private datasetRepository: DatasetRepository;
   private userRepository: UserRepository;
   private videoRepository: VideoRepository;
   private resultRepository: ResultRepository;
-  // private wsService: WebSocketService;
 
   constructor() {
     this.inferenceRepository = new InferenceJobRepository();
@@ -28,9 +30,16 @@ export class InferenceJobService {
     this.userRepository = new UserRepository();
     this.videoRepository = new VideoRepository();
     this.resultRepository = new ResultRepository();
-    //     this.wsService = WebSocketService.getInstance();
   }
 
+  /**
+   * Create and enqueue inference jobs
+   * @param userId the ID of the dataset owner
+   * @param datasetId the ID of the dataset to use in inference
+   * @param parameters the inference parameters
+   * @param range the dataset partition to use
+   * @returns list of jobs ids
+   */
   public enqueueJob = async (
     userId: string,
     datasetId: string,
@@ -112,6 +121,11 @@ export class InferenceJobService {
     return createdJobIds;
   };
 
+  /**
+   * Retrieves the inference job status
+   * @param jobId The ID of the inference job.
+   * @returns the inference job status
+   */
   getInferenceStatus = async (jobId: string): Promise<InferenceJobStatus> => {
     const status = await this.inferenceRepository
       .findById(jobId)
@@ -122,12 +136,22 @@ export class InferenceJobService {
     return status;
   };
 
+  /**
+   * Retrieves the JSON file containing the inference results.
+   * @param jobId The ID of the inference job.
+   * @returns The JSON file as object.
+   */
   getInferenceJSONResults = async (jobId: string): Promise<object> => {
     const results = await this.resultRepository.getJsonResult(jobId);
     if (!results) throw getError(ErrorEnum.NOT_FOUND_ERROR).getErrorObj();
     return results;
   };
 
+  /**
+   * Retrieves the ZIP file containing the inference results.
+   * @param jobId The ID of the inference job.
+   * @returns The ZIP file as a Buffer.
+   */
   getInferenceZIPResults = async (jobId: string): Promise<Buffer> => {
     const results = await this.resultRepository.getImageZip(jobId);
     if (!results) throw getError(ErrorEnum.NOT_FOUND_ERROR).getErrorObj();
@@ -135,30 +159,41 @@ export class InferenceJobService {
   };
 
   /**
-   * Aggiorna lo stato di un'inferenza (chiamato dal worker)
+   * Updates the status of an inference job.
+   * @param inferenceId The ID of the inference job.
+   * @param status The new status of the inference job.
+   * @param result The result of the inference job (if completed).
+   * @param errorMessage The error message (if failed or aborted).
    */
   async updateInferenceStatus(
     inferenceId: string,
     status: InferenceJobStatus,
-    result?: any,
+    result?: CNSResponse,
     errorMessage?: string,
-    carbonFootprint?: number,
   ): Promise<void> {
-    // const updateData: any = { status, updatedAt: new Date() };
-    // await this.inferenceRepository.update(updateData, { where: { id: inferenceId } });
-    // this.wsService.notifyUser(inference.userId, {
+    await this.inferenceRepository.updateStatus(inferenceId, status);
+
+    const inference = await this.inferenceRepository.findById(inferenceId);
+    // if (inference) {
+    //   this.wsService.notifyUser(inference.user_id, {
     //     type: 'INFERENCE_STATUS_UPDATE',
     //     data: {
-    //         inferenceId,
-    //         status,
-    //         result: status === 'COMPLETED' ? result : undefined,
-    //         errorMessage,
-    //         carbonFootprint
+    //       inferenceId,
+    //       status,
+    //       result: status === InferenceJobStatus.COMPLETED ? result : undefined,
+    //       errorMessage,
     //     },
     //     timestamp: new Date()
-    // });
+    //   });
+    // }
   }
 
+  /**
+   * Allows to take specific partions of a dataset.
+   * @param datasetId
+   * @param range
+   * @returns list of videos in the specified range
+   */
   private getVideosByRange = async (
     datasetId: string,
     range: string,
