@@ -1,10 +1,17 @@
 import { UserRole } from "@/common/enums";
 import Joi from "joi";
 
+/**
+ * Schema for validating the id parameter
+ */
 export const IdSchema = Joi.object({
   id: Joi.string().uuid().required(),
 });
 
+/**
+ * Schema for validating the user registration login
+ * and user recharge data
+ */
 export const UserSchema = {
   register: Joi.object({
     email: Joi.string().email().required(),
@@ -24,6 +31,9 @@ export const UserSchema = {
   }),
 };
 
+/**
+ * Schema for validating the dataset CRUD operations
+ */
 export const DatasetSchema = {
   get: Joi.object({
     tags: Joi.array().items(Joi.string()).optional(),
@@ -54,6 +64,9 @@ export const DatasetSchema = {
   }),
 };
 
+/**
+ * Schema for validating the inference creation
+ */
 export const InferenceSchema = {
   create: Joi.object({
     userId: Joi.string().uuid().required(),

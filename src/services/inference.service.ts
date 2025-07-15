@@ -35,6 +35,14 @@ export class InferenceJobService {
     this.wsService = WebSocketService.getInstance();
   }
 
+  /**
+   * Enqueues an inference job for a specific user and dataset.
+   * @param userId The ID of the user.
+   * @param datasetId The ID of the dataset.
+   * @param parameters The inference parameters.
+   * @param range The range of videos to process.
+   * @returns An array of created job IDs.
+   */
   public enqueueJob = async (
     userId: string,
     datasetId: string,
@@ -45,7 +53,7 @@ export class InferenceJobService {
       datasetId,
       userId,
     );
-    if (!dataset) throw getError(ErrorEnum.NOT_FOUND_ERROR).getErrorObj();
+    if (!dataset) throw getError(ErrorEnum.NOT_FOUND_ERROR);
 
     const videos =
       range === "all"
@@ -60,6 +68,8 @@ export class InferenceJobService {
       (a: Video, b: Video) =>
         new Date(a.created_at).getTime() - new Date(b.created_at).getTime(),
     );
+
+    //TODO: new code to handle path to video pipeline
 
     const createdJobIds: string[] = [];
 
@@ -139,7 +149,7 @@ export class InferenceJobService {
     const status = await this.inferenceRepository
       .findById(jobId)
       .then((inference) => {
-        if (!inference) throw getError(ErrorEnum.NOT_FOUND_ERROR).getErrorObj();
+        if (!inference) throw getError(ErrorEnum.NOT_FOUND_ERROR);
         return inference.status;
       });
     return status;
@@ -152,7 +162,7 @@ export class InferenceJobService {
    */
   getInferenceJSONResults = async (jobId: string): Promise<object> => {
     const results = await this.resultRepository.getJsonResult(jobId);
-    if (!results) throw getError(ErrorEnum.NOT_FOUND_ERROR).getErrorObj();
+    if (!results) throw getError(ErrorEnum.NOT_FOUND_ERROR);
     return results;
   };
 
@@ -163,7 +173,7 @@ export class InferenceJobService {
    */
   getInferenceZIPResults = async (jobId: string): Promise<Buffer> => {
     const results = await this.resultRepository.getImageZip(jobId);
-    if (!results) throw getError(ErrorEnum.NOT_FOUND_ERROR).getErrorObj();
+    if (!results) throw getError(ErrorEnum.NOT_FOUND_ERROR);
     return results;
   };
 
@@ -187,7 +197,7 @@ export class InferenceJobService {
       // Get inference details to retrieve userId
       const inference = await this.inferenceRepository.findById(inferenceId);
       if (!inference) {
-        throw getError(ErrorEnum.NOT_FOUND_ERROR).getErrorObj();
+        throw getError(ErrorEnum.NOT_FOUND_ERROR);
       }
 
       // Send WebSocket notification
@@ -204,6 +214,12 @@ export class InferenceJobService {
     }
   }
 
+  /**
+   * Retrieves videos from a dataset within a specific range.
+   * @param datasetId The ID of the dataset.
+   * @param range The range of video indices to retrieve (e.g., "0-10").
+   * @returns An array of videos within the specified range.
+   */
   private getVideosByRange = async (
     datasetId: string,
     range: string,
@@ -213,7 +229,7 @@ export class InferenceJobService {
     const end = parseInt(endStr, 10);
 
     if (end < start) {
-      throw getError(ErrorEnum.BAD_REQUEST_ERROR).getErrorObj();
+      throw getError(ErrorEnum.BAD_REQUEST_ERROR);
     }
 
     const limit = end - start + 1;

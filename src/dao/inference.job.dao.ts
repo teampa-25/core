@@ -9,64 +9,94 @@ import { ErrorEnum } from "@/common/enums";
  * Provides methods to create, retrieve, update, and delete inference jobs
  */
 export class InferenceJobDAO implements IDAO<InferenceJob> {
+  /**
+   * Retrieves an inference job by its ID
+   * @param id - The ID of the inference job to retrieve
+   * @returns A Promise that resolves to the inference job or null if not found
+   * @throws Error if the retrieval operation fails
+   */
   async get(id: string): Promise<InferenceJob | null> {
-    return InferenceJob.findByPk(id);
+    try {
+      return await InferenceJob.findByPk(id);
+    } catch (error) {
+      throw getError(ErrorEnum.NOT_FOUND_ERROR);
+    }
   }
 
   /**
    * Retrieves all inference jobs
-   * @returns Promise<InferenceJob[]> - Array of all inference jobs
+   * @returns A Promise that resolves to an array of all inference jobs
+   * @throws Error if the retrieval operation fails
    */
   async getAll(): Promise<InferenceJob[]> {
-    return InferenceJob.findAll();
+    try {
+      return await InferenceJob.findAll();
+    } catch (error) {
+      throw getError(ErrorEnum.GENERIC_ERROR);
+    }
   }
 
   /**
    * Updates an inference job by its ID
    * @param id - The ID of the inference job to update
    * @param data - The new data for the inference job
-   * @returns Promise<InferenceJob | null> - The updated inference job if found, null otherwise
+   * @returns A Promise that resolves to the updated inference job or null if not found
+   * @throws Error if the update operation fails
    */
   async update(
     id: string,
     data: Partial<InferenceJob>,
   ): Promise<InferenceJob | null> {
-    const update_inference_job = await this.get(id);
+    try {
+      const updateInferencejob = await this.get(id);
 
-    if (!update_inference_job) {
-      return null;
+      if (!updateInferencejob) {
+        return null;
+      }
+
+      return await updateInferencejob.update(data);
+    } catch (error) {
+      throw getError(ErrorEnum.GENERIC_ERROR);
     }
-
-    return update_inference_job.update(data);
   }
 
   /**
    * Deletes an inference job by its ID
    * @param id - The ID of the inference job to delete
-   * @returns Promise<boolean> - True if the inference job was deleted, false otherwise
+   * @returns A Promise that resolves to true if the inference job was deleted, false otherwise
+   * @throws Error if the delete operation fails
    */
   async delete(id: string): Promise<boolean> {
-    const delete_inference_job = await this.get(id);
+    try {
+      const deleteInferencejob = await this.get(id);
 
-    if (!delete_inference_job) {
-      return false;
+      if (!deleteInferencejob) {
+        return false;
+      }
+      await deleteInferencejob.destroy();
+      return true;
+    } catch (error) {
+      throw getError(ErrorEnum.NOT_FOUND_ERROR);
     }
-    await delete_inference_job.destroy();
-    return true;
   }
 
   /**
    * Creates a new inference job
    * @param data - The data for the new inference job
-   * @returns Promise<string> - The ID of the created inference job
+   * @returns A Promise that resolves to the ID of the created inference job
+   * @throws Error if the creation operation fails
    */
   async create(data: InferCreationAttributes<InferenceJob>): Promise<string> {
-    const new_inference_job = await InferenceJob.create(data);
+    try {
+      const newiInferenceJob = await InferenceJob.create(data);
 
-    if (!new_inference_job.id) {
-      throw getError(ErrorEnum.GENERIC_ERROR).getErrorObj();
+      if (!newiInferenceJob.id) {
+        throw getError(ErrorEnum.GENERIC_ERROR);
+      }
+
+      return newiInferenceJob.id;
+    } catch (error) {
+      throw getError(ErrorEnum.GENERIC_ERROR);
     }
-
-    return new_inference_job.id;
   }
 }

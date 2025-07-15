@@ -8,7 +8,7 @@ import { getError } from "@/common/utils/api-error";
 import { logger } from "@/config/logger";
 import enviroment from "@/config/enviroment";
 import { IncomingMessage } from "http";
-import { parse } from "url";
+import { WEBSOCKET } from "@/common/const";
 
 interface AuthenticatedWebSocket extends WebSocket {
   userId?: string;
@@ -31,6 +31,7 @@ export class WebSocketService {
 
   /**
    * Get singleton instance of WebSocketService
+   * @returns WebSocketService instance
    */
   public static getInstance(): WebSocketService {
     if (!WebSocketService.instance) {
@@ -54,7 +55,7 @@ export class WebSocketService {
   }
 
   /**
-   * Setup WebSocket event handlers
+   * Setup event handlers for WebSocket connections
    */
   private setupEventHandlers(): void {
     this.wss.on(
@@ -171,7 +172,7 @@ export class WebSocketService {
         ws,
         getError(ErrorEnum.UNAUTHORIZED_ERROR).getErrorObj().msg,
       );
-      ws.close(1008, "Authentication failed");
+      ws.close(WEBSOCKET.POLICY_VIOLATION, "Authentication failed");
     }
   }
 
@@ -276,7 +277,6 @@ export class WebSocketService {
     status: string,
     result?: any,
     errorMessage?: string,
-    carbonFootprint?: number,
   ): void {
     const notification: WebSocketNotification = {
       type: "INFERENCE_STATUS_UPDATE",
@@ -285,7 +285,6 @@ export class WebSocketService {
         status,
         result: status === "COMPLETED" ? result : undefined,
         errorMessage,
-        carbonFootprint,
       },
       timestamp: new Date(),
     };
@@ -336,7 +335,7 @@ export class WebSocketService {
     if (userSockets) {
       userSockets.forEach((ws) => {
         if (ws.readyState === WebSocket.OPEN) {
-          ws.close(1000, "Disconnected by server");
+          ws.close(WEBSOCKET.NORMAL_CLOSURE, "Disconnected by server");
         }
       });
       this.userConnections.delete(userId);

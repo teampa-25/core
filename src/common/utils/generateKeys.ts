@@ -4,6 +4,13 @@ import { join } from "path";
 import { logger } from "../../config/logger";
 import { exit } from "process";
 
+/**
+ * Script that generates public and private keys for JWT authentication using RSA
+ * it can be executed via npm scripts:
+ * npn run keys to generate keys
+ * npm run keys-force to force the keys generation
+ */
+
 const keysDir = "./keys";
 let force = false;
 let directory_exists = false;

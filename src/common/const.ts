@@ -1,5 +1,16 @@
+/**
+ * @description Constants for the inference process
+ */
 export const INFERENCE = {
   COST_PER_FRAME: 0.001,
   COST_OF_INFERENCE: 0.002,
   SUPPORTED_VIDEO_FORMATS: ["video/mp4"],
 } as const;
+
+/**
+ * @description Constants for WebSocket close codes
+ */
+export const WEBSOCKET = {
+  POLICY_VIOLATION: 1008,
+  NORMAL_CLOSURE: 1000,
+};

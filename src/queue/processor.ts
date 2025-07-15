@@ -159,7 +159,7 @@ export class InferenceJobProcessor {
         } as any);
       }
     } catch (error) {
-      throw getError(ErrorEnum.GENERIC_ERROR).getErrorObj();
+      throw getError(ErrorEnum.GENERIC_ERROR);
     }
   }
 }

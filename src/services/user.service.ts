@@ -52,6 +52,11 @@ export class UserService {
     });
   }
 
+  /**
+   * Retrieves the credits of a user by their ID.
+   * @param id The ID of the user.
+   * @returns The number of credits the user has, or null if not found.
+   */
   async getCreditsByUserId(id: string): Promise<number | null> {
     const foundUser = await this.userRepo.findById(id);
 
@@ -62,6 +67,12 @@ export class UserService {
     return foundUser.credit;
   }
 
+  /**
+   * Adds credits to a user by their email.
+   * @param email The email of the user.
+   * @param credits The number of credits to add.
+   * @returns The updated number of credits, or null if the user was not found.
+   */
   async addCreditsByUserEmail(
     email: string,
     credits: number,

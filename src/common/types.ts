@@ -1,5 +1,8 @@
 import { Detector } from "@/common/enums";
 
+/**
+ * @description Interface for video information
+ */
 interface VideoInfo {
   frameCount: number;
   duration: number;
@@ -9,7 +12,7 @@ interface VideoInfo {
 }
 
 /**
- * User info per JWT Payload
+ * @description User info per JWT Payload
  */
 interface UserPayload {
   id: string;
@@ -18,7 +21,7 @@ interface UserPayload {
 }
 
 /**
- * Interface object for validation middleware
+ * @description Interface object for validation middleware
  */
 interface ValidationError {
   field: string;
@@ -28,7 +31,7 @@ interface ValidationError {
 }
 
 /**
- * Interface object for the response coming from the model CNS
+ * @description Interface object for the response coming from the model CNS
  */
 interface CNSResponse {
   requestId: string;
@@ -39,7 +42,7 @@ interface CNSResponse {
 }
 
 /**
- * Interface for inference parameters
+ * @description Interface for inference parameters
  */
 interface InferenceParameters {
   startFrame: number;
@@ -51,7 +54,7 @@ interface InferenceParameters {
 }
 
 /**
- * Interface for WebSocket notification data
+ * @description Interface for WebSocket notification data
  */
 interface WebSocketNotification {
   type: string;
@@ -65,7 +68,7 @@ interface WebSocketNotification {
 }
 
 /**
- * Interface to map env variables.
+ * @description Interface to map env variables.
  */
 interface Enviroment {
   nodeEnv: string;
