@@ -51,6 +51,21 @@ interface InferenceParameters {
 }
 
 /**
+ * Interface for WebSocket notification data
+ */
+interface WebSocketNotification {
+  type: string;
+  data: {
+    inferenceId: string;
+    status: string;
+    result?: any;
+    errorMessage?: string;
+    carbonFootprint?: number;
+  };
+  timestamp: Date;
+}
+
+/**
  * Interface to map env variables.
  */
 interface Enviroment {
@@ -79,5 +94,6 @@ export {
   ValidationError,
   CNSResponse,
   InferenceParameters,
+  WebSocketNotification,
   Enviroment,
 };
