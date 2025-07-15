@@ -9,6 +9,7 @@ import { unzipBuffer } from "@/common/utils/unzip";
 import { faker } from "@faker-js/faker";
 import { INFERENCE } from "@/common/const";
 
+import * as path from "path";
 import { mkdir, writeFile, access } from "fs/promises";
 import { constants } from "fs";
 import { dirname } from "path";
@@ -249,21 +250,23 @@ export class DatasetService {
 
     if (type === "zip") {
       // const files = await unzipBuffer(content, name); // ................................................................
-      const files = await decompress(content);
+      const files = await decompress(content, {
+        filter: (file) =>
+          path.extname(file.path) == ".mp4" && !file.path.includes("__MACOSX"),
+      });
 
       let total_frames = 0;
 
       // TODO: NEEEDS REFACTORING AND CHECKING FOR FILETYPES !!!!!!
       for (const file in files) {
         const frame_count = await this.calcFrameCount(
-          `${name}-${faker.string.alphanumeric(10)}`,
+          files[file].path,
           files[file].data,
         );
-
         total_frames = total_frames + frame_count;
       }
 
-      cost = await this.calculateCost(total_frames);
+      cost = Math.ceil(await this.calculateCost(total_frames));
 
       const hasEnoughCredits = await this.userRepository.hasEnoughCredits(
         userId,
@@ -290,11 +293,18 @@ export class DatasetService {
 
         await this.userRepository.deductCredits(userId, cost);
         logger.info(`credits deducted ${cost} from ${userId}`);
+
+        //TODO: fix message
+        return {
+          message: "videos added",
+          datasetId,
+          costDeducted: cost,
+        };
       }
     } else if (type === "video") {
-      //TODO: FIX this.calcFrameCount
       const frame_count = await this.calcFrameCount(name, content);
       cost = Math.ceil(await this.calculateCost(frame_count));
+
       const hasEnoughCredits = await this.userRepository.hasEnoughCredits(
         userId,
         cost,
