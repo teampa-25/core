@@ -9,6 +9,10 @@ import { unzipBuffer } from "@/common/utils/unzip";
 import { faker } from "@faker-js/faker";
 import { INFERENCE } from "@/common/const";
 
+/**
+ * Service for managing datasets, including creation, retrieval, updating, and deletion.
+ * It also handles video uploads and calculates costs associated with dataset operations.
+ */
 export class DatasetService {
   private datasetRepository: DatasetRepository;
   private videoRepository: VideoRepository;
@@ -21,7 +25,10 @@ export class DatasetService {
   }
 
   /**
-   * extract frame count from video
+   * Calculates the number of frames in a video.
+   * @param videoName The name of the video.
+   * @param video The video file buffer.
+   * @returns The number of frames in the video.
    */
   private async calcFrameCount(
     videoName: string,
@@ -31,7 +38,12 @@ export class DatasetService {
   }
 
   /**
-   * add video to repo
+   * Adds a video to the repository.
+   * @param videoName The name of the video.
+   * @param video The video file buffer.
+   * @param datasetId The ID of the dataset.
+   * @param frame_count The number of frames in the video.
+   * @returns The ID of the created video.
    */
   private async addVideoToRepo(
     videoName: string,
@@ -50,7 +62,9 @@ export class DatasetService {
   }
 
   /**
-   * Calulcate the cost of upload
+   * Calculates the cost of processing a video based on the number of frames.
+   * @param frame_count The number of frames in the video.
+   * @returns The cost of processing the video.
    */
   private async calculateCost(frame_count: number): Promise<number> {
     const framecost = INFERENCE.COST_PER_FRAME;
@@ -58,15 +72,15 @@ export class DatasetService {
   }
 
   /**
-   * Create a new dataset
-   * @returns a Promise that resolves to the created dataset
+   * Creates a new dataset for a user.
+   * @param userId The ID of the user.
+   * @param datasetData The data for the new dataset.
+   * @returns The created dataset.
    */
   async createDataset(
     userId: string,
     datasetData: { name: string; tags?: string[] },
   ): Promise<Dataset> {
-    // should datasetData be declared somewhere else?
-
     const exists = await this.datasetRepository.existsByNameAndUserId(
       datasetData.name,
       userId,
@@ -90,9 +104,10 @@ export class DatasetService {
   }
 
   /**
-   * Returns the list of datasets for a certain user
-   * @param filters filter bucket (really helpful) DO NOT REMOVE
-   * @returns a Promise that resolves to an array of datasets
+   * Retrieves the list of datasets for a certain user.
+   * @param userId The ID of the user.
+   * @param filters Optional filters to apply when retrieving datasets.
+   * @returns A Promise that resolves to an array of datasets.
    */
   async getDatasets(
     userId: string,
@@ -102,8 +117,10 @@ export class DatasetService {
   }
 
   /**
-   * Returns a dataset by its ID
-   * @returns a Promise that resolves to the dataset or null if not found
+   * Retrieves a dataset by its ID.
+   * @param datasetId The ID of the dataset.
+   * @param userId The ID of the user.
+   * @returns A Promise that resolves to the dataset or null if not found.
    */
   async getDatasetById(
     datasetId: string,
@@ -167,11 +184,13 @@ export class DatasetService {
   }
 
   /**
-   * Adds videos to a dataset
-   * @param datasetId id of the dataset where to put the video
-   * @param userId the user requesting the insertion
-   * @param content Array of video files or single video file
-   * @returns a Promise that resolves with the result of the operation
+   * Uploads a video to a dataset.
+   * @param datasetId The ID of the dataset.
+   * @param userId The ID of the user.
+   * @param content The video content.
+   * @param name The name of the video.
+   * @param type The type of the video.
+   * @returns A Promise that resolves to the result of the upload operation.
    */
   async uploadVideo(
     datasetId: string,

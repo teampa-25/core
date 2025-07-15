@@ -4,6 +4,10 @@ import { getError } from "@/common/utils/api-error";
 import { ErrorEnum } from "@/common/enums";
 import { InferCreationAttributes } from "sequelize";
 
+/**
+ * UserRepository is responsible for managing user data.
+ * It provides methods to create, find, update, and delete users.
+ */
 export class UserRepository {
   private userDAO: UserDAO;
 
@@ -86,7 +90,7 @@ export class UserRepository {
     }
 
     if (user.credit < creditsToDeduct) {
-      throw getError(ErrorEnum.UNAUTHORIZED_ERROR).getErrorObj();
+      throw getError(ErrorEnum.UNAUTHORIZED_ERROR);
     }
 
     const newCreditAmount = user.credit - creditsToDeduct;

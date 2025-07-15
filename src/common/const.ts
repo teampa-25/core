@@ -6,3 +6,11 @@ export const INFERENCE = {
   COST_OF_INFERENCE: 0.002,
   SUPPORTED_VIDEO_FORMATS: ["video/mp4"],
 } as const;
+
+/**
+ * @description Constants for WebSocket close codes
+ */
+export const WEBSOCKET = {
+  POLICY_VIOLATION: 1008,
+  NORMAL_CLOSURE: 1000,
+};
