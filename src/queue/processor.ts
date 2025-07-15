@@ -5,14 +5,8 @@ import { ResultRepository } from "@/repositories/result.repository";
 import axios from "axios";
 import FormData from "form-data";
 import enviroment from "@/config/enviroment";
-
-interface CNSResponse {
-  requestId: string;
-  velocity: number[][];
-  carbon_footprint: number;
-  download_url: string;
-  message: string;
-}
+import { ErrorEnum, InferenceJobStatus } from "@/common/enums";
+import { getError } from "@/common/utils/api-error";
 
 /**
  * Class responsible for processing inference jobs.
