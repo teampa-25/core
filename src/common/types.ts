@@ -60,7 +60,6 @@ interface WebSocketNotification {
     status: string;
     result?: any;
     errorMessage?: string;
-    carbonFootprint?: number;
   };
   timestamp: Date;
 }

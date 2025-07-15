@@ -55,7 +55,6 @@ export class InferenceJobProcessor {
         InferenceJobStatus.COMPLETED,
         resultJson,
         undefined,
-        resultJson.carbon_footprint,
       );
     } catch (error) {
       console.error(`Errore durante inferenza ${inferenceId}:`, error);

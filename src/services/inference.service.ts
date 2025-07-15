@@ -197,7 +197,6 @@ export class InferenceJobService {
         status,
         result,
         errorMessage,
-        carbonFootprint,
       );
     } catch (error) {
       console.error(`Error updating inference status ${inferenceId}:`, error);
