@@ -1,5 +1,4 @@
 import enviroment from "@/config/enviroment";
-import config from "@/config/enviroment";
 
 export const swaggerDef = {
   myapi: "3.0.0",

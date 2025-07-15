@@ -1,7 +1,8 @@
 import { InferCreationAttributes } from "sequelize";
-import { IDAO } from "@/dao/interfaces/idao";
-import { Video } from "@/models/video";
-import { ErrorEnum, getError } from "@/utils/api.error";
+import { IDAO } from "./interfaces/idao";
+import { Video } from "@/models";
+import { getError } from "@/common/utils/api-error";
+import { ErrorEnum } from "@/common/enums";
 
 export class VideoDAO implements IDAO<Video> {
   async get(id: string): Promise<Video | null> {
@@ -15,6 +16,25 @@ export class VideoDAO implements IDAO<Video> {
   async getAll(): Promise<Video[]> {
     try {
       return await Video.findAll();
+    } catch (error) {
+      throw getError(ErrorEnum.GENERIC_ERROR)?.getErrorObj();
+    }
+  }
+
+  async getByRange(
+    datasetId: string,
+    offset: number,
+    limit: number,
+  ): Promise<Video[]> {
+    try {
+      return await Video.findAll({
+        where: {
+          dataset_id: datasetId,
+        },
+        offset,
+        limit,
+        order: [["created_at", "ASC"]],
+      });
     } catch (error) {
       throw getError(ErrorEnum.GENERIC_ERROR)?.getErrorObj();
     }

@@ -6,7 +6,7 @@ import enviroment from "@/config/enviroment";
 const MAX_CONCURRENT_JOBS = enviroment.maxConcurrentJobs;
 
 export const inferenceWorker = new Worker(
-  "inference",
+  "inferenceJobs",
   async (job: Job) => {
     const processor = new InferenceJobProcessor();
     return await processor.processInference(job);

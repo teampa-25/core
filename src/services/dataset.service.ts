@@ -1,12 +1,13 @@
 import { DatasetRepository } from "@/repositories/dataset.repository";
 import { VideoRepository } from "@/repositories/video.repository";
 import { UserRepository } from "@/repositories/user.repository";
-import { Dataset } from "@/models/dataset";
-import { ErrorEnum, getError } from "@/utils/api.error";
-import { VideoAnalyzer } from "@/utils/video.analyzer";
-import { unzipBuffer } from "@/utils/unzip";
+import { Dataset } from "@/models";
+import { getError } from "@/common/utils/api-error";
+import { ErrorEnum } from "@/common/enums";
+import { VideoAnalyzer } from "@/common/utils/video-analyzer";
+import { unzipBuffer } from "@/common/utils/unzip";
 import { faker } from "@faker-js/faker";
-import { INFERENCE } from "@/utils/const";
+import { INFERENCE } from "@/common/const";
 
 export class DatasetService {
   private datasetRepository: DatasetRepository;

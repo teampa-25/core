@@ -1,4 +1,4 @@
-import { Dataset } from "@/models/dataset";
+import { Dataset } from "@/models";
 import { DatasetDAO } from "@/dao/dataset.dao";
 
 /**

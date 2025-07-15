@@ -1,6 +1,5 @@
-import { Result } from "@/models/result";
+import { Result } from "@/models";
 import { ResultDAO } from "@/dao/result.dao";
-import { ErrorEnum, getError } from "@/utils/api-error";
 import { InferCreationAttributes } from "sequelize";
 
 /**
@@ -119,21 +118,21 @@ export class ResultRepository {
 
   /**
    * Gets the JSON result data for a specific result
-   * @param id - The ID of the result
+   * @param jobId - The ID of the job
    * @returns A Promise that resolves to the JSON result data or null if not found
    */
-  async getJsonResult(id: string): Promise<object | null> {
-    const result = await this.resultDAO.get(id);
+  async getJsonResult(jobId: string): Promise<object | null> {
+    const result = await this.resultDAO.getByInferenceJobId(jobId);
     return result ? result.json_res : null;
   }
 
   /**
    * Gets the image ZIP data for a specific result
-   * @param id - The ID of the result
+   * @param jobId - The ID of the job
    * @returns A Promise that resolves to the image ZIP buffer or null if not found
    */
-  async getImageZip(id: string): Promise<Buffer | null> {
-    const result = await this.resultDAO.get(id);
+  async getImageZip(jobId: string): Promise<Buffer | null> {
+    const result = await this.resultDAO.getByInferenceJobId(jobId);
     return result ? result.image_zip : null;
   }
 }

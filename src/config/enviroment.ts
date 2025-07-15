@@ -1,30 +1,15 @@
+import { Enviroment } from "@/common/types";
 import dotenv from "dotenv";
 
 dotenv.config();
-
-interface Enviroment {
-  nodeEnv: string;
-  apiPort: number;
-  redisPort: number;
-  redisHost: string;
-  postgresPort: number;
-  postgresHost: string;
-  postgresUser: string;
-  postgresPassword: string;
-  postgresDB: string;
-  jwtPrivateKeyPath: string;
-  jwtPublicKeyPath: string;
-  jwtExpiresIn: string;
-  jwtAlgorithm: string;
-  saltRounds: number;
-  maxConcurrentJobs: number;
-}
 
 const enviroment: Enviroment = {
   nodeEnv: process.env.NODE_ENV || "development",
   apiPort: Number(process.env.API_PORT) || 3000,
   redisPort: Number(process.env.REDIS_PORT) || 6379,
   redisHost: process.env.REDIS_HOST || "redis",
+  fastApiPort: Number(process.env.FASTAPI_PORT) || 8000,
+  fastApiHost: process.env.FASTAPI_HOST || "localhost",
   postgresPort: Number(process.env.POSTGRES_PORT) || 5432,
   postgresHost: process.env.POSTGRES_HOST || "postgres",
   postgresUser: process.env.POSTGRES_USER || "admin",

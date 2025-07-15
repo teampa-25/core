@@ -1,4 +1,4 @@
-import { UserRole } from "@/models/enums/user.role";
+import { UserRole } from "@/common/enums";
 import Joi from "joi";
 
 export const IdSchema = Joi.object({
@@ -56,14 +56,17 @@ export const DatasetSchema = {
 
 export const InferenceSchema = {
   create: Joi.object({
+    userId: Joi.string().uuid().required(),
     datasetId: Joi.string().uuid().required(),
-    modelId: Joi.string().required(),
     parameters: Joi.object({
-      startFrame: Joi.number().integer().min(0).optional(),
-      endFrame: Joi.number().integer().min(0).optional(),
-      frameStep: Joi.number().integer().min(1).default(1),
-      detector: Joi.string().valid("AKAZE", "SIFT", "ORB").default("AKAZE"),
-      useDevice: Joi.boolean().default(false),
+      startFrame: Joi.number().integer().min(0).required(),
+      endFrame: Joi.number().integer().min(0).required(),
+      frameStep: Joi.number().integer().min(1).required(),
+      detector: Joi.string().valid("AKAZE", "SIFT", "ORB").required(),
+      useDevice: Joi.boolean().required(),
     }).required(),
+    range: Joi.string()
+      .pattern(/^all$|^\d+-\d+$/)
+      .required(),
   }),
 };

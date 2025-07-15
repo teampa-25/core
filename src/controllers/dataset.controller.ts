@@ -1,8 +1,10 @@
-import { Request, Response } from "express";
+import { NextFunction, Request, Response } from "express";
+import { Dataset } from "@/models";
 import { StatusCodes } from "http-status-codes";
 import { DatasetService } from "@/services/dataset.service";
-import { catchAsync } from "@/utils/catchAsync";
-import { ErrorEnum, getError } from "@/utils/api.error";
+import { catchAsync } from "@/common/utils/catchAsync";
+import { getError } from "@/common/utils/api-error";
+import { ErrorEnum } from "@/common/enums";
 
 /**
  * Dataset Controller where all the dataset-related endpoints are defined.
@@ -60,7 +62,6 @@ export class DatasetController {
    */
   getAll = catchAsync(async (req: Request, res: Response) => {
     const userId = req.user!.id;
-
     const { tags } = req.body;
     const filters = tags
       ? { tags: Array.isArray(tags) ? (tags as string[]) : [tags as string] }

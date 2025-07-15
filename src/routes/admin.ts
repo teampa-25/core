@@ -2,9 +2,10 @@ import { authenticate } from "@/middlewares/authenticate.middleware";
 import { authorize } from "@/middlewares/authorize.middleware";
 import { validate } from "@/middlewares/validate.middleware";
 import { UserController } from "@/controllers/user.controller";
-import { UserRole } from "@/models/enums/user.role";
-import { UserSchema } from "@/utils/validation.schema";
+import { UserRole } from "@/common/enums";
+import { UserSchema } from "@/common/utils/validation-schema";
 import { Router } from "express";
+import { serverAdapter } from "@/config/bull-board";
 
 const router = Router();
 const userController = new UserController();
@@ -16,4 +17,5 @@ router.post(
   userController.recharge,
 );
 
+router.use("/queues", serverAdapter.getRouter());
 export default router;

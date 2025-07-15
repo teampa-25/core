@@ -1,10 +1,40 @@
-import { InferenceJobController } from "@/controllers/inference-job.controller";
+import { InferenceJobController } from "@/controllers/inference.controller";
+import { authenticate } from "@/middlewares/authenticate.middleware";
+import { authorize } from "@/middlewares/authorize.middleware";
+import { validate } from "@/middlewares/validate.middleware";
+import { UserRole } from "@/common/enums";
+import { IdSchema, InferenceSchema } from "@/common/utils/validation-schema";
 import { Router } from "express";
 
 const router = Router();
 
 const inferenceJobController = new InferenceJobController();
 
-router.post("/", inferenceJobController.createInference);
+router.use(authenticate);
+router.use(authorize(UserRole.USER));
+
+router.post(
+  "/",
+  validate(InferenceSchema.create),
+  inferenceJobController.createInference,
+);
+
+router.get(
+  "/status/:id",
+  validate(IdSchema, "params"),
+  inferenceJobController.getInferenceStatus,
+);
+
+router.get(
+  "/result/json/:id",
+  validate(IdSchema, "params"),
+  inferenceJobController.getInferenceJSONResults,
+);
+
+router.get(
+  "/result/zip/:id",
+  validate(IdSchema, "params"),
+  inferenceJobController.getInferenceZIPResults,
+);
 
 export default router;

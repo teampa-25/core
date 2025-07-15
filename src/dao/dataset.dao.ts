@@ -1,7 +1,8 @@
-import { Dataset } from "@/models/dataset";
+import { Dataset } from "@/models";
 import { IDAO } from "@/dao/interfaces/idao";
-import { ErrorEnum, getError } from "@/utils/api.error";
+import { getError } from "@/common/utils/api-error";
 import { Op, InferCreationAttributes } from "sequelize";
+import { ErrorEnum } from "@/common/enums";
 
 /**
  * DatasetDAO class implements IDAO interface for Dataset model

@@ -1,5 +1,6 @@
 import { Sequelize } from "sequelize";
 import enviroment from "@/config/enviroment";
+
 /**
  * Database connection
  *

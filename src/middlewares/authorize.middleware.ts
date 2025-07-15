@@ -1,6 +1,6 @@
 import { Request, Response, NextFunction } from "express";
-import { UserRole } from "@/models/enums/user.role";
-import { getError, ErrorEnum } from "@/utils/api.error";
+import { getError } from "@/common/utils/api-error";
+import { ErrorEnum, UserRole } from "@/common/enums";
 
 export function authorize(...allowedRoles: UserRole[]) {
   return (req: Request, res: Response, next: NextFunction) => {

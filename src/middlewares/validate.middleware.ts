@@ -1,13 +1,7 @@
+import { ValidationError } from "@/common/types";
 import { Request, Response, NextFunction } from "express";
 import { StatusCodes } from "http-status-codes";
 import Joi from "joi";
-
-interface ValidationError {
-  field: string;
-  message: string;
-  value?: any;
-  type: string;
-}
 
 /**
  * validation middleware

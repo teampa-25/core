@@ -1,11 +1,11 @@
-import { catchAsync } from "@/utils/catchAsync";
+import { catchAsync } from "@/common/utils/catchAsync";
 import { Request, Response } from "express";
 import { StatusCodes } from "http-status-codes";
 
 export class HealthController {
   ping = catchAsync(async (req: Request, res: Response, NextFunction) => {
     res.status(StatusCodes.OK).json({
-      status: "Server is working1",
+      status: "Server is working!",
       timestamp: new Date().toISOString(),
     });
   });

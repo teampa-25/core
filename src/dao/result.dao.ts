@@ -1,12 +1,28 @@
 import { InferCreationAttributes } from "sequelize";
-import { IDAO } from "@/dao/interfaces/idao";
-import { Result } from "@/models/result";
-import { ErrorEnum, getError } from "@/utils/api.error";
+import { IDAO } from "./interfaces/idao";
+import { Result } from "@/models";
+import { ErrorEnum } from "@/common/enums";
+import { getError } from "@/common/utils/api-error";
 
 export class ResultDAO implements IDAO<Result> {
   async get(id: string): Promise<Result | null> {
     try {
       return await Result.findByPk(id);
+    } catch (error) {
+      throw getError(ErrorEnum.NOT_FOUND_ERROR)?.getErrorObj();
+    }
+  }
+
+  /**
+   * Retrieves a result by its associated inference job ID
+   * @param inferenceJobId - The ID of the inference job
+   * @returns A Promise that resolves to the result or null if not found
+   */
+  async getByInferenceJobId(inferenceJobId: string): Promise<Result | null> {
+    try {
+      return await Result.findOne({
+        where: { inference_job_id: inferenceJobId },
+      });
     } catch (error) {
       throw getError(ErrorEnum.NOT_FOUND_ERROR)?.getErrorObj();
     }

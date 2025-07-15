@@ -1,4 +1,3 @@
-import { Database } from "@/database/database";
 import {
   DataTypes,
   Model,
@@ -6,10 +5,8 @@ import {
   InferAttributes,
   InferCreationAttributes,
   ForeignKey,
+  Sequelize,
 } from "sequelize";
-import { User } from "@/models/user";
-
-const sequelize = Database.getInstance();
 
 /**
  * Dataset Model Definition
@@ -17,7 +14,7 @@ const sequelize = Database.getInstance();
  * @extends Dataset - Sequelize dataset model
  */
 
-class Dataset extends Model<
+export class Dataset extends Model<
   InferAttributes<Dataset>,
   InferCreationAttributes<Dataset>
 > {
@@ -28,69 +25,68 @@ class Dataset extends Model<
   declare deleted_at: CreationOptional<Date | null>;
   declare created_at: Date;
   declare updated_at: Date;
-}
 
-Dataset.init(
-  {
-    id: {
-      type: DataTypes.UUID,
-      defaultValue: DataTypes.UUIDV4,
-      primaryKey: true,
-    },
-    user_id: {
-      type: DataTypes.UUID,
-      allowNull: false,
-      references: {
-        model: "User",
-        key: "id",
-      },
-      onUpdate: "CASCADE",
-      onDelete: "CASCADE",
-    },
-    name: {
-      type: DataTypes.STRING,
-      allowNull: false,
-    },
-    tags: {
-      type: DataTypes.ARRAY(DataTypes.STRING),
-      allowNull: false,
-      defaultValue: [],
-    },
-    deleted_at: {
-      type: DataTypes.DATE,
-      allowNull: true,
-    },
-    created_at: {
-      type: DataTypes.DATE,
-      allowNull: false,
-      defaultValue: DataTypes.NOW,
-    },
-    updated_at: {
-      type: DataTypes.DATE,
-      allowNull: false,
-      defaultValue: DataTypes.NOW,
-    },
-  },
-  {
-    sequelize,
-    modelName: "Dataset",
-    tableName: "Dataset",
-    timestamps: true,
-    createdAt: "created_at",
-    updatedAt: "updated_at",
-    deletedAt: "deleted_at",
-    paranoid: true,
-    indexes: [
+  static initModel(sequelize: Sequelize) {
+    Dataset.init(
       {
-        name: "unique_user_dataset_name",
-        unique: true,
-        fields: ["user_id", "name"],
-        where: {
-          deleted_at: null,
+        id: {
+          type: DataTypes.UUID,
+          defaultValue: DataTypes.UUIDV4,
+          primaryKey: true,
+        },
+        user_id: {
+          type: DataTypes.UUID,
+          allowNull: false,
+          references: {
+            model: "User",
+            key: "id",
+          },
+          onUpdate: "CASCADE",
+          onDelete: "CASCADE",
+        },
+        name: {
+          type: DataTypes.STRING,
+          allowNull: false,
+        },
+        tags: {
+          type: DataTypes.ARRAY(DataTypes.STRING),
+          allowNull: false,
+          defaultValue: [],
+        },
+        deleted_at: {
+          type: DataTypes.DATE,
+          allowNull: true,
+        },
+        created_at: {
+          type: DataTypes.DATE,
+          allowNull: false,
+          defaultValue: DataTypes.NOW,
+        },
+        updated_at: {
+          type: DataTypes.DATE,
+          allowNull: false,
+          defaultValue: DataTypes.NOW,
         },
       },
-    ],
-  },
-);
-
-export { Dataset };
+      {
+        sequelize,
+        modelName: "Dataset",
+        tableName: "Dataset",
+        timestamps: true,
+        createdAt: "created_at",
+        updatedAt: "updated_at",
+        paranoid: true,
+        indexes: [
+          {
+            name: "unique_user_dataset_name",
+            unique: true,
+            fields: ["user_id", "name"],
+            where: {
+              deleted_at: null,
+            },
+          },
+        ],
+      },
+    );
+  }
+}

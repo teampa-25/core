@@ -2,10 +2,10 @@ import { authorize } from "@/middlewares/authorize.middleware";
 import { authenticate } from "@/middlewares/authenticate.middleware";
 import { validate } from "@/middlewares/validate.middleware";
 import { upload } from "../middlewares/multer.middleware";
-import { UserRole } from "@/models/enums/user.role";
+import { UserRole } from "@/common/enums";
 import { Router } from "express";
 import { DatasetController } from "@/controllers/dataset.controller";
-import { DatasetSchema, IdSchema } from "@/utils/validation.schema";
+import { DatasetSchema, IdSchema } from "@/common/utils/validation-schema";
 
 const router = Router();
 const datasetController = new DatasetController();

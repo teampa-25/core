@@ -1,4 +1,4 @@
-import { Video } from "@/models/video";
+import { Video } from "@/models";
 import { VideoDAO } from "@/dao/video.dao";
 
 /**
@@ -39,6 +39,14 @@ export class VideoRepository {
   async findByDatasetId(datasetId: string): Promise<Video[]> {
     const allVideos = await this.videoDAO.getAll();
     return allVideos.filter((video) => video.dataset_id === datasetId);
+  }
+
+  async findByRange(
+    datasetId: string,
+    offset: number,
+    limit: number,
+  ): Promise<Video[]> {
+    return await this.videoDAO.getByRange(datasetId, offset, limit);
   }
 
   /**
