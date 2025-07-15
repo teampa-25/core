@@ -1,5 +1,6 @@
 FROM node:24-alpine
-#RUN apk add --no-cache postgresql-client
+
+RUN apk add --no-cache bash
 
 WORKDIR /app
 
@@ -9,7 +10,7 @@ RUN npm install -g ts-node typescript nodemon
 
 COPY . .
 
-# RUN chmod +x entrypoint/*
-# ENTRYPOINT [ "./entrypoint/entrypoint.sh" ]
-#
+RUN chmod +x entrypoint/entrypoint.sh
+RUN dos2unix entrypoint/entrypoint.sh
+ENTRYPOINT ["bash", "./entrypoint/entrypoint.sh"]
 CMD ["npm", "run", "dev"]
