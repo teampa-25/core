@@ -49,11 +49,6 @@ export class DatasetController {
     const { id } = req.params;
     const deleted = await this.datasetService.deleteDataset(id, userId);
 
-    if (!deleted) {
-      const error = getError(ErrorEnum.NOT_FOUND_ERROR).getErrorObj();
-      return res.status(error.status).json({ message: error.msg });
-    }
-
     return res
       .status(StatusCodes.OK)
       .json({ message: "Dataset deleted successfully" });
@@ -137,10 +132,7 @@ export class DatasetController {
     const { id } = req.params;
 
     const dataset = await this.datasetService.getDatasetById(id, userId);
-    if (!dataset) {
-      const error = getError(ErrorEnum.NOT_FOUND_ERROR).getErrorObj();
-      return res.status(error.status).json({ message: error.msg });
-    }
+
     return res.status(StatusCodes.OK).json({ dataset });
   });
 }

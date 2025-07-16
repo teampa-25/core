@@ -5,14 +5,12 @@ import { Dataset } from "@/models";
 import { getError } from "@/common/utils/api-error";
 import { ErrorEnum } from "@/common/enums";
 import { VideoAnalyzer } from "@/common/utils/video-analyzer";
-import { unzipBuffer } from "@/common/utils/unzip";
 import { faker } from "@faker-js/faker";
 import { INFERENCE } from "@/common/const";
 
 import * as path from "path";
 import { mkdir, writeFile, access } from "fs/promises";
 import { constants } from "fs";
-import { dirname } from "path";
 
 import { logger } from "@/config/logger";
 import decompress from "decompress";
@@ -34,17 +32,23 @@ export class DatasetService {
 
   /**
    * Calculates the number of frames in a video.
-   * @param videoName The name of the video.
    * @param video The video file buffer.
+   * @param videoName The name of the video.
    * @returns The number of frames in the video.
    */
   private async calcFrameCount(
-    videoName: string,
     video: Buffer,
+    videoName: string,
   ): Promise<number> {
     return await VideoAnalyzer.frameCount(video, videoName);
   }
 
+  /**
+   * Ensures that the user's video and results directories exist.
+   * Creates them if they do not exist.
+   * @param userId The ID of the user.
+   * @returns True if the directories are successfully created or already exist, false otherwise.
+   */
   private async checkUserDirectory(userId: string) {
     try {
       const videos = `/files/${userId}/videos`;
@@ -61,39 +65,40 @@ export class DatasetService {
 
   /**
    * Adds a video to the repository.
+   * @param userId The ID of the user.
    * @param videoName The name of the video.
    * @param video The video file buffer.
-   * @param datasetId The ID of the dataset.
-   * @param frame_count The number of frames in the video.
+   * @param id The ID of the dataset.
+   * @param frameCount The number of frames in the video.
    * @returns The ID of the created video.
    */
   private async addVideoToRepo(
     userId: string,
     videoName: string,
     video: Buffer,
-    datasetId: string,
-    frame_count: number,
+    id: string,
+    frameCount: number,
   ): Promise<string> {
     await this.checkUserDirectory(userId);
 
     const videoId = await this.videoRepository.create({
-      dataset_id: datasetId,
+      datasetId: id,
       name: videoName,
-      frame_count: frame_count,
+      frameCount: frameCount,
     });
 
-    const file_name = `/files/${userId}/videos/${videoId}.mp4`;
+    const fileName = `/files/${userId}/videos/${videoId}.mp4`;
 
-    await this.videoRepository.update(videoId, { file: file_name });
+    await this.videoRepository.update(videoId, { file: fileName });
 
     try {
       logger.info("checking if file exists");
-      await access(file_name, constants.F_OK);
+      await access(fileName, constants.F_OK);
       logger.info("file exists - throwing error");
       throw getError(ErrorEnum.FORBIDDEN_ERROR); // TODO: find another error to throw that better explains this - this should never happen anyways
     } catch {
-      await writeFile(file_name, video);
-      logger.info(`written video in ${file_name}`);
+      await writeFile(fileName, video);
+      logger.info(`written video in ${fileName}`);
     }
 
     return videoId;
@@ -103,12 +108,11 @@ export class DatasetService {
 
   /**
    * Calculates the cost of processing a video based on the number of frames.
-   * @param frame_count The number of frames in the video.
+   * @param frameCount The number of frames in the video.
    * @returns The cost of processing the video.
    */
-  private async calculateCost(frame_count: number): Promise<number> {
-    const framecost = INFERENCE.COST_PER_FRAME;
-    return frame_count * framecost;
+  private calculateCost(frameCount: number): number {
+    return frameCount * INFERENCE.COST_PER_FRAME;
   }
 
   /**
@@ -120,25 +124,26 @@ export class DatasetService {
   async createDataset(
     userId: string,
     datasetData: { name: string; tags?: string[] },
-  ): Promise<Dataset> {
+  ): Promise<Dataset | ErrorEnum> {
     const exists = await this.datasetRepository.existsByNameAndUserId(
       datasetData.name,
       userId,
     );
-    if (exists)
-      throw getError(ErrorEnum.DATASET_NAME_CONFLICT_ERROR).getErrorObj();
+
+    if (exists) throw getError(ErrorEnum.DATASET_NAME_CONFLICT_ERROR);
 
     const datasetCreate = {
-      user_id: userId,
+      userId: userId,
       name: datasetData.name,
       tags: datasetData.tags || [],
     };
 
-    const datasetId = await this.datasetRepository.create(datasetCreate);
+    const id = await this.datasetRepository.create(datasetCreate);
 
     // Retrieves the created dataset to return it
-    const createdDataset = await this.datasetRepository.findById(datasetId);
-    if (!createdDataset) throw getError(ErrorEnum.GENERIC_ERROR).getErrorObj();
+    const createdDataset = await this.datasetRepository.findById(id);
+
+    if (!createdDataset) throw getError(ErrorEnum.GENERIC_ERROR);
 
     return createdDataset;
   }
@@ -158,74 +163,67 @@ export class DatasetService {
 
   /**
    * Retrieves a dataset by its ID.
-   * @param datasetId The ID of the dataset.
+   * @param id The ID of the dataset.
    * @param userId The ID of the user.
    * @returns A Promise that resolves to the dataset or null if not found.
    */
-  async getDatasetById(
-    datasetId: string,
-    userId: string,
-  ): Promise<Dataset | null> {
-    return await this.datasetRepository.findByIdAndUserId(datasetId, userId);
+  async getDatasetById(id: string, userId: string): Promise<Dataset> {
+    const dataset = await this.datasetRepository.findByIdAndUserId(id, userId);
+
+    if (!dataset) {
+      throw getError(ErrorEnum.NOT_FOUND_ERROR);
+    }
+
+    return dataset;
   }
 
   /**
    * Updates a dataset
-   * @param datasetId dataset id
+   * @param id dataset id
    * @param userId user id
    * @param updateData name and tags to be updated
    * @returns a Promise that resolves to the updated dataset or null if not found
    */
   async updateDataset(
-    datasetId: string,
+    id: string,
     userId: string,
     updateData: { name?: string; tags?: string[] },
   ): Promise<Dataset | null> {
     // Checks if the dataset belongs to the user
-    const dataset = await this.datasetRepository.findByIdAndUserId(
-      datasetId,
-      userId,
-    );
-    if (!dataset) throw getError(ErrorEnum.NOT_FOUND_ERROR).getErrorObj();
+    const dataset = await this.datasetRepository.findByIdAndUserId(id, userId);
+    if (!dataset) throw getError(ErrorEnum.NOT_FOUND_ERROR);
 
     // If updating the name, check for uniqueness
     if (updateData.name && updateData.name !== dataset.name) {
       const exists = await this.datasetRepository.existsByNameAndUserId(
         updateData.name,
         userId,
-        datasetId,
+        id,
       );
-      if (exists)
-        throw getError(ErrorEnum.DATASET_NAME_CONFLICT_ERROR).getErrorObj();
+      if (exists) throw getError(ErrorEnum.DATASET_NAME_CONFLICT_ERROR);
     }
 
-    const updatedDataset = await this.datasetRepository.update(
-      datasetId,
-      updateData,
-    );
+    const updatedDataset = await this.datasetRepository.update(id, updateData);
     return updatedDataset;
   }
 
   /**
    * Soft deletes a dataset
-   * @param datasetId dataset id
+   * @param id dataset id
    * @param userId user id
    * @returns a Promise that resolves to true if the dataset was deleted, false otherwise
    */
-  async deleteDataset(datasetId: string, userId: string): Promise<boolean> {
+  async deleteDataset(id: string, userId: string): Promise<boolean> {
     // Checks if the dataset belongs to the user
-    const dataset = await this.datasetRepository.findByIdAndUserId(
-      datasetId,
-      userId,
-    );
-    if (!dataset) throw getError(ErrorEnum.NOT_FOUND_ERROR).getErrorObj();
+    const dataset = await this.datasetRepository.findByIdAndUserId(id, userId);
+    if (!dataset) throw getError(ErrorEnum.NOT_FOUND_ERROR);
 
-    return await this.datasetRepository.softDelete(datasetId);
+    return await this.datasetRepository.softDelete(id);
   }
 
   /**
    * Uploads a video to a dataset.
-   * @param datasetId The ID of the dataset.
+   * @param id The ID of the dataset.
    * @param userId The ID of the user.
    * @param content The video content.
    * @param name The name of the video.
@@ -233,18 +231,15 @@ export class DatasetService {
    * @returns A Promise that resolves to the result of the upload operation.
    */
   async uploadVideo(
-    datasetId: string,
+    id: string,
     userId: string,
     content: Buffer,
     name: string,
     type: string,
   ): Promise<any> {
     // const supportedFormats = ["video/mp4"]; // better somewhere else, i think -beg
-    const dataset = await this.datasetRepository.findByIdAndUserId(
-      datasetId,
-      userId,
-    );
-    if (!dataset) throw getError(ErrorEnum.NOT_FOUND_ERROR).getErrorObj();
+    const dataset = await this.datasetRepository.findByIdAndUserId(id, userId);
+    if (!dataset) throw getError(ErrorEnum.NOT_FOUND_ERROR);
 
     let cost = 0;
 
@@ -255,30 +250,29 @@ export class DatasetService {
           path.extname(file.path) == ".mp4" && !file.path.includes("__MACOSX"),
       });
 
-      let total_frames = 0;
+      let totalFrames = 0;
 
       // TODO: NEEEDS REFACTORING AND CHECKING FOR FILETYPES !!!!!!
       for (const file in files) {
-        const frame_count = await this.calcFrameCount(
-          files[file].path,
+        const frameCount = await this.calcFrameCount(
           files[file].data,
+          files[file].path,
         );
-        total_frames = total_frames + frame_count;
+        totalFrames = totalFrames + frameCount;
       }
 
-      cost = Math.ceil(await this.calculateCost(total_frames));
+      cost = Math.ceil(this.calculateCost(totalFrames));
 
       const hasEnoughCredits = await this.userRepository.hasEnoughCredits(
         userId,
         cost,
       );
-      if (!hasEnoughCredits)
-        throw getError(ErrorEnum.UNAUTHORIZED_ERROR).getErrorObj();
+      if (!hasEnoughCredits) throw getError(ErrorEnum.UNAUTHORIZED_ERROR);
       else {
         for (const file in files) {
-          const frame_count = await this.calcFrameCount(
-            `${name}-${faker.string.alphanumeric(10)}`,
+          const frameCount = await this.calcFrameCount(
             files[file].data,
+            `${name}-${faker.string.alphanumeric(10)}`,
           );
 
           // TODO: Should make a constructor for this
@@ -286,8 +280,8 @@ export class DatasetService {
             userId,
             name,
             files[file].data,
-            datasetId,
-            frame_count,
+            id,
+            frameCount,
           );
         }
 
@@ -297,28 +291,27 @@ export class DatasetService {
         //TODO: fix message
         return {
           message: "videos added",
-          datasetId,
+          id,
           costDeducted: cost,
         };
       }
     } else if (type === "video") {
-      const frame_count = await this.calcFrameCount(name, content);
-      cost = Math.ceil(await this.calculateCost(frame_count));
+      const frameCount = await this.calcFrameCount(content, name);
+      cost = Math.ceil(this.calculateCost(frameCount));
 
       const hasEnoughCredits = await this.userRepository.hasEnoughCredits(
         userId,
         cost,
       );
 
-      if (!hasEnoughCredits)
-        throw getError(ErrorEnum.UNAUTHORIZED_ERROR).getErrorObj();
+      if (!hasEnoughCredits) throw getError(ErrorEnum.UNAUTHORIZED_ERROR);
       else {
         const r = await this.addVideoToRepo(
           userId,
           name,
           content,
-          datasetId,
-          frame_count,
+          id,
+          frameCount,
         );
         await this.userRepository.deductCredits(userId, cost);
 
@@ -326,7 +319,7 @@ export class DatasetService {
 
         return {
           message: `${name} - ${r} - video added`,
-          datasetId,
+          id,
           costDeducted: cost,
         };
       }
