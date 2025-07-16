@@ -49,8 +49,6 @@ export class InferenceJobService {
     parameters: InferenceParameters,
     range: string,
   ): Promise<string[]> => {
-    logger.debug("SOB: son of a bitch im here");
-
     // Validate dataset exists for user
     const dataset = await this.datasetRepository.findByIdAndUserId(
       datasetId,
@@ -64,11 +62,7 @@ export class InferenceJobService {
         ? await this.videoRepository.findByDatasetId(datasetId)
         : await this.getVideosByRange(datasetId, range);
 
-    logger.debug("SOB: ahaha porcoooooo");
-
-    if (!videos?.length) {
-      throw getError(ErrorEnum.BAD_REQUEST_ERROR);
-    }
+    if (!videos?.length) throw getError(ErrorEnum.BAD_REQUEST_ERROR);
 
     // Sort videos by creation date
     const sorted = videos.sort(
@@ -83,15 +77,12 @@ export class InferenceJobService {
       }
     }
 
-    logger.debug("SOB: mannaggia al clero tutto");
-
     // Calculate inference cost
     let inferenceCost = 0;
     if (sorted.length === 1) {
       inferenceCost = sorted[0].frame_count * INFERENCE.COST_OF_INFERENCE;
     } else {
       for (let i = 0; i < sorted.length; i++) {
-        logger.debug("SOB: anubi il dio"); //TODO remove before mancini see this
         inferenceCost += sorted[i].frame_count;
       }
       inferenceCost *= INFERENCE.COST_OF_INFERENCE;
@@ -105,13 +96,27 @@ export class InferenceJobService {
       inferenceCost,
     );
     if (!hasCredits) {
+      const abortedJobData = {
+        dataset_id: datasetId,
+        user_id: userId,
+        goal_id: sorted[0].id,
+        current_id: sorted[0].id,
+        params: parameters,
+        status: InferenceJobStatus.ABORTED,
+      } as InferCreationAttributes<InferenceJob>;
+
+      //Create aborted job
+      const abortedJobId =
+        await this.inferenceRepository.createInferenceJob(abortedJobData);
       const err = getError(ErrorEnum.UNAUTHORIZED_ERROR).getErrorObj();
+
       this.wsService.notifyInferenceStatusUpdate(
         userId,
-        datasetId,
+        abortedJobId,
         InferenceJobStatus.ABORTED,
         err.msg,
       );
+      logger.error(`[BullMQ] Job ${abortedJobId} failed: ${err.msg}`);
       throw getError(ErrorEnum.UNAUTHORIZED_ERROR);
     }
 

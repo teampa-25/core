@@ -2,6 +2,8 @@ import express from "express";
 import { createServer } from "http";
 import "tsconfig-paths/register"; // required for path aliases like @/*
 import "@/models"; // Initialize models and associations
+import "@/queue/worker"; // Import worker to initialize it
+import "@/config/bull-board"; // Import Bull Board configuration
 import routes from "@/routes/routes";
 import enviroment from "@/config/enviroment";
 import { morganMiddleware } from "@/config/morgan";
@@ -13,19 +15,21 @@ import {
 import { WebSocketService } from "@/services/websocket.service";
 import { logger } from "@/config/logger";
 import helmet from "helmet";
-// Import worker to initialize it
-import "@/queue/worker";
 
 const app = express();
 const httpServer = createServer(app);
 
-// Initialize WebSocket service
 const wsService = WebSocketService.getInstance();
 wsService.initialize(httpServer);
 
-app.use(helmet());
+app.use(
+  helmet({
+    contentSecurityPolicy: false,
+  }),
+);
 app.use(morganMiddleware);
 app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
 
 app.use("/api", routes);
 
