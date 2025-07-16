@@ -1,5 +1,6 @@
 import { QUEUE } from "@/common/const";
 import enviroment from "@/config/enviroment";
+import { logger } from "@/config/logger";
 import { Queue } from "bullmq";
 import IORedis from "ioredis";
 
@@ -14,11 +15,19 @@ export const redisConnection = new IORedis({
 });
 
 redisConnection.on("ready", () => {
-  console.log("Redis connection ready");
+  logger.info("Redis connection established successfully");
 });
 
 redisConnection.on("error", (err) => {
-  console.error("Redis connection error:", err);
+  logger.error(`Redis connection error: ${err.message}`);
+});
+
+redisConnection.on("close", () => {
+  logger.warn("Redis connection closed");
+});
+
+redisConnection.on("reconnecting", () => {
+  logger.info("Redis reconnecting...");
 });
 
 /**

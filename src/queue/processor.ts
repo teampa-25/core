@@ -23,19 +23,35 @@ export class InferenceJobProcessor {
    * Process an inference job.
    * @param job The job to process.
    */
-  async processInference(job: Job): Promise<void> {
+  async processInference(job: Job): Promise<any> {
     const { inferenceId, parameters, goalVideoBuffer, currentVideoBuffer } =
       job.data;
 
     try {
-      logger.debug("Processing inference job aaaaaah diocan");
+      logger.info(`Processing inference job ${inferenceId}`);
       logger.debug("Inference Job Data", {
         inferenceId,
         parameters,
       });
 
-      await new Promise((resolve) => setTimeout(resolve, 3000)); // Simula inferenza
-      // // do inference
+      // Simulate processing
+      logger.info(`Job ${inferenceId}: Starting simulation`);
+      await new Promise((resolve) => setTimeout(resolve, 3000));
+      logger.info(`Job ${inferenceId}: Simulation completed`);
+
+      // Return a mock result for testing
+      const mockResult = {
+        requestId: inferenceId,
+        velocity: [
+          [0.1, 0.2],
+          [0.3, 0.4],
+        ],
+        carbon_footprint: 25,
+        download_url: "/mock/download/url",
+        message: "Simulation completed successfully",
+      };
+
+      // In production, uncomment this code:
       // const resultJson = await this.sendToFastAPI(
       //   inferenceId,
       //   parameters,
@@ -43,9 +59,11 @@ export class InferenceJobProcessor {
       //   currentVideoBuffer,
       // );
       // const resultZip = await this.downloadResultZip(resultJson.download_url);
-      // // Save results into DB
       // await this.saveResultsToDatabase(inferenceId, resultJson, resultZip);
+
+      return mockResult;
     } catch (error) {
+      logger.error(`Job ${inferenceId} failed with error: ${error}`);
       throw error;
     }
   }
