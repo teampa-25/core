@@ -19,9 +19,8 @@ router.post(
   userController.recharge,
 );
 
-// DEBUG
 router.use("/queues", (req, res, next) => {
   logger.info(`Accesso alla Bull Board: ${req.url}`);
-  return serverAdapter.getRouter()(req, res, next);
+  serverAdapter.getRouter()(req, res, next);
 });
 export default router;

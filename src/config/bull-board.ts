@@ -7,11 +7,9 @@ import { logger } from "@/config/logger";
 /**
  * Bull board server adapter to be used in the express app
  */
-
 const serverAdapter = new ExpressAdapter();
-serverAdapter.setBasePath("/api/admin/queues");
-logger.info("Bull Board adapter configurato con base path: /api/admin/queues");
-
+serverAdapter.setBasePath("/queues");
+logger.info("Bull Board adapter configurato con base path: /queues");
 /**
  * Bull board configuration
  */

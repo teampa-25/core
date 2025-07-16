@@ -12,11 +12,6 @@ const wsService = WebSocketService.getInstance();
 export const inferenceWorker = new Worker(
   "inferenceJobs",
   async (job: Job) => {
-    logger.debug("Starting inference job", {
-      jobId: job.id,
-      userId: job.data.userId,
-      payload: job.data,
-    });
     const processor = new InferenceJobProcessor();
     return await processor.processInference(job);
   },
