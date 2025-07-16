@@ -48,13 +48,13 @@ export const errorHandler = (
   err: ErrorObj,
   req: Request,
   res: Response,
-  next: NextFunction,
 ): void => {
   if (err && typeof err.getErrorObj === "function") {
     const { status, msg } = (err as ErrorObj).getErrorObj();
     res.status(status).json({
       success: false,
       error: msg,
+      method: req.method,
       path: req.originalUrl,
       timestamp: new Date().toISOString(),
     });

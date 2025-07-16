@@ -62,7 +62,7 @@ export class InferenceJobService {
         : await this.getVideosByRange(datasetId, range);
 
     if (!videos?.length) {
-      throw getError(ErrorEnum.BAD_REQUEST_ERROR).getErrorObj();
+      throw getError(ErrorEnum.BAD_REQUEST_ERROR);
     }
 
     // Sort videos by creation date

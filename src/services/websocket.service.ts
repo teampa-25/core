@@ -46,7 +46,6 @@ export class WebSocketService {
     });
 
     this.setupEventHandlers();
-    logger.info("WebSocket service initialized");
   }
 
   /**
