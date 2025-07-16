@@ -1,0 +1,3 @@
+[submodule "cns"]
+	path = cns
+	url = https://github.com/teampa-25/cns.git
