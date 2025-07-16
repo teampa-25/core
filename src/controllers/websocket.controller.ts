@@ -45,15 +45,7 @@ export class WebSocketController {
     async (req: Request, res: Response): Promise<void> => {
       const { message } = req.body;
 
-      if (!req.user) {
-        res.status(StatusCodes.UNAUTHORIZED).json({
-          success: false,
-          message: "User not authenticated",
-        });
-        return;
-      }
-
-      this.wsService.notifyUser(req.user.id, {
+      this.wsService.notifyUser(req.user!.id, {
         type: "TEST_NOTIFICATION",
         data: {
           inferenceId: "test-id",

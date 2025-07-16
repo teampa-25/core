@@ -1,6 +1,6 @@
 import { InferenceJobService } from "@/services/inference.service";
 import { catchAsync } from "@/common/utils/catchAsync";
-import { NextFunction, Request, Response } from "express";
+import { Request, Response } from "express";
 import { StatusCodes } from "http-status-codes";
 
 /**

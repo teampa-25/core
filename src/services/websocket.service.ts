@@ -19,7 +19,7 @@ interface AuthenticatedWebSocket extends WebSocket {
  */
 export class WebSocketService {
   private static instance: WebSocketService;
-  private wss!: WebSocketServer; // TODO I have doubt bout that '!'
+  private wss!: WebSocketServer;
   private userConnections: Map<string, AuthenticatedWebSocket[]> = new Map();
 
   private constructor() {}
@@ -60,6 +60,15 @@ export class WebSocketService {
         logger.info(`New WebSocket connection: ${connectionId}`);
 
         ws.isAuthenticated = false;
+        ws.on("message", (data: Buffer) => {
+          try {
+            const message = JSON.parse(data.toString());
+            this.handleMessage(ws, message, connectionId);
+          } catch (error) {
+            logger.error(`Error parsing message from ${connectionId}:`, error);
+            this.sendError(ws, "Invalid JSON message format");
+          }
+        });
 
         // Handle disconnection
         ws.on("close", () => {
@@ -81,6 +90,39 @@ export class WebSocketService {
         });
       },
     );
+  }
+
+  /**
+   * Handle incoming WebSocket messages
+   * @param ws - WebSocket connection
+   * @param message - Parsed message object
+   * @param connectionId - Connection identifier
+   */
+  private handleMessage(
+    ws: AuthenticatedWebSocket,
+    message: any,
+    connectionId: string,
+  ): void {
+    switch (message.type) {
+      case "authenticate":
+        this.handleAuthentication(ws, message.token, connectionId);
+        break;
+      case "ping":
+        this.sendMessage(ws, { type: "pong", data: {}, timestamp: new Date() });
+        break;
+      default:
+        if (!ws.isAuthenticated) {
+          this.sendError(
+            ws,
+            getError(ErrorEnum.UNAUTHORIZED_ERROR).getErrorObj().msg,
+          );
+          return;
+        }
+        logger.warn(
+          `Unknown message type: ${message.type} from ${connectionId}`,
+        );
+        break;
+    }
   }
 
   /**

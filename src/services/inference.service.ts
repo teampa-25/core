@@ -1,4 +1,4 @@
-import { Video } from "@/models";
+import { User, Video } from "@/models";
 import { InferenceJob } from "@/models";
 import { inferenceQueue } from "@/queue/queue";
 import { DatasetRepository } from "@/repositories/dataset.repository";
@@ -11,6 +11,8 @@ import { ErrorEnum, InferenceJobStatus } from "@/common/enums";
 import { InferCreationAttributes } from "sequelize";
 import { InferenceParameters } from "@/common/types";
 import { FileSystemUtils } from "@/common/utils/file-system";
+import { INFERENCE } from "@/common/const";
+import { WebSocketService } from "./websocket.service";
 
 /**
  * Class responsible for handling inference jobs.
@@ -22,6 +24,7 @@ export class InferenceJobService {
   private userRepository: UserRepository;
   private videoRepository: VideoRepository;
   private resultRepository: ResultRepository;
+  private wsService: WebSocketService = WebSocketService.getInstance();
 
   constructor() {
     this.inferenceRepository = new InferenceJobRepository();
@@ -45,41 +48,72 @@ export class InferenceJobService {
     parameters: InferenceParameters,
     range: string,
   ): Promise<string[]> => {
+    // Validate dataset exists for user
     const dataset = await this.datasetRepository.findByIdAndUserId(
       datasetId,
       userId,
     );
     if (!dataset) throw getError(ErrorEnum.NOT_FOUND_ERROR);
 
+    // Get videos based on range
     const videos =
       range === "all"
         ? await this.videoRepository.findByDatasetId(datasetId)
         : await this.getVideosByRange(datasetId, range);
 
-    if (!videos || videos.length === 0) {
+    if (!videos?.length) {
       throw getError(ErrorEnum.BAD_REQUEST_ERROR).getErrorObj();
     }
 
+    // Sort videos by creation date
     const sorted = videos.sort(
-      (a: Video, b: Video) =>
+      (a, b) =>
         new Date(a.created_at).getTime() - new Date(b.created_at).getTime(),
     );
 
-    //TODO: check user credits to perform inference by counting video frames.
-
-    //TODO: new code to handle path to video pipeline
-
-    const createdJobIds: string[] = [];
-
-    // if only one video selected then targer == current
-    if (sorted.length === 1) {
-      const video = sorted[0];
-
-      // Check if video file exists
+    // Validate all video files exist
+    for (const video of sorted) {
       if (!video.file || !FileSystemUtils.fileExists(video.file)) {
         throw getError(ErrorEnum.NOT_FOUND_ERROR);
       }
+    }
 
+    // Calculate inference cost
+    let inferenceCost = 0;
+    if (sorted.length === 1) {
+      inferenceCost = sorted[0].frame_count * INFERENCE.COST_OF_INFERENCE;
+    } else {
+      for (let i = 0; i < sorted.length - 1; i++) {
+        inferenceCost += sorted[i].frame_count + sorted[i + 1].frame_count;
+      }
+    }
+
+    // Check and deduct credits
+    const hasCredits = await this.userRepository.hasEnoughCredits(
+      userId,
+      inferenceCost,
+    );
+    if (!hasCredits) {
+      const err = getError(ErrorEnum.UNAUTHORIZED_ERROR).getErrorObj();
+      this.wsService.notifyInferenceStatusUpdate(
+        userId,
+        datasetId,
+        InferenceJobStatus.ABORTED,
+        err.msg,
+      );
+      throw getError(ErrorEnum.UNAUTHORIZED_ERROR);
+    }
+
+    const user = await this.userRepository.deductCredits(userId, inferenceCost);
+    if (!user) {
+      throw getError(ErrorEnum.GENERIC_ERROR);
+    }
+
+    const createdJobIds: string[] = [];
+
+    // Process single video case
+    if (sorted.length === 1) {
+      const video = sorted[0];
       const jobData = {
         dataset_id: datasetId,
         user_id: userId,
@@ -92,11 +126,9 @@ export class InferenceJobService {
         await this.inferenceRepository.createInferenceJob(jobData);
       createdJobIds.push(inferenceId);
 
-      // Read video file from filesystem
       const videoBuffer = await FileSystemUtils.readVideoFile(video.file);
-
       await inferenceQueue.add("run", {
-        inferenceId: inferenceId,
+        inferenceId,
         goalVideoBuffer: videoBuffer,
         currentVideoBuffer: videoBuffer,
         params: parameters,
@@ -105,18 +137,10 @@ export class InferenceJobService {
       return createdJobIds;
     }
 
-    // Otherwise creates multiple jobs with coupled videos
+    // Process multiple videos
     for (let i = 0; i < sorted.length - 1; i++) {
       const target = sorted[i];
       const current = sorted[i + 1];
-
-      // Check if video files exist
-      if (!target.file || !FileSystemUtils.fileExists(target.file)) {
-        throw getError(ErrorEnum.NOT_FOUND_ERROR);
-      }
-      if (!current.file || !FileSystemUtils.fileExists(current.file)) {
-        throw getError(ErrorEnum.NOT_FOUND_ERROR);
-      }
 
       const jobData = {
         dataset_id: datasetId,
@@ -130,16 +154,13 @@ export class InferenceJobService {
         await this.inferenceRepository.createInferenceJob(jobData);
       createdJobIds.push(inferenceId);
 
-      // Read video files from filesystem
-      const targetVideoBuffer = await FileSystemUtils.readVideoFile(
-        target.file,
-      );
-      const currentVideoBuffer = await FileSystemUtils.readVideoFile(
-        current.file,
-      );
+      const [targetVideoBuffer, currentVideoBuffer] = await Promise.all([
+        FileSystemUtils.readVideoFile(target.file),
+        FileSystemUtils.readVideoFile(current.file),
+      ]);
 
       await inferenceQueue.add("run", {
-        inferenceId: inferenceId,
+        inferenceId,
         goalVideoBuffer: targetVideoBuffer,
         currentVideoBuffer: currentVideoBuffer,
         params: parameters,

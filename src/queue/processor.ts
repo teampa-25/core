@@ -1,5 +1,4 @@
 import { Job } from "bullmq";
-import { InferenceJobService } from "../services/inference.service";
 import { CNSResponse, InferenceParameters } from "@/common/types";
 import { ResultRepository } from "@/repositories/result.repository";
 import axios from "axios";
@@ -7,18 +6,15 @@ import FormData from "form-data";
 import enviroment from "@/config/enviroment";
 import { ErrorEnum, InferenceJobStatus } from "@/common/enums";
 import { getError } from "@/common/utils/api-error";
-import { logger } from "@/config/logger";
 
 /**
  * Class responsible for processing inference jobs.
  * It handles the lifecycle of an inference job, including sending requests to the FastAPI server.
  */
 export class InferenceJobProcessor {
-  private inferenceJobService: InferenceJobService;
   private resultRepository: ResultRepository;
 
   constructor() {
-    this.inferenceJobService = new InferenceJobService();
     this.resultRepository = new ResultRepository();
   }
 
@@ -31,42 +27,17 @@ export class InferenceJobProcessor {
       job.data;
 
     try {
-      // Update status to RUNNING and notify via WebSocket
-      await this.inferenceJobService.updateInferenceStatus(
-        inferenceId,
-        InferenceJobStatus.RUNNING,
-      );
-
-      // do inference
-      const resultJson = await this.sendToFastAPI(
-        inferenceId,
-        parameters,
-        goalVideoBuffer,
-        currentVideoBuffer,
-      );
-      const resultZip = await this.downloadResultZip(resultJson.download_url);
-
-      // Save results into DB
-      await this.saveResultsToDatabase(inferenceId, resultJson, resultZip);
-
-      // Update status to COMPLETED and notify via WebSocket
-      await this.inferenceJobService.updateInferenceStatus(
-        inferenceId,
-        InferenceJobStatus.COMPLETED,
-        resultJson,
-        undefined,
-      );
+      // // do inference
+      // const resultJson = await this.sendToFastAPI(
+      //   inferenceId,
+      //   parameters,
+      //   goalVideoBuffer,
+      //   currentVideoBuffer,
+      // );
+      // const resultZip = await this.downloadResultZip(resultJson.download_url);
+      // // Save results into DB
+      // await this.saveResultsToDatabase(inferenceId, resultJson, resultZip);
     } catch (error) {
-      console.error(`Errore durante inferenza ${inferenceId}:`, error);
-
-      // Update status to FAILED and notify via WebSocket
-      await this.inferenceJobService.updateInferenceStatus(
-        inferenceId,
-        InferenceJobStatus.FAILED,
-        undefined,
-        error instanceof Error ? error.message : "Unknown error",
-      );
-
       throw error;
     }
   }
