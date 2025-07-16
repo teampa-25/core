@@ -4,7 +4,7 @@ import { ResultRepository } from "@/repositories/result.repository";
 import axios from "axios";
 import FormData from "form-data";
 import enviroment from "@/config/enviroment";
-import { ErrorEnum, InferenceJobStatus } from "@/common/enums";
+import { ErrorEnum } from "@/common/enums";
 import { getError } from "@/common/utils/api-error";
 import { logger } from "@/config/logger";
 

@@ -1,5 +1,5 @@
 import { Job, Worker } from "bullmq";
-import { redisConnection } from "./queue";
+import { redisConnection } from "@/config/redis";
 import { InferenceJobProcessor } from "./processor";
 import { CNSResponse } from "@/common/types";
 import { logger } from "@/config/logger";
@@ -22,52 +22,52 @@ export const inferenceWorker = new Worker(
   },
 );
 
-inferenceWorker.on("active", (job: Job) => {
-  logger.info("Job RUNNING", {
-    jobId: job.id,
-    userId: job.data.userId,
-    payload: job.data,
-  });
+// inferenceWorker.on("active", (job: Job) => {
+//   logger.info("Job RUNNING", {
+//     jobId: job.id,
+//     userId: job.data.userId,
+//     payload: job.data,
+//   });
 
-  wsService.notifyInferenceStatusUpdate(
-    job.data.userId,
-    job.id!,
-    InferenceJobStatus.RUNNING,
-  );
-});
+//   wsService.notifyInferenceStatusUpdate(
+//     job.data.userId,
+//     job.id!,
+//     InferenceJobStatus.RUNNING,
+//   );
+// });
 
-inferenceWorker.on("completed", (job: Job, result: CNSResponse) => {
-  logger.info("Job COMPLETED", {
-    jobId: job.id,
-    userId: job.data.userId,
-  });
+// inferenceWorker.on("completed", (job: Job, result: CNSResponse) => {
+//   logger.info("Job COMPLETED", {
+//     jobId: job.id,
+//     userId: job.data.userId,
+//   });
 
-  wsService.notifyInferenceStatusUpdate(
-    job.data.userId,
-    job.id!,
-    InferenceJobStatus.COMPLETED,
-    result,
-  );
-});
+//   wsService.notifyInferenceStatusUpdate(
+//     job.data.userId,
+//     job.id!,
+//     InferenceJobStatus.COMPLETED,
+//     result,
+//   );
+// });
 
-inferenceWorker.on("failed", (job, err) => {
-  if (!job) {
-    logger.error("Job FAILED but job object is undefined", {
-      error: err.message,
-    });
-    return;
-  }
-  logger.error("Job FAILED", {
-    jobId: job.data.id,
-    userId: job.data.userId,
-    error: err.message,
-    stack: err.stack,
-  });
+// inferenceWorker.on("failed", (job, err) => {
+//   if (!job) {
+//     logger.error("Job FAILED but job object is undefined", {
+//       error: err.message,
+//     });
+//     return;
+//   }
+//   logger.error("Job FAILED", {
+//     jobId: job.data.id,
+//     userId: job.data.userId,
+//     error: err.message,
+//     stack: err.stack,
+//   });
 
-  wsService.notifyInferenceStatusUpdate(
-    job.data.userId,
-    job.id!,
-    InferenceJobStatus.FAILED,
-    err.message,
-  );
-});
+//   wsService.notifyInferenceStatusUpdate(
+//     job.data.userId,
+//     job.id!,
+//     InferenceJobStatus.FAILED,
+//     err.message,
+//   );
+// });
