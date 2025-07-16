@@ -1,8 +1,6 @@
 import { WebSocketServer, WebSocket } from "ws";
 import { Server as HttpServer } from "http";
-import jwt from "jsonwebtoken";
-import { readFileSync } from "fs";
-import { UserPayload, WebSocketNotification } from "@/common/types";
+import { WebSocketNotification } from "@/common/types";
 import { ErrorEnum, InferenceJobStatus } from "@/common/enums";
 import { getError } from "@/common/utils/api-error";
 import { logger } from "@/config/logger";
