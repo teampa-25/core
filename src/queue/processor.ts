@@ -6,6 +6,7 @@ import FormData from "form-data";
 import enviroment from "@/config/enviroment";
 import { ErrorEnum, InferenceJobStatus } from "@/common/enums";
 import { getError } from "@/common/utils/api-error";
+import { logger } from "@/config/logger";
 
 /**
  * Class responsible for processing inference jobs.
@@ -27,6 +28,13 @@ export class InferenceJobProcessor {
       job.data;
 
     try {
+      logger.debug("Processing inference job aaaaaah diocan");
+      logger.debug("Inference Job Data", {
+        inferenceId,
+        parameters,
+      });
+
+      await new Promise((resolve) => setTimeout(resolve, 3000)); // Simula inferenza
       // // do inference
       // const resultJson = await this.sendToFastAPI(
       //   inferenceId,
