@@ -6,8 +6,9 @@ import { logger } from "@/config/logger";
 import { QUEUE } from "@/common/const";
 import { WebSocketService } from "@/services/websocket.service";
 import { InferenceJobStatus } from "@/common/enums";
+import "@/queue/queue.events"; // Import queue events to initialize listeners
 
-const wsService = WebSocketService.getInstance();
+// const wsService = WebSocketService.getInstance();
 
 export const inferenceWorker = new Worker(
   "inferenceJobs",
