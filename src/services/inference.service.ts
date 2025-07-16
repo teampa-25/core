@@ -13,6 +13,7 @@ import { ErrorEnum, InferenceJobStatus } from "@/common/enums";
 import { INFERENCE } from "@/common/const";
 import { InferCreationAttributes } from "sequelize";
 import { CNSResponse, InferenceParameters } from "@/common/types";
+import { FileSystemUtils } from "@/common/utils/file-system";
 
 /**
  * Class responsible for handling inference jobs.
@@ -69,13 +70,17 @@ export class InferenceJobService {
         new Date(a.created_at).getTime() - new Date(b.created_at).getTime(),
     );
 
-    //TODO: new code to handle path to video pipeline
-
     const createdJobIds: string[] = [];
 
     // if only one video selected then targer == current
     if (sorted.length === 1) {
       const video = sorted[0];
+
+      // Check if video file exists
+      if (!video.file || !FileSystemUtils.fileExists(video.file)) {
+        throw getError(ErrorEnum.NOT_FOUND_ERROR);
+      }
+
       const jobData = {
         dataset_id: datasetId,
         user_id: userId,
@@ -95,10 +100,13 @@ export class InferenceJobService {
         InferenceJobStatus.PENDING,
       );
 
+      // Read video file from filesystem
+      const videoBuffer = await FileSystemUtils.readVideoFile(video.file);
+
       await inferenceQueue.add("run", {
         inferenceId: inferenceId,
-        goalVideoBuffer: video.file,
-        currentVideoBuffer: video.file,
+        goalVideoBuffer: videoBuffer,
+        currentVideoBuffer: videoBuffer,
         params: parameters,
       });
 
@@ -109,6 +117,14 @@ export class InferenceJobService {
     for (let i = 0; i < sorted.length - 1; i++) {
       const target = sorted[i];
       const current = sorted[i + 1];
+
+      // Check if video files exist
+      if (!target.file || !FileSystemUtils.fileExists(target.file)) {
+        throw getError(ErrorEnum.NOT_FOUND_ERROR);
+      }
+      if (!current.file || !FileSystemUtils.fileExists(current.file)) {
+        throw getError(ErrorEnum.NOT_FOUND_ERROR);
+      }
 
       const jobData = {
         dataset_id: datasetId,
@@ -129,10 +145,18 @@ export class InferenceJobService {
         InferenceJobStatus.PENDING,
       );
 
+      // Read video files from filesystem
+      const targetVideoBuffer = await FileSystemUtils.readVideoFile(
+        target.file,
+      );
+      const currentVideoBuffer = await FileSystemUtils.readVideoFile(
+        current.file,
+      );
+
       await inferenceQueue.add("run", {
         inferenceId: inferenceId,
-        goalVideoBuffer: target.file,
-        currentVideoBuffer: current.file,
+        goalVideoBuffer: targetVideoBuffer,
+        currentVideoBuffer: currentVideoBuffer,
         params: parameters,
       });
     }

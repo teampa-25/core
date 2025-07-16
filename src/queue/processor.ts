@@ -146,17 +146,16 @@ export class InferenceJobProcessor {
           existingResult.id,
           resultJson,
         );
-        await this.resultRepository.updateImageZip(
-          existingResult.id,
-          resultZip,
-        );
+        await this.resultRepository.saveImageZip(existingResult.id, resultZip);
       } else {
         // Create new result
-        await this.resultRepository.createResult({
+        const resultId = await this.resultRepository.createResult({
           inference_job_id: inferenceId,
           json_res: resultJson,
-          image_zip: resultZip,
         } as any);
+
+        // Save ZIP file to filesystem
+        await this.resultRepository.saveImageZip(resultId, resultZip);
       }
     } catch (error) {
       throw getError(ErrorEnum.GENERIC_ERROR);

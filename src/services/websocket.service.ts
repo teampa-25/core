@@ -234,7 +234,7 @@ export class WebSocketService {
    * @returns Unique connection identifier
    */
   private generateConnectionId(): string {
-    return `conn_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+    return `conn_${Date.now()}_${Math.random().toString(36).substring(2, 11)}`;
   }
 
   /**

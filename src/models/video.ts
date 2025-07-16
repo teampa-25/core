@@ -40,6 +40,8 @@ export class Video extends Model<
             model: "Dataset",
             key: "id",
           },
+          onUpdate: "CASCADE",
+          onDelete: "CASCADE",
         },
         file: {
           type: DataTypes.STRING,
