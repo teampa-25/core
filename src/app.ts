@@ -13,6 +13,8 @@ import {
 import { WebSocketService } from "@/services/websocket.service";
 import { logger } from "@/config/logger";
 import helmet from "helmet";
+// Import worker to initialize it
+import "@/queue/worker";
 
 const app = express();
 const httpServer = createServer(app);
@@ -40,4 +42,5 @@ httpServer.listen(enviroment.apiPort, () => {
     `Health Check: http://localhost:${enviroment.apiPort}/api/health`,
   );
   logger.info("WebSocket server initialized");
+  logger.info("BullMQ worker initialized and listening for jobs");
 });

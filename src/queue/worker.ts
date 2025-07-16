@@ -23,6 +23,7 @@ export const inferenceWorker = new Worker(
   {
     connection: redisConnection,
     concurrency: QUEUE.MAX_CONCURRENT_JOBS,
+    autorun: true,
   },
 );
 
@@ -36,7 +37,7 @@ inferenceWorker.on("active", (job: Job) => {
   wsService.notifyInferenceStatusUpdate(
     job.data.userId,
     job.id!,
-    InferenceJobStatus.PENDING,
+    InferenceJobStatus.RUNNING,
   );
 });
 
