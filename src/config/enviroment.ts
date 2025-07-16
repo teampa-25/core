@@ -25,6 +25,7 @@ const enviroment: Enviroment = {
   jwtAlgorithm: process.env.JWT_ALGORITHM || "RS256",
   saltRounds: Number(process.env.JWT_SALT_ROUNDS) || 10,
   maxConcurrentJobs: Number(process.env.MAX_CONCURRENT_JOBS) || 2,
+  resultsBasePath: process.env.RESULTS_BASE_PATH || "./uploads/results",
 };
 
 export default enviroment;

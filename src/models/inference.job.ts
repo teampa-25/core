@@ -45,6 +45,8 @@ export class InferenceJob extends Model<
             model: "Dataset",
             key: "id",
           },
+          onUpdate: "CASCADE",
+          onDelete: "CASCADE",
         },
         user_id: {
           type: DataTypes.UUID,
@@ -53,6 +55,8 @@ export class InferenceJob extends Model<
             model: "User",
             key: "id",
           },
+          onUpdate: "CASCADE",
+          onDelete: "CASCADE",
         },
         goal_id: {
           type: DataTypes.UUID,
@@ -61,6 +65,8 @@ export class InferenceJob extends Model<
             model: "Video",
             key: "id",
           },
+          onUpdate: "CASCADE",
+          onDelete: "CASCADE",
         },
         current_id: {
           type: DataTypes.UUID,
@@ -69,6 +75,8 @@ export class InferenceJob extends Model<
             model: "Video",
             key: "id",
           },
+          onUpdate: "CASCADE",
+          onDelete: "CASCADE",
         },
         status: {
           type: DataTypes.ENUM(...Object.values(InferenceJobStatus)),

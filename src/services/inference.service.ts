@@ -10,6 +10,7 @@ import { getError } from "@/common/utils/api-error";
 import { ErrorEnum, InferenceJobStatus } from "@/common/enums";
 import { InferCreationAttributes } from "sequelize";
 import { InferenceParameters } from "@/common/types";
+import { FileSystemUtils } from "@/common/utils/file-system";
 
 /**
  * Class responsible for handling inference jobs.
@@ -74,6 +75,11 @@ export class InferenceJobService {
     if (sorted.length === 1) {
       const video = sorted[0];
 
+      // Check if video file exists
+      if (!video.file || !FileSystemUtils.fileExists(video.file)) {
+        throw getError(ErrorEnum.NOT_FOUND_ERROR);
+      }
+
       const jobData = {
         dataset_id: datasetId,
         user_id: userId,
@@ -86,11 +92,13 @@ export class InferenceJobService {
         await this.inferenceRepository.createInferenceJob(jobData);
       createdJobIds.push(inferenceId);
 
+      // Read video file from filesystem
+      const videoBuffer = await FileSystemUtils.readVideoFile(video.file);
+
       await inferenceQueue.add("run", {
         inferenceId: inferenceId,
-        userId: userId,
-        goalVideoBuffer: video.file,
-        currentVideoBuffer: video.file,
+        goalVideoBuffer: videoBuffer,
+        currentVideoBuffer: videoBuffer,
         params: parameters,
       });
 
@@ -101,6 +109,14 @@ export class InferenceJobService {
     for (let i = 0; i < sorted.length - 1; i++) {
       const target = sorted[i];
       const current = sorted[i + 1];
+
+      // Check if video files exist
+      if (!target.file || !FileSystemUtils.fileExists(target.file)) {
+        throw getError(ErrorEnum.NOT_FOUND_ERROR);
+      }
+      if (!current.file || !FileSystemUtils.fileExists(current.file)) {
+        throw getError(ErrorEnum.NOT_FOUND_ERROR);
+      }
 
       const jobData = {
         dataset_id: datasetId,
@@ -114,11 +130,18 @@ export class InferenceJobService {
         await this.inferenceRepository.createInferenceJob(jobData);
       createdJobIds.push(inferenceId);
 
+      // Read video files from filesystem
+      const targetVideoBuffer = await FileSystemUtils.readVideoFile(
+        target.file,
+      );
+      const currentVideoBuffer = await FileSystemUtils.readVideoFile(
+        current.file,
+      );
+
       await inferenceQueue.add("run", {
         inferenceId: inferenceId,
-        userId: userId,
-        goalVideoBuffer: target.file,
-        currentVideoBuffer: current.file,
+        goalVideoBuffer: targetVideoBuffer,
+        currentVideoBuffer: currentVideoBuffer,
         params: parameters,
       });
     }

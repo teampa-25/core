@@ -6,7 +6,6 @@ import { UserPayload, WebSocketNotification } from "@/common/types";
 import { ErrorEnum, InferenceJobStatus } from "@/common/enums";
 import { getError } from "@/common/utils/api-error";
 import { logger } from "@/config/logger";
-import enviroment from "@/config/enviroment";
 import { IncomingMessage } from "http";
 import { WEBSOCKET } from "@/common/const";
 import { JwtUtils } from "@/common/utils/jwt";

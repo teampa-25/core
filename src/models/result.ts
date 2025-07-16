@@ -20,7 +20,7 @@ export class Result extends Model<
   declare id: string;
   declare inference_job_id: ForeignKey<string>;
   declare json_res: object;
-  declare image_zip: Buffer;
+  declare image_zip: string;
   declare created_at: Date;
   declare updated_at: Date;
 
@@ -40,14 +40,16 @@ export class Result extends Model<
             model: "InferenceJob",
             key: "id",
           },
+          onUpdate: "CASCADE",
+          onDelete: "CASCADE",
         },
         json_res: {
           type: DataTypes.JSON,
           allowNull: false,
         },
         image_zip: {
-          type: DataTypes.BLOB("long"),
-          allowNull: false,
+          type: DataTypes.STRING,
+          allowNull: true,
         },
         created_at: {
           type: DataTypes.DATE,

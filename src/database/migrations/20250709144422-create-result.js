@@ -9,7 +9,7 @@ module.exports = {
         defaultValue: Sequelize.UUIDV4,
         primaryKey: true,
       },
-      inferenceJob_id: {
+      inference_job_id: {
         type: Sequelize.UUID,
         allowNull: false,
         unique: true,
@@ -25,8 +25,8 @@ module.exports = {
         allowNull: false,
       },
       image_zip: {
-        type: Sequelize.BLOB("long"),
-        allowNull: false,
+        type: Sequelize.STRING,
+        allowNull: true,
       },
       created_at: {
         type: Sequelize.DATE,

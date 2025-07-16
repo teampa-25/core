@@ -88,6 +88,7 @@ interface Enviroment {
   jwtAlgorithm: string;
   saltRounds: number;
   maxConcurrentJobs: number;
+  resultsBasePath: string;
 }
 
 export {

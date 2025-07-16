@@ -1,6 +1,8 @@
 import { Result } from "@/models";
 import { ResultDAO } from "@/dao/result.dao";
 import { InferCreationAttributes } from "sequelize";
+import { FileSystemUtils } from "@/common/utils/file-system";
+import enviroment from "@/config/enviroment";
 
 /**
  * ResultRepository is responsible for managing result data.
@@ -60,7 +62,28 @@ export class ResultRepository {
    * @returns A Promise that resolves to true if deleted, false otherwise
    */
   async deleteResult(id: string): Promise<boolean> {
-    return await this.resultDAO.delete(id);
+    // Get the result first to check if it has an associated ZIP file
+    const result = await this.findById(id);
+
+    // Delete the result from database
+    const deleted = await this.resultDAO.delete(id);
+
+    // If result was deleted and had a ZIP file, delete it from filesystem
+    if (
+      deleted &&
+      result &&
+      result.image_zip &&
+      FileSystemUtils.fileExists(result.image_zip)
+    ) {
+      try {
+        await FileSystemUtils.deleteFile(result.image_zip);
+      } catch (error) {
+        console.error(`Error deleting ZIP file ${result.image_zip}:`, error);
+        // Don't throw error here, as the database deletion was successful
+      }
+    }
+
+    return deleted;
   }
 
   /**
@@ -89,11 +112,34 @@ export class ResultRepository {
   /**
    * Updates the image ZIP data
    * @param id - The ID of the result
-   * @param imageZip - The image ZIP buffer
+   * @param imageZipPath - The path to the image ZIP file
    * @returns A Promise that resolves to the updated result or null if not found
    */
-  async updateImageZip(id: string, imageZip: Buffer): Promise<Result | null> {
-    return await this.resultDAO.update(id, { image_zip: imageZip });
+  async updateImageZip(
+    id: string,
+    imageZipPath: string,
+  ): Promise<Result | null> {
+    // Get the current result to check if it has an existing ZIP file
+    const currentResult = await this.findById(id);
+
+    // If there's an existing ZIP file, delete it
+    if (
+      currentResult &&
+      currentResult.image_zip &&
+      FileSystemUtils.fileExists(currentResult.image_zip)
+    ) {
+      try {
+        await FileSystemUtils.deleteFile(currentResult.image_zip);
+      } catch (error) {
+        console.error(
+          `Error deleting old ZIP file ${currentResult.image_zip}:`,
+          error,
+        );
+        // Continue with update even if deletion fails
+      }
+    }
+
+    return await this.resultDAO.update(id, { image_zip: imageZipPath });
   }
 
   /**
@@ -133,6 +179,36 @@ export class ResultRepository {
    */
   async getImageZip(jobId: string): Promise<Buffer | null> {
     const result = await this.resultDAO.getByInferenceJobId(jobId);
-    return result ? result.image_zip : null;
+    if (!result || !result.image_zip) return null;
+
+    // Check if file exists
+    if (!FileSystemUtils.fileExists(result.image_zip)) {
+      return null;
+    }
+
+    // Read and return file as buffer
+    return await FileSystemUtils.readZipFile(result.image_zip);
+  }
+
+  /**
+   * Saves the image ZIP data to the filesystem and updates the result
+   * @param id - The ID of the result
+   * @param imageZip - The image ZIP buffer
+   * @param basePath - The base path where to save the file (optional)
+   * @returns A Promise that resolves to the updated result or null if not found
+   */
+  async saveImageZip(
+    id: string,
+    imageZip: Buffer,
+    basePath: string = enviroment.resultsBasePath,
+  ): Promise<Result | null> {
+    const zipFileName = `result_${id}_${Date.now()}.zip`;
+    const zipFilePath = `${basePath}/${zipFileName}`;
+
+    // Save ZIP file to filesystem
+    await FileSystemUtils.writeZipFile(zipFilePath, imageZip);
+
+    // Update result with file path
+    return await this.updateImageZip(id, zipFilePath);
   }
 }

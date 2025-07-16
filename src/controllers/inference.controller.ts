@@ -15,6 +15,7 @@ export class InferenceJobController {
   }
 
   /**
+   * Creates a new inference job for a user.
    * @param req Request containing userId, datasetId and parameters
    * @param res Response object to send back jobId
    * @returns Promise resolving to created job ID
@@ -39,7 +40,7 @@ export class InferenceJobController {
    */
   getInferenceStatus = catchAsync(async (req: Request, res: Response) => {
     const { jobId } = req.params;
-    const status = this.inferenceJobService.getInferenceStatus(jobId);
+    const status = await this.inferenceJobService.getInferenceStatus(jobId);
     res.status(StatusCodes.OK).json({ status: status });
   });
 
@@ -51,7 +52,7 @@ export class InferenceJobController {
    */
   getInferenceJSONResults = catchAsync(async (req: Request, res: Response) => {
     const { jobId } = req.params;
-    const json = this.inferenceJobService.getInferenceJSONResults(jobId);
+    const json = await this.inferenceJobService.getInferenceJSONResults(jobId);
     res.status(StatusCodes.OK).json({ results: json });
   });
 
@@ -63,7 +64,7 @@ export class InferenceJobController {
    */
   getInferenceZIPResults = catchAsync(async (req: Request, res: Response) => {
     const { jobId } = req.params;
-    const zip = this.inferenceJobService.getInferenceZIPResults(jobId);
+    const zip = await this.inferenceJobService.getInferenceZIPResults(jobId);
     res.status(StatusCodes.OK).json({ results: zip });
   });
 }
