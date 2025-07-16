@@ -3,6 +3,7 @@ import { createServer } from "http";
 import "tsconfig-paths/register"; // required for path aliases like @/*
 import "@/models"; // Initialize models and associations
 import "@/queue/worker"; // Import worker to initialize it
+
 import "@/config/bull-board"; // Import Bull Board configuration
 import routes from "@/routes/routes";
 import enviroment from "@/config/enviroment";
