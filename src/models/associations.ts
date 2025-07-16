@@ -25,12 +25,23 @@ export function setupAssociations() {
 
   // Video associations
   Video.belongsTo(Dataset, { foreignKey: "dataset_id", as: "dataset" });
-  Video.hasMany(InferenceJob, { foreignKey: "video_id", as: "inferenceJobs" });
+  Video.hasMany(InferenceJob, {
+    foreignKey: "goal_id",
+    as: "goalInferenceJobs",
+  });
+  Video.hasMany(InferenceJob, {
+    foreignKey: "current_id",
+    as: "currentInferenceJobs",
+  });
 
   // InferenceJob associations
   InferenceJob.belongsTo(Dataset, { foreignKey: "dataset_id", as: "dataset" });
   InferenceJob.belongsTo(User, { foreignKey: "user_id", as: "user" });
-  InferenceJob.belongsTo(Video, { foreignKey: "video_id", as: "video" });
+  InferenceJob.belongsTo(Video, { foreignKey: "goal_id", as: "goalVideo" });
+  InferenceJob.belongsTo(Video, {
+    foreignKey: "current_id",
+    as: "currentVideo",
+  });
   InferenceJob.hasOne(Result, { foreignKey: "inferenceJob_id", as: "result" });
 
   // Result associations

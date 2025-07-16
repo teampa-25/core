@@ -69,7 +69,6 @@ export const DatasetSchema = {
  */
 export const InferenceSchema = {
   create: Joi.object({
-    userId: Joi.string().uuid().required(),
     datasetId: Joi.string().uuid().required(),
     parameters: Joi.object({
       startFrame: Joi.number().integer().min(0).required(),
