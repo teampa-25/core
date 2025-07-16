@@ -3,6 +3,8 @@ import { UserDAO } from "@/dao/user.dao";
 import { getError } from "@/common/utils/api-error";
 import { ErrorEnum } from "@/common/enums";
 import { InferCreationAttributes } from "sequelize";
+import { log } from "console";
+import { logger } from "@/config/logger";
 
 /**
  * UserRepository is responsible for managing user data.
@@ -71,6 +73,9 @@ export class UserRepository {
     if (!user || user.credit === undefined) {
       return false;
     }
+    logger.debug(
+      `Checking credits for user ${userId}: ${user.credit} available, ${requiredCredits} required?`,
+    );
     return user.credit >= requiredCredits;
   }
 

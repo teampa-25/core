@@ -13,6 +13,7 @@ import { InferenceParameters } from "@/common/types";
 import { FileSystemUtils } from "@/common/utils/file-system";
 import { INFERENCE } from "@/common/const";
 import { WebSocketService } from "./websocket.service";
+import { logger } from "@/config/logger";
 
 /**
  * Class responsible for handling inference jobs.
@@ -48,6 +49,8 @@ export class InferenceJobService {
     parameters: InferenceParameters,
     range: string,
   ): Promise<string[]> => {
+    logger.debug("SOB: son of a bitch im here");
+
     // Validate dataset exists for user
     const dataset = await this.datasetRepository.findByIdAndUserId(
       datasetId,
@@ -60,6 +63,8 @@ export class InferenceJobService {
       range === "all"
         ? await this.videoRepository.findByDatasetId(datasetId)
         : await this.getVideosByRange(datasetId, range);
+
+    logger.debug("SOB: ahaha porcoooooo");
 
     if (!videos?.length) {
       throw getError(ErrorEnum.BAD_REQUEST_ERROR).getErrorObj();
@@ -78,15 +83,21 @@ export class InferenceJobService {
       }
     }
 
+    logger.debug("SOB: mannaggia al clero tutto");
+
     // Calculate inference cost
     let inferenceCost = 0;
     if (sorted.length === 1) {
       inferenceCost = sorted[0].frame_count * INFERENCE.COST_OF_INFERENCE;
     } else {
-      for (let i = 0; i < sorted.length - 1; i++) {
-        inferenceCost += sorted[i].frame_count + sorted[i + 1].frame_count;
+      for (let i = 0; i < sorted.length; i++) {
+        logger.debug("SOB: anubi il dio"); //TODO remove before mancini see this
+        inferenceCost += sorted[i].frame_count;
       }
+      inferenceCost *= INFERENCE.COST_OF_INFERENCE;
     }
+
+    inferenceCost = Math.ceil(inferenceCost);
 
     // Check and deduct credits
     const hasCredits = await this.userRepository.hasEnoughCredits(
