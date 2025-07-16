@@ -16,6 +16,7 @@ import { constants } from "fs";
 
 import { logger } from "@/config/logger";
 import decompress from "decompress";
+import { file } from "pdfkit";
 
 /**
  * Service for managing datasets, including creation, retrieval, updating, and deletion.
@@ -224,6 +225,9 @@ export class DatasetService {
     let cost = 0;
 
     if (type === "zip") {
+      // if (path.extname(filename) !== "zip") throw getError(ErrorEnum.BAD_REQUEST_ERROR);
+      // if (mime !== "application/zip") throw getError(ErrorEnum.BAD_REQUEST_ERROR);
+
       // const files = await unzipBuffer(content, name); // ................................................................
       const files = await decompress(content, {
         filter: (file) =>
@@ -276,6 +280,9 @@ export class DatasetService {
         };
       }
     } else if (type === "video") {
+      // if (path.extname(filename) !== "mp4") throw getError(ErrorEnum.BAD_REQUEST_ERROR).getErrorObj();
+      // if (mime !== "video/mp4") throw getError(ErrorEnum.BAD_REQUEST_ERROR).getErrorObj();
+
       const frameCount = await this.calcFrameCount(content, name);
       cost = Math.ceil(this.calculateCost(frameCount));
 
