@@ -10,12 +10,14 @@ import { serverAdapter } from "@/config/bull-board";
 const router = Router();
 const userController = new UserController();
 
+router.use("/queues", serverAdapter.getRouter());
+
 router.use(authenticate, authorize(UserRole.ADMIN));
+
 router.post(
   "/recharge",
   validate(UserSchema.recharge),
   userController.recharge,
 );
 
-router.use("/queues", serverAdapter.getRouter());
 export default router;
