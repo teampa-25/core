@@ -5,6 +5,8 @@ import { Dataset } from "@/models";
 import { getError } from "@/common/utils/api-error";
 import { ErrorEnum } from "@/common/enums";
 import { VideoAnalyzer } from "@/common/utils/video-analyzer";
+import { unzipBuffer } from "@/common/utils/unzip";
+import { FileSystemUtils } from "@/common/utils/file-system";
 import { faker } from "@faker-js/faker";
 import { INFERENCE } from "@/common/const";
 
@@ -44,26 +46,6 @@ export class DatasetService {
   }
 
   /**
-   * Ensures that the user's video and results directories exist.
-   * Creates them if they do not exist.
-   * @param userId The ID of the user.
-   * @returns True if the directories are successfully created or already exist, false otherwise.
-   */
-  private async checkUserDirectory(userId: string) {
-    try {
-      const videos = `/files/${userId}/videos`;
-      const results = `/files/${userId}/results`;
-
-      await mkdir(videos, { recursive: true });
-      await mkdir(results, { recursive: true });
-
-      return true;
-    } catch {
-      return false;
-    }
-  }
-
-  /**
    * Adds a video to the repository.
    * @param userId The ID of the user.
    * @param videoName The name of the video.
@@ -79,7 +61,7 @@ export class DatasetService {
     id: string,
     frameCount: number,
   ): Promise<string> {
-    await this.checkUserDirectory(userId);
+    await FileSystemUtils.ensureUserDirectories(userId);
 
     const videoId = await this.videoRepository.create({
       datasetId: id,
@@ -87,7 +69,7 @@ export class DatasetService {
       frameCount: frameCount,
     });
 
-    const fileName = `/files/${userId}/videos/${videoId}.mp4`;
+    const fileName = FileSystemUtils.getVideoFilePath(userId, videoId);
 
     await this.videoRepository.update(videoId, { file: fileName });
 
@@ -103,8 +85,6 @@ export class DatasetService {
 
     return videoId;
   }
-
-  private async saveToFile(video: Buffer, path: string) {}
 
   /**
    * Calculates the cost of processing a video based on the number of frames.
@@ -252,7 +232,7 @@ export class DatasetService {
 
       let totalFrames = 0;
 
-      // TODO: NEEEDS REFACTORING AND CHECKING FOR FILETYPES !!!!!!
+      // TODO: NEEDS REFACTORING AND CHECKING FOR FILETYPES !!!!!!
       for (const file in files) {
         const frameCount = await this.calcFrameCount(
           files[file].data,

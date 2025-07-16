@@ -1,10 +1,13 @@
 import { Job, Worker } from "bullmq";
 import { redisConnection } from "./queue";
 import { InferenceJobProcessor } from "./processor";
-import enviroment from "@/config/enviroment";
+import { CNSResponse } from "@/common/types";
+import { logger } from "@/config/logger";
+import { QUEUE } from "@/common/const";
+import { WebSocketService } from "@/services/websocket.service";
+import { InferenceJobStatus } from "@/common/enums";
 
-// The variable below is used to set the maximum number of concurrent jobs that can be processed by the worker.
-const MAX_CONCURRENT_JOBS = enviroment.maxConcurrentJobs;
+const wsService = WebSocketService.getInstance();
 
 export const inferenceWorker = new Worker(
   "inferenceJobs",
@@ -14,22 +17,56 @@ export const inferenceWorker = new Worker(
   },
   {
     connection: redisConnection,
-    concurrency: Number(MAX_CONCURRENT_JOBS),
+    concurrency: QUEUE.MAX_CONCURRENT_JOBS,
   },
 );
 
-inferenceWorker.on("completed", (job) => {
-  console.log(`Job ${job.id} completato`);
+inferenceWorker.on("active", (job: Job) => {
+  logger.info("Job RUNNING", {
+    jobId: job.id,
+    userId: job.data.userId,
+    payload: job.data,
+  });
+
+  wsService.notifyInferenceStatusUpdate(
+    job.data.userId,
+    job.id!,
+    InferenceJobStatus.PENDING,
+  );
+});
+
+inferenceWorker.on("completed", (job: Job, result: CNSResponse) => {
+  logger.info("Job COMPLETED", {
+    jobId: job.id,
+    userId: job.data.userId,
+  });
+
+  wsService.notifyInferenceStatusUpdate(
+    job.data.userId,
+    job.id!,
+    InferenceJobStatus.COMPLETED,
+    result,
+  );
 });
 
 inferenceWorker.on("failed", (job, err) => {
-  console.error(`Job ${job?.id} fallito:`, err);
-});
+  if (!job) {
+    logger.error("Job FAILED but job object is undefined", {
+      error: err.message,
+    });
+    return;
+  }
+  logger.error("Job FAILED", {
+    jobId: job.data.id,
+    userId: job.data.userId,
+    error: err.message,
+    stack: err.stack,
+  });
 
-inferenceWorker.on("stalled", (jobId: string) => {
-  console.warn(`Job ${jobId} bloccato`);
-});
-
-inferenceWorker.on("progress", (job, progress) => {
-  console.log(`Job ${job.id} progresso: ${progress}%`);
+  wsService.notifyInferenceStatusUpdate(
+    job.data.userId,
+    job.id!,
+    InferenceJobStatus.FAILED,
+    err.message,
+  );
 });
