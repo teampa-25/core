@@ -10,7 +10,7 @@ import IORedis from "ioredis";
 export const redisConnection = new IORedis({
   host: enviroment.redisHost,
   port: Number(enviroment.redisPort),
-  maxRetriesPerRequest: 2,
+  maxRetriesPerRequest: null,
   enableReadyCheck: true,
 });
 

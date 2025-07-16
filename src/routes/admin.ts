@@ -11,7 +11,6 @@ import { logger } from "@/config/logger";
 const router = Router();
 const userController = new UserController();
 
-// Protezione per le API admin
 router.post(
   "/recharge",
   authenticate,
@@ -20,7 +19,7 @@ router.post(
   userController.recharge,
 );
 
-// Monta la Bull Board UI senza protezione per debug
+// DEBUG
 router.use("/queues", (req, res, next) => {
   logger.info(`Accesso alla Bull Board: ${req.url}`);
   return serverAdapter.getRouter()(req, res, next);
