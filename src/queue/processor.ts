@@ -64,30 +64,33 @@ export class InferenceJobProcessor {
     goalVideoBuffer: ArrayBuffer,
     currentVideoBuffer: ArrayBuffer,
   ): Promise<CNSResponse> {
+    const baseUrl = `http://${enviroment.fastApiHost}:${enviroment.fastApiPort}`;
     const form = new FormData();
-    form.append("jobId", inferenceId);
-    form.append("device", parameters.useGpus ? "cuda:0" : "cpu");
-    form.append("detector", parameters.detector);
+
+    // Add all form fields at once
+    Object.entries({
+      jobId: inferenceId,
+      device: parameters.useGpus ? "cuda:0" : "cpu",
+      detector: parameters.detector,
+      goal_frame_idx: parameters.goalFrameId,
+      frame_step: parameters.frameStep,
+      start_frame: parameters.startFrame,
+      end_frame: parameters.endFrame,
+    }).forEach(([key, value]) => form.append(key, value));
+
+    // Add video buffers
     form.append("goal_video", goalVideoBuffer, { filename: "goal.mp4" });
     form.append("current_video", currentVideoBuffer, {
       filename: "current.mp4",
     });
-    form.append("goal_frame_idx", parameters.goalFrameId);
-    form.append("frame_step", parameters.frameStep);
-    form.append("start_frame", parameters.startFrame);
-    form.append("end_frame", parameters.endFrame);
 
-    const res = await axios.post<CNSResponse>(
-      `http://${enviroment.fastApiHost}:${enviroment.fastApiPort}/analyze`,
-      form,
-      {
-        headers: form.getHeaders(),
-        maxBodyLength: Infinity,
-        maxContentLength: Infinity,
-      },
-    );
+    const { data } = await axios.post<CNSResponse>(`${baseUrl}/analyze`, form, {
+      headers: form.getHeaders(),
+      maxBodyLength: Infinity,
+      maxContentLength: Infinity,
+    });
 
-    return res.data;
+    return data;
   }
 
   /**
@@ -96,11 +99,11 @@ export class InferenceJobProcessor {
    * @returns A promise that resolves to a Buffer containing the ZIP file data.
    */
   private async downloadResultZip(download_url: string): Promise<Buffer> {
-    const response = await axios.get<ArrayBuffer>(
-      `http://${enviroment.fastApiHost}:${enviroment.fastApiPort}${download_url}`,
-      { responseType: "arraybuffer" },
-    );
-    return Buffer.from(response.data);
+    const baseUrl = `http://${enviroment.fastApiHost}:${enviroment.fastApiPort}`;
+    const { data } = await axios.get<ArrayBuffer>(`${baseUrl}${download_url}`, {
+      responseType: "arraybuffer",
+    });
+    return Buffer.from(data);
   }
 
   /**
@@ -115,17 +118,15 @@ export class InferenceJobProcessor {
     resultZip: Buffer,
   ): Promise<void> {
     try {
-      // Existing result check
       const existingResult =
         await this.resultRepository.findByInferenceJobId(inferenceId);
 
       if (existingResult) {
-        // Update existing result
-        await this.resultRepository.updateJsonResult(
-          existingResult.id,
-          resultJson,
-        );
-        await this.resultRepository.saveImageZip(existingResult.id, resultZip);
+        // Update existing result in parallel
+        await Promise.all([
+          this.resultRepository.updateJsonResult(existingResult.id, resultJson),
+          this.resultRepository.saveImageZip(existingResult.id, resultZip),
+        ]);
       } else {
         // Create new result
         const resultId = await this.resultRepository.createResult({
@@ -133,7 +134,6 @@ export class InferenceJobProcessor {
           json_res: resultJson,
         } as any);
 
-        // Save ZIP file to filesystem
         await this.resultRepository.saveImageZip(resultId, resultZip);
       }
     } catch (error) {
