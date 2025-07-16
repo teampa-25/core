@@ -2,8 +2,9 @@ import { InferCreationAttributes } from "sequelize";
 import { JwtUtils } from "@/common/utils/jwt";
 import { hashPass, comparePass } from "@/common/utils/encryption";
 import { User } from "@/models";
-import { UserRole } from "@/common/enums";
+import { ErrorEnum, UserRole } from "@/common/enums";
 import { UserRepository } from "@/repositories/user.repository";
+import { getError } from "@/common/utils/api-error";
 
 /**
  * UserService is responsible for managing user data.
@@ -34,7 +35,7 @@ export class UserService {
    * @param password - The password of the user
    * @returns A JWT token if login is successful, null otherwise
    */
-  async login(email: string, password: string): Promise<string | null> {
+  async login(email: string, password: string): Promise<string> {
     const foundUser = await this.userRepo.findByEmail(email);
 
     if (
@@ -42,7 +43,7 @@ export class UserService {
       !foundUser.password ||
       !(await comparePass(password, foundUser.password))
     ) {
-      return null;
+      throw getError(ErrorEnum.NOT_FOUND_ERROR);
     }
 
     return JwtUtils.generateToken({
@@ -57,11 +58,11 @@ export class UserService {
    * @param id The ID of the user.
    * @returns The number of credits the user has, or null if not found.
    */
-  async getCreditsByUserId(id: string): Promise<number | null> {
+  async getCreditsByUserId(id: string): Promise<number> {
     const foundUser = await this.userRepo.findById(id);
 
     if (!foundUser || !foundUser.credit) {
-      return null;
+      throw getError(ErrorEnum.NOT_FOUND_ERROR);
     }
 
     return foundUser.credit;
@@ -73,14 +74,11 @@ export class UserService {
    * @param credits The number of credits to add.
    * @returns The updated number of credits, or null if the user was not found.
    */
-  async addCreditsByUserEmail(
-    email: string,
-    credits: number,
-  ): Promise<number | null> {
+  async addCreditsByUserEmail(email: string, credits: number): Promise<number> {
     const foundUser = await this.userRepo.findByEmail(email);
 
     if (!foundUser || !foundUser.id || !foundUser.credit) {
-      return null;
+      throw getError(ErrorEnum.NOT_FOUND_ERROR);
     }
 
     const updatedUser = await this.userRepo.updateCredits(

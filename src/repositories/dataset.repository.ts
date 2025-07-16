@@ -18,12 +18,12 @@ export class DatasetRepository {
    * @returns a Promise that resolves to the ID of the created dataset
    */
   async create(datasetData: {
-    user_id: string;
+    userId: string;
     name: string;
     tags?: string[];
   }): Promise<string> {
     return await this.datasetDAO.create({
-      user_id: datasetData.user_id,
+      user_id: datasetData.userId,
       name: datasetData.name,
       tags: datasetData.tags || [],
     } as Dataset);
@@ -69,7 +69,7 @@ export class DatasetRepository {
    */
   async findByIdAndUserId(id: string, userId: string): Promise<Dataset | null> {
     const dataset = await this.datasetDAO.get(id);
-    if (dataset && dataset.user_id === userId) {
+    if (dataset && dataset.user_id === userId && dataset.deleted_at === null) {
       return dataset;
     }
     return null;

@@ -18,14 +18,14 @@ export class VideoRepository {
    * @returns a Promise that resolves to the ID of the created video
    */
   async create(videoData: {
-    dataset_id: string;
+    datasetId: string;
     name: string;
-    frame_count: number;
+    frameCount: number;
   }): Promise<string> {
     return await this.videoDAO.create({
-      dataset_id: videoData.dataset_id,
+      dataset_id: videoData.datasetId,
       name: videoData.name,
-      frame_count: videoData.frame_count,
+      frame_count: videoData.frameCount,
     } as Video);
   }
 
