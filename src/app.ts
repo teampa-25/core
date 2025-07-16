@@ -41,3 +41,5 @@ httpServer.listen(enviroment.apiPort, () => {
   );
   logger.info("WebSocket server initialized");
 });
+
+export default app;
