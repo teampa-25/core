@@ -1,18 +1,15 @@
 import { Video } from "@/models";
 import { InferenceJob } from "@/models";
-import { Result } from "@/models";
 import { inferenceQueue } from "@/queue/queue";
 import { DatasetRepository } from "@/repositories/dataset.repository";
 import { InferenceJobRepository } from "@/repositories/inference.job.repository";
 import { ResultRepository } from "@/repositories/result.repository";
 import { UserRepository } from "@/repositories/user.repository";
 import { VideoRepository } from "@/repositories/video.repository";
-import { WebSocketService } from "@/services/websocket.service";
 import { getError } from "@/common/utils/api-error";
 import { ErrorEnum, InferenceJobStatus } from "@/common/enums";
-import { INFERENCE } from "@/common/const";
 import { InferCreationAttributes } from "sequelize";
-import { CNSResponse, InferenceParameters } from "@/common/types";
+import { InferenceParameters } from "@/common/types";
 
 /**
  * Class responsible for handling inference jobs.
@@ -24,7 +21,6 @@ export class InferenceJobService {
   private userRepository: UserRepository;
   private videoRepository: VideoRepository;
   private resultRepository: ResultRepository;
-  private wsService: WebSocketService;
 
   constructor() {
     this.inferenceRepository = new InferenceJobRepository();
@@ -32,7 +28,6 @@ export class InferenceJobService {
     this.userRepository = new UserRepository();
     this.videoRepository = new VideoRepository();
     this.resultRepository = new ResultRepository();
-    this.wsService = WebSocketService.getInstance();
   }
 
   /**
@@ -69,6 +64,8 @@ export class InferenceJobService {
         new Date(a.created_at).getTime() - new Date(b.created_at).getTime(),
     );
 
+    //TODO: check user credits to perform inference by counting video frames.
+
     //TODO: new code to handle path to video pipeline
 
     const createdJobIds: string[] = [];
@@ -76,6 +73,7 @@ export class InferenceJobService {
     // if only one video selected then targer == current
     if (sorted.length === 1) {
       const video = sorted[0];
+
       const jobData = {
         dataset_id: datasetId,
         user_id: userId,
@@ -88,15 +86,9 @@ export class InferenceJobService {
         await this.inferenceRepository.createInferenceJob(jobData);
       createdJobIds.push(inferenceId);
 
-      // Notify job queued
-      this.wsService.notifyInferenceStatusUpdate(
-        userId,
-        inferenceId,
-        InferenceJobStatus.PENDING,
-      );
-
       await inferenceQueue.add("run", {
         inferenceId: inferenceId,
+        userId: userId,
         goalVideoBuffer: video.file,
         currentVideoBuffer: video.file,
         params: parameters,
@@ -122,15 +114,9 @@ export class InferenceJobService {
         await this.inferenceRepository.createInferenceJob(jobData);
       createdJobIds.push(inferenceId);
 
-      // Notify job queued
-      this.wsService.notifyInferenceStatusUpdate(
-        userId,
-        inferenceId,
-        InferenceJobStatus.PENDING,
-      );
-
       await inferenceQueue.add("run", {
         inferenceId: inferenceId,
+        userId: userId,
         goalVideoBuffer: target.file,
         currentVideoBuffer: current.file,
         params: parameters,
@@ -176,43 +162,6 @@ export class InferenceJobService {
     if (!results) throw getError(ErrorEnum.NOT_FOUND_ERROR);
     return results;
   };
-
-  /**
-   * Updates the status of an inference job.
-   * @param inferenceId The ID of the inference job.
-   * @param status The new status of the inference job.
-   * @param result The result of the inference job (if completed).
-   * @param errorMessage The error message (if failed or aborted).
-   */
-  async updateInferenceStatus(
-    inferenceId: string,
-    status: InferenceJobStatus,
-    result?: CNSResponse,
-    errorMessage?: string,
-  ): Promise<void> {
-    try {
-      // Update inference status in database
-      await this.inferenceRepository.updateStatus(inferenceId, status);
-
-      // Get inference details to retrieve userId
-      const inference = await this.inferenceRepository.findById(inferenceId);
-      if (!inference) {
-        throw getError(ErrorEnum.NOT_FOUND_ERROR);
-      }
-
-      // Send WebSocket notification
-      this.wsService.notifyInferenceStatusUpdate(
-        inference.user_id,
-        inferenceId,
-        status,
-        result,
-        errorMessage,
-      );
-    } catch (error) {
-      console.error(`Error updating inference status ${inferenceId}:`, error);
-      throw error;
-    }
-  }
 
   /**
    * Retrieves videos from a dataset within a specific range.

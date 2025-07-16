@@ -3,12 +3,13 @@ import { Server as HttpServer } from "http";
 import jwt from "jsonwebtoken";
 import { readFileSync } from "fs";
 import { UserPayload, WebSocketNotification } from "@/common/types";
-import { ErrorEnum } from "@/common/enums";
+import { ErrorEnum, InferenceJobStatus } from "@/common/enums";
 import { getError } from "@/common/utils/api-error";
 import { logger } from "@/config/logger";
 import enviroment from "@/config/enviroment";
 import { IncomingMessage } from "http";
 import { WEBSOCKET } from "@/common/const";
+import { JwtUtils } from "@/common/utils/jwt";
 
 interface AuthenticatedWebSocket extends WebSocket {
   userId?: string;
@@ -23,11 +24,8 @@ export class WebSocketService {
   private static instance: WebSocketService;
   private wss!: WebSocketServer; // TODO I have doubt bout that '!'
   private userConnections: Map<string, AuthenticatedWebSocket[]> = new Map();
-  private publicKey: string;
 
-  private constructor() {
-    this.publicKey = readFileSync(enviroment.jwtPublicKeyPath, "utf8");
-  }
+  private constructor() {}
 
   /**
    * Get singleton instance of WebSocketService
@@ -51,7 +49,7 @@ export class WebSocketService {
     });
 
     this.setupEventHandlers();
-    logger.info("WebSocket service initialized with 'ws' library");
+    logger.info("WebSocket service initialized");
   }
 
   /**
@@ -65,17 +63,6 @@ export class WebSocketService {
         logger.info(`New WebSocket connection: ${connectionId}`);
 
         ws.isAuthenticated = false;
-
-        // Handle incoming messages
-        ws.on("message", (data: Buffer) => {
-          try {
-            const message = JSON.parse(data.toString());
-            this.handleMessage(ws, message, connectionId);
-          } catch (error) {
-            logger.error(`Error parsing message from ${connectionId}:`, error);
-            this.sendError(ws, "Invalid JSON message format");
-          }
-        });
 
         // Handle disconnection
         ws.on("close", () => {
@@ -100,36 +87,6 @@ export class WebSocketService {
   }
 
   /**
-   * Handle incoming WebSocket messages
-   * @param ws - WebSocket connection
-   * @param message - Parsed message object
-   * @param connectionId - Connection identifier
-   */
-  private handleMessage(
-    ws: AuthenticatedWebSocket,
-    message: any,
-    connectionId: string,
-  ): void {
-    switch (message.type) {
-      case "authenticate":
-        this.handleAuthentication(ws, message.token, connectionId);
-        break;
-      case "ping":
-        this.sendMessage(ws, { type: "pong", data: {}, timestamp: new Date() });
-        break;
-      default:
-        if (!ws.isAuthenticated) {
-          this.sendError(ws, "Authentication required"); //TODO change this to a more specific error (401?)
-          return;
-        }
-        logger.warn(
-          `Unknown message type: ${message.type} from ${connectionId}`,
-        );
-        break;
-    }
-  }
-
-  /**
    * Handle client authentication
    * @param ws - WebSocket connection
    * @param token - JWT token
@@ -141,9 +98,7 @@ export class WebSocketService {
     connectionId: string,
   ): void {
     try {
-      const decoded = jwt.verify(token, this.publicKey, {
-        algorithms: [enviroment.jwtAlgorithm as jwt.Algorithm],
-      }) as UserPayload;
+      const decoded = JwtUtils.verifyToken(token);
 
       // Store user connection
       if (!this.userConnections.has(decoded.id)) {
@@ -234,7 +189,7 @@ export class WebSocketService {
    * @returns Unique connection identifier
    */
   private generateConnectionId(): string {
-    return `conn_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+    return `conn_${Date.now()}_${Math.random().toString(36).slice(2, 11)}`;
   }
 
   /**
@@ -267,9 +222,8 @@ export class WebSocketService {
    * @param userId - User ID
    * @param inferenceId - Inference job ID
    * @param status - New status
-   * @param result - Result data (optional)
-   * @param errorMessage - Error message (optional)
-   * @param carbonFootprint - Carbon footprint (optional)
+   * @param result - Result data (only when inference status is completed, optional)
+   * @param errorMessage - Error message (only when inference status is failed or aborted, optional)
    */
   public notifyInferenceStatusUpdate(
     userId: string,
@@ -283,8 +237,12 @@ export class WebSocketService {
       data: {
         inferenceId,
         status,
-        result: status === "COMPLETED" ? result : undefined,
-        errorMessage,
+        result: status === InferenceJobStatus.COMPLETED ? result : undefined,
+        errorMessage:
+          status === InferenceJobStatus.FAILED ||
+          status === InferenceJobStatus.ABORTED
+            ? errorMessage
+            : undefined,
       },
       timestamp: new Date(),
     };
@@ -314,16 +272,6 @@ export class WebSocketService {
       total += sockets.filter((ws) => ws.readyState === WebSocket.OPEN).length;
     });
     return total;
-  }
-
-  /**
-   * Broadcast message to all connected users
-   * @param notification - Notification to broadcast
-   */
-  public broadcastToAll(notification: WebSocketNotification): void {
-    this.userConnections.forEach((sockets, userId) => {
-      this.notifyUser(userId, notification);
-    });
   }
 
   /**
