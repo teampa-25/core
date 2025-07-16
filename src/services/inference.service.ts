@@ -116,7 +116,7 @@ export class InferenceJobService {
         InferenceJobStatus.ABORTED,
         err.msg,
       );
-
+      logger.error(`[BullMQ] Job ${abortedJobId} failed: ${err.msg}`);
       throw getError(ErrorEnum.UNAUTHORIZED_ERROR);
     }
 
