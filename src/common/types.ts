@@ -98,7 +98,6 @@ interface Enviroment {
   jwtExpiresIn: string;
   jwtAlgorithm: string;
   saltRounds: number;
-  maxConcurrentJobs: number;
   resultsBasePath: string;
 }
 

@@ -9,7 +9,7 @@ import { VideoRepository } from "@/repositories/video.repository";
 import { getError } from "@/common/utils/api-error";
 import { ErrorEnum, InferenceJobStatus } from "@/common/enums";
 import { InferCreationAttributes } from "sequelize";
-import { InferenceParameters } from "@/common/types";
+import { InferenceJobData, InferenceParameters } from "@/common/types";
 import { FileSystemUtils } from "@/common/utils/file-system";
 import { INFERENCE } from "@/common/const";
 import { WebSocketService } from "./websocket.service";
@@ -142,13 +142,15 @@ export class InferenceJobService {
         await this.inferenceRepository.createInferenceJob(jobData);
       createdJobIds.push(inferenceId);
 
-      await inferenceQueue.add("run", {
+      const inferenceJobData: InferenceJobData = {
         inferenceId,
         userId,
         goalVideoPath: video.file,
         currentVideoPath: video.file,
         params: parameters,
-      });
+      };
+
+      await inferenceQueue.add("run", inferenceJobData);
 
       return createdJobIds;
     }
@@ -170,13 +172,15 @@ export class InferenceJobService {
         await this.inferenceRepository.createInferenceJob(jobData);
       createdJobIds.push(inferenceId);
 
-      await inferenceQueue.add("run", {
+      const inferenceJobData: InferenceJobData = {
         inferenceId,
         userId,
         goalVideoPath: target.file,
         currentVideoPath: current.file,
         params: parameters,
-      });
+      };
+
+      await inferenceQueue.add("run", inferenceJobData);
     }
 
     return createdJobIds;

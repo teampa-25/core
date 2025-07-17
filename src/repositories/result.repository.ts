@@ -53,7 +53,7 @@ export class ResultRepository {
   async findByInferenceJobId(inferenceJobId: string): Promise<Result | null> {
     const allResults = await this.resultDAO.getAll();
     const result = allResults.find(
-      (result) => result.inference_job_id === inferenceJobId,
+      (result) => result.inferenceJob_id === inferenceJobId,
     );
     return result || null;
   }

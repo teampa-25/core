@@ -18,7 +18,7 @@ export class Result extends Model<
   InferCreationAttributes<Result>
 > {
   declare id: string;
-  declare inference_job_id: ForeignKey<string>;
+  declare inferenceJob_id: ForeignKey<string>;
   declare json_res: object;
   declare image_zip: string;
   declare created_at: Date;
@@ -32,7 +32,7 @@ export class Result extends Model<
           defaultValue: DataTypes.UUIDV4,
           primaryKey: true,
         },
-        inference_job_id: {
+        inferenceJob_id: {
           type: DataTypes.UUID,
           allowNull: false,
           unique: true,

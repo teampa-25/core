@@ -29,14 +29,6 @@ export class InferenceJobProcessor {
       job.data;
 
     try {
-      logger.debug("Processing inference job", {
-        inferenceId,
-        userId,
-        goalVideoPath,
-        currentVideoPath,
-        params,
-      });
-
       // Read video files
       const [goalVideoBuffer, currentVideoBuffer] = await Promise.all([
         FileSystemUtils.readVideoFile(goalVideoPath),
@@ -50,6 +42,7 @@ export class InferenceJobProcessor {
         currentVideoBuffer,
       );
       const resultZip = await this.downloadResultZip(resultJson.download_url);
+
       await this.saveResultsToDatabase(inferenceId, resultJson, resultZip);
 
       return resultJson;
@@ -139,7 +132,7 @@ export class InferenceJobProcessor {
       } else {
         // Create new result
         const resultId = await this.resultRepository.createResult({
-          inference_job_id: inferenceId,
+          inferenceJobId: inferenceId,
           json_res: resultJson,
         } as any);
 
