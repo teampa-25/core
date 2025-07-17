@@ -1,0 +1,969 @@
+openapi: 3.0.0
+info:
+  title: InferNode API
+  version: 1.0.0
+  description: A REST API built with Node.js, TypeScript, Express, and PostgreSQL for BAM inference processing,
+
+servers:
+  - url: http://localhost:3000
+    description: Development server
+
+tags:
+  - name: Authentication
+    description: User authentication operations
+  - name: User
+    description: User management operations
+  - name: Admin
+    description: Administrative operations
+  - name: Dataset
+    description: Dataset management operations
+  - name: Inference
+    description: Inference job operations
+  - name: WebSocket
+    description: WebSocket operations
+  - name: Health
+    description: Health check operations
+
+paths:
+  /api/auth/register:
+    post:
+      tags:
+        - Authentication
+      summary: Register a new user
+      description: Creates a new user account
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - email
+                - password
+              properties:
+                email:
+                  type: string
+                  format: email
+                  example: user@example.com
+                password:
+                  type: string
+                  format: password
+                  example: "password123"
+      responses:
+        '201':
+          description: User registered successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: User registered successfully
+                  user:
+                    $ref: '#/components/schemas/User'
+        '400':
+          description: Bad request
+        '409':
+          description: Email already exists
+
+  /api/auth/login:
+    post:
+      tags:
+        - Authentication
+      summary: Login user
+      description: Authenticates a user and returns a JWT token
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - email
+                - password
+              properties:
+                email:
+                  type: string
+                  format: email
+                  example: user@example.com
+                password:
+                  type: string
+                  format: password
+                  example: "password123"
+      responses:
+        '200':
+          description: Login successful
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: Login successful
+                  token:
+                    type: string
+                    example: eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9...
+        '401':
+          description: Invalid credentials
+        '400':
+          description: Bad request
+
+  /api/user/credits:
+    get:
+      tags:
+        - User
+      summary: Get user credits
+      description: Returns the current credit balance for the authenticated user
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: User credits retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  credits:
+                    type: integer
+                    example: 100
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
+
+
+  /api/admin/recharge:
+    post:
+      tags:
+        - Admin
+      summary: Recharge user credits
+      description: Adds credits to a user's account (admin only)
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - email
+                - credits
+              properties:
+                email:
+                  type: string
+                  format: email
+                  example: user@example.com
+                credits:
+                  type: integer
+                  minimum: 0
+                  example: 50
+      responses:
+        '200':
+          description: Credits updated successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: User's credits updated
+                  newBalance:
+                    type: integer
+                    example: 150
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden - Admin access required
+        '404':
+          description: User not found
+  
+  /api/dataset:
+    post:
+      tags:
+        - Dataset
+      summary: Create a new dataset
+      description: Creates a new dataset for the authenticated user
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - name
+              properties:
+                name:
+                  type: string
+                  example: "My Dataset"
+                tags:
+                  type: array
+                  items:
+                    type: string
+                  example: ["tag1", "tag2"]
+      responses:
+        '201':
+          description: Dataset created successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: Dataset created successfully
+                  dataset:
+                    $ref: '#/components/schemas/Dataset'
+        '400':
+          description: Bad request
+        '401':
+          description: Unauthorized
+        '409':
+          description: Dataset name already exists for this user
+    
+    get:
+      tags:
+        - Dataset
+      summary: Get all datasets
+      description: Returns all datasets for the authenticated user
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: body
+          name: filters
+          schema:
+            type: object
+            properties:
+              tags:
+                type: array
+                items:
+                  type: string
+                example: ["tag1", "tag2"]
+      responses:
+        '200':
+          description: Datasets retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  datasets:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Dataset'
+        '401':
+          description: Unauthorized
+ 
+  /api/dataset/{id}:
+    get:
+      tags:
+        - Dataset
+      summary: Get dataset by ID
+      description: Returns a specific dataset by ID
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+            format: uuid
+          description: Dataset ID
+      responses:
+        '200':
+          description: Dataset retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  dataset:
+                    $ref: '#/components/schemas/Dataset'
+        '401':
+          description: Unauthorized
+        '404':
+          description: Dataset not found
+    
+    put:
+      tags:
+        - Dataset
+      summary: Update dataset
+      description: Updates a specific dataset
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+            format: uuid
+          description: Dataset ID
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                  example: "Updated Dataset Name"
+                tags:
+                  type: array
+                  items:
+                    type: string
+                  example: ["tag1", "tag2", "tag3"]
+      responses:
+        '200':
+          description: Dataset updated successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: Dataset updated successfully
+                  dataset:
+                    $ref: '#/components/schemas/Dataset'
+        '400':
+          description: Bad request
+        '401':
+          description: Unauthorized
+        '404':
+          description: Dataset not found
+        '409':
+          description: Dataset name already exists for this user
+    
+    delete:
+      tags:
+        - Dataset
+      summary: Delete dataset
+      description: Deletes a specific dataset (logical deletion)
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+            format: uuid
+          description: Dataset ID
+      responses:
+        '200':
+          description: Dataset deleted successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: Dataset deleted successfully
+        '401':
+          description: Unauthorized
+        '404':
+          description: Dataset not found
+ 
+  /api/dataset/{id}/videos:
+    post:
+      tags:
+        - Dataset
+      summary: Upload video to dataset
+      description: Uploads a video or zip file to a dataset
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+            format: uuid
+          description: Dataset ID
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              required:
+                - content
+                - name
+                - type
+              properties:
+                content:
+                  type: string
+                  format: binary
+                  description: Video file or ZIP file containing videos
+                name:
+                  type: string
+                  example: "My Video"
+                type:
+                  type: string
+                  enum: [video, zip]
+                  example: "video"
+      responses:
+        '200':
+          description: Video uploaded successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "My Video - video added"
+                  id:
+                    type: string
+                    format: uuid
+                  costDeducted:
+                    type: integer
+                    example: 10
+        '400':
+          description: Bad request
+        '401':
+          description: Unauthorized
+        '404':
+          description: Dataset not found
+  
+  /api/inference:
+     post:
+      tags:
+        - Inference
+      summary: Create a new inference job
+      description: Creates and enqueues a new inference job
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - datasetId
+                - parameters
+                - range
+              properties:
+                datasetId:
+                  type: string
+                  format: uuid
+                  example: 550e8400-e29b-41d4-a716-446655440000
+                parameters:
+                  type: object
+                  required:
+                    - startFrame
+                    - endFrame
+                    - frameStep
+                    - detector
+                    - useGpus
+                  properties:
+                    startFrame:
+                      type: integer
+                      minimum: 0
+                      example: 0
+                    endFrame:
+                      type: integer
+                      minimum: 0
+                      example: 100
+                    frameStep:
+                      type: integer
+                      minimum: 1
+                      example: 1
+                    detector:
+                      type: string
+                      enum: [AKAZE, SIFT, ORB]
+                      example: SIFT
+                    useGpus:
+                      type: boolean
+                      example: true
+                range:
+                  type: string
+                  pattern: "^all$|^\\d+-\\d+$"
+                  example: "all"
+                  description: "Either 'all' or a range like '0-10'"
+      responses:
+        '201':
+          description: Inference job created successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  jobId:
+                    type: array
+                    items:
+                      type: string
+                      format: uuid
+                    example: ["550e8400-e29b-41d4-a716-446655440000"]
+        '400':
+          description: Bad request
+        '401':
+          description: Unauthorized
+        '404':
+          description: Dataset not found
+    
+  /api/inference/status/{id}:
+    get:
+      tags:
+        - Inference
+      summary: Get inference job status
+      description: Returns the status of a specific inference job
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+            format: uuid
+          description: Inference job ID
+      responses:
+        '200':
+          description: Status retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    enum: [PENDING, RUNNING, COMPLETED, FAILED, ABORTED]
+                    example: RUNNING
+        '401':
+          description: Unauthorized
+        '404':
+          description: Inference job not found
+
+    
+  /api/inference/result/json/{id}:
+    get:
+      tags:
+        - Inference
+      summary: Get inference job JSON results
+      description: Returns the JSON results of a completed inference job
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+            format: uuid
+          description: Inference job ID
+      responses:
+        '200':
+          description: Results retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  results:
+                    $ref: '#/components/schemas/CNSResponse'
+        '401':
+          description: Unauthorized
+        '404':
+          description: Results not found
+    
+  /api/inference/result/zip/{id}:
+    get:
+      tags:
+        - Inference
+      summary: Get inference job ZIP results
+      description: Returns the ZIP file containing result images
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+            format: uuid
+          description: Inference job ID
+      responses:
+        '200':
+          description: ZIP file retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  results:
+                    type: string
+                    format: binary
+                    description: ZIP file containing result images
+        '401':
+          description: Unauthorized
+        '404':
+          description: Results not found
+    
+  
+  
+  /api/websocket/stats:
+    get:
+      tags:
+        - WebSocket
+      summary: Get WebSocket connection statistics
+      description: Returns statistics about WebSocket connections
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Statistics retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  data:
+                    type: object
+                    properties:
+                      totalConnections:
+                        type: integer
+                        example: 5
+                      userConnections:
+                        type: integer
+                        example: 2
+        '401':
+          description: Unauthorized
+  
+  /api/websocket/test:
+     post:
+      tags:
+        - WebSocket
+      summary: Send test notification
+      description: Sends a test notification to the authenticated user
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                message:
+                  type: string
+                  example: "This is a test notification"
+      responses:
+        '200':
+          description: Test notification sent
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  message:
+                    type: string
+                    example: "Test notification sent"
+        '401':
+          description: Unauthorized
+  
+  /api/health:
+     get:
+      tags:
+        - Health
+      summary: Health check
+      description: Checks if the server is running
+      responses:
+        '200':
+          description: Server is working
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: "Server is working!"
+                  timestamp:
+                    type: string
+                    format: date-time
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+  
+  schemas:
+    User:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          example: 550e8400-e29b-41d4-a716-446655440000
+        email:
+          type: string
+          format: email
+          example: user@example.com
+        role:
+          type: string
+          enum: [user, admin]
+          example: user
+        credit:
+          type: integer
+          example: 100
+        created_at:
+          type: string
+          format: date-time
+        updated_at:
+          type: string
+          format: date-time
+      required:
+        - email
+        - password
+        - role
+
+    Dataset:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          example: 550e8400-e29b-41d4-a716-446655440000
+        user_id:
+          type: string
+          format: uuid
+          example: 550e8400-e29b-41d4-a716-446655440000
+        name:
+          type: string
+          example: "My Dataset"
+        tags:
+          type: array
+          items:
+            type: string
+          example: ["tag1", "tag2"]
+        deleted_at:
+          type: string
+          format: date-time
+          nullable: true
+        created_at:
+          type: string
+          format: date-time
+        updated_at:
+          type: string
+          format: date-time
+      required:
+        - name
+        - user_id
+
+
+    Video:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          example: 550e8400-e29b-41d4-a716-446655440000
+        dataset_id:
+          type: string
+          format: uuid
+          example: 550e8400-e29b-41d4-a716-446655440000
+        file:
+          type: string
+          example: "/files/user-id/videos/video-id.mp4"
+        name:
+          type: string
+          example: "My Video"
+        frame_count:
+          type: integer
+          example: 1500
+        created_at:
+          type: string
+          format: date-time
+        updated_at:
+          type: string
+          format: date-time
+      required:
+        - dataset_id
+        - name
+        - frame_count
+
+
+    InferenceJob:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          example: 550e8400-e29b-41d4-a716-446655440000
+        dataset_id:
+          type: string
+          format: uuid
+          example: 550e8400-e29b-41d4-a716-446655440000
+        user_id:
+          type: string
+          format: uuid
+          example: 550e8400-e29b-41d4-a716-446655440000
+        goal_id:
+          type: string
+          format: uuid
+          example: 550e8400-e29b-41d4-a716-446655440000
+        current_id:
+          type: string
+          format: uuid
+          example: 550e8400-e29b-41d4-a716-446655440000
+        status:
+          type: string
+          enum: [PENDING, RUNNING, COMPLETED, FAILED, ABORTED]
+          example: PENDING
+        params:
+          type: object
+          properties:
+            startFrame:
+              type: integer
+              example: 0
+            endFrame:
+              type: integer
+              example: 100
+            frameStep:
+              type: integer
+              example: 1
+            goalFrameId:
+              type: integer
+              example: 25
+            detector:
+              type: string
+              example: SIFT
+            useGpus:
+              type: boolean
+              example: true
+        carbon_footprint:
+          type: integer
+          example: 25
+        created_at:
+          type: string
+          format: date-time
+        updated_at:
+          type: string
+          format: date-time
+      required:
+        - dataset_id
+        - user_id
+        - goal_id
+        - current_id
+        - params
+
+
+    Result:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          example: 550e8400-e29b-41d4-a716-446655440000
+        inference_job_id:
+          type: string
+          format: uuid
+          example: 550e8400-e29b-41d4-a716-446655440000
+        json_res:
+          type: object
+          properties:
+            requestId:
+              type: string
+              format: uuid
+              example: 550e8400-e29b-41d4-a716-446655440000
+            velocity:
+              type: array
+              items:
+                type: array
+                items:
+                  type: number
+              example: [[0.1, 0.2], [0.3, 0.4]]
+            carbon_footprint:
+              type: number
+              example: 25
+            download_url:
+              type: string
+              example: "/download/results/550e8400-e29b-41d4-a716-446655440000.zip"
+            message:
+              type: string
+              example: "Inference completed successfully"
+        image_zip:
+          type: string
+          example: "/files/results/550e8400-e29b-41d4-a716-446655440000.zip"
+        created_at:
+          type: string
+          format: date-time
+        updated_at:
+          type: string
+          format: date-time
+      required:
+        - inference_job_id
+        - json_res
+
+
+    CNSResponse:
+      type: object
+      properties:
+        requestId:
+          type: string
+          format: uuid
+          example: 550e8400-e29b-41d4-a716-446655440000
+        velocity:
+          type: array
+          items:
+            type: array
+            items:
+              type: number
+          example: [[0.1, 0.2], [0.3, 0.4]]
+        carbon_footprint:
+          type: number
+          example: 25
+        download_url:
+          type: string
+          example: "/download/results/550e8400-e29b-41d4-a716-446655440000.zip"
+        message:
+          type: string
+          example: "Inference completed successfully"
+
+    WebSocketNotification:
+      type: object
+      properties:
+        type:
+          type: string
+          example: "INFERENCE_STATUS_UPDATE"
+        data:
+          type: object
+          properties:
+            inferenceId:
+              type: string
+              format: uuid
+              example: 550e8400-e29b-41d4-a716-446655440000
+            status:
+              type: string
+              enum: [PENDING, RUNNING, COMPLETED, FAILED, ABORTED]
+              example: RUNNING
+            result:
+              type: object
+              nullable: true
+            errorMessage:
+              type: string
+              nullable: true
+              example: "Error processing inference job"
+        timestamp:
+          type: string
+          format: date-time
