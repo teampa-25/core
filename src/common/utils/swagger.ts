@@ -1,7 +1,7 @@
 import enviroment from "@/config/enviroment";
 
 export const swaggerDef = {
-  myapi: "3.0.0",
+  openapi: "3.0.0",
   info: {
     title: "InferNode API",
     version: "v1",

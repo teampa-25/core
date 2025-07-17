@@ -19,9 +19,11 @@ import { UserRole } from "./common/enums";
 import { authenticate } from "./middlewares/authenticate.middleware";
 import { authorize } from "./middlewares/authorize.middleware";
 
+/**
+ * App and Websocket setup
+ */
 const app = express();
 const httpServer = createServer(app);
-
 const wsService = WebSocketService.getInstance();
 wsService.initialize(httpServer);
 

@@ -5,6 +5,10 @@ import { swaggerDef } from "@/common/utils/swagger";
 
 const router = Router();
 
+/**
+ * @description: Swagger-jsdoc build
+ */
+
 const specs = swaggerJsDoc({
   definition: swaggerDef,
   apis: ["@/routes/**/*.ts", "@/controllers/**/*.ts"],
