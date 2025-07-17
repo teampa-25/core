@@ -10,6 +10,8 @@ services:
         condition: service_started
       postgres:
         condition: service_healthy
+      cns:
+        condition: service_started
     environment:
       - NODE_ENV=${NODE_ENV}
       - REDIS_HOST=${REDIS_HOST}
@@ -24,6 +26,24 @@ services:
       - /app/keys
       - ./tsconfig.json:/app/tsconfig.json
       - ./files/:/files
+  cns:
+    build:
+      context: ./cns/
+    # uncomment this to enable gpu support
+    # deploy:
+    #   resources:
+    #     reservations:
+    #       devices:
+    #         - driver: nvidia
+    #           count: 1
+    #           capabilities: [gpu]
+    ports:
+      - "${FASTAPI_PORT:-8000}:8000"
+    
+    working_dir: /workspace/src
+    volumes:
+      # Solo la directory cns completa
+      - ./cns/:/workspace/
 
   redis:
     image: redis:latest

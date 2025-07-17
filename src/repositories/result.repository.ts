@@ -3,6 +3,8 @@ import { ResultDAO } from "@/dao/result.dao";
 import { InferCreationAttributes } from "sequelize";
 import { FileSystemUtils } from "@/common/utils/file-system";
 import enviroment from "@/config/enviroment";
+import { getError } from "@/common/utils/api-error";
+import { ErrorEnum } from "@/common/enums";
 
 /**
  * ResultRepository is responsible for managing result data.
@@ -44,49 +46,6 @@ export class ResultRepository {
   }
 
   /**
-   * Updates a result
-   * @param id - The ID of the result to update
-   * @param updateData - The data to update
-   * @returns A Promise that resolves to the updated result or null if not found
-   */
-  async updateResult(
-    id: string,
-    updateData: Partial<Result>,
-  ): Promise<Result | null> {
-    return await this.resultDAO.update(id, updateData);
-  }
-
-  /**
-   * Deletes a result
-   * @param id - The ID of the result to delete
-   * @returns A Promise that resolves to true if deleted, false otherwise
-   */
-  async deleteResult(id: string): Promise<boolean> {
-    // Get the result first to check if it has an associated ZIP file
-    const result = await this.findById(id);
-
-    // Delete the result from database
-    const deleted = await this.resultDAO.delete(id);
-
-    // If result was deleted and had a ZIP file, delete it from filesystem
-    if (
-      deleted &&
-      result &&
-      result.image_zip &&
-      FileSystemUtils.fileExists(result.image_zip)
-    ) {
-      try {
-        await FileSystemUtils.deleteFile(result.image_zip);
-      } catch (error) {
-        console.error(`Error deleting ZIP file ${result.image_zip}:`, error);
-        // Don't throw error here, as the database deletion was successful
-      }
-    }
-
-    return deleted;
-  }
-
-  /**
    * Finds a result by inference job ID
    * @param inferenceJobId - The inference job ID
    * @returns A Promise that resolves to the result or null if not found
@@ -94,20 +53,20 @@ export class ResultRepository {
   async findByInferenceJobId(inferenceJobId: string): Promise<Result | null> {
     const allResults = await this.resultDAO.getAll();
     const result = allResults.find(
-      (result) => result.inference_job_id === inferenceJobId,
+      (result) => result.inferenceJob_id === inferenceJobId,
     );
     return result || null;
   }
 
-  /**
-   * Updates the JSON result data
-   * @param id - The ID of the result
-   * @param jsonRes - The JSON result data
-   * @returns A Promise that resolves to the updated result or null if not found
-   */
-  async updateJsonResult(id: string, jsonRes: object): Promise<Result | null> {
-    return await this.resultDAO.update(id, { json_res: jsonRes });
-  }
+  // /**
+  //  * Updates the JSON result data
+  //  * @param id - The ID of the result
+  //  * @param jsonRes - The JSON result data
+  //  * @returns A Promise that resolves to the updated result or null if not found
+  //  */
+  // async updateJsonResult(id: string, jsonRes: object): Promise<Result | null> {
+  //   return await this.resultDAO.update(id, { json_res: jsonRes });
+  // }
 
   /**
    * Updates the image ZIP data
@@ -131,25 +90,11 @@ export class ResultRepository {
       try {
         await FileSystemUtils.deleteFile(currentResult.image_zip);
       } catch (error) {
-        console.error(
-          `Error deleting old ZIP file ${currentResult.image_zip}:`,
-          error,
-        );
-        // Continue with update even if deletion fails
+        throw getError(ErrorEnum.GENERIC_ERROR);
       }
     }
 
     return await this.resultDAO.update(id, { image_zip: imageZipPath });
-  }
-
-  /**
-   * Checks if a result exists
-   * @param id - The ID of the result
-   * @returns A Promise that resolves to true if the result exists, false otherwise
-   */
-  async exists(id: string): Promise<boolean> {
-    const result = await this.resultDAO.get(id);
-    return result !== null;
   }
 
   /**

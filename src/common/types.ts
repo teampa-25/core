@@ -54,6 +54,17 @@ interface InferenceParameters {
 }
 
 /**
+ * @description Interface for inference job data passed to BullMQ
+ */
+interface InferenceJobData {
+  inferenceId: string;
+  userId: string;
+  goalVideoPath: string;
+  currentVideoPath: string;
+  params: InferenceParameters;
+}
+
+/**
  * @description Interface for WebSocket notification data
  */
 interface WebSocketNotification {
@@ -87,7 +98,6 @@ interface Enviroment {
   jwtExpiresIn: string;
   jwtAlgorithm: string;
   saltRounds: number;
-  maxConcurrentJobs: number;
   resultsBasePath: string;
 }
 
@@ -97,6 +107,7 @@ export {
   ValidationError,
   CNSResponse,
   InferenceParameters,
+  InferenceJobData,
   WebSocketNotification,
   Enviroment,
 };

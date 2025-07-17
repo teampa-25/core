@@ -4,9 +4,11 @@ import { ResultRepository } from "@/repositories/result.repository";
 import axios from "axios";
 import FormData from "form-data";
 import enviroment from "@/config/enviroment";
-import { ErrorEnum, InferenceJobStatus } from "@/common/enums";
+import { ErrorEnum } from "@/common/enums";
 import { getError } from "@/common/utils/api-error";
 import { logger } from "@/config/logger";
+import { FileSystemUtils } from "@/common/utils/file-system";
+import { Result } from "@/models";
 
 /**
  * Class responsible for processing inference jobs.
@@ -23,29 +25,30 @@ export class InferenceJobProcessor {
    * Process an inference job.
    * @param job The job to process.
    */
-  async processInference(job: Job): Promise<void> {
-    const { inferenceId, parameters, goalVideoBuffer, currentVideoBuffer } =
+  async processInference(job: Job): Promise<CNSResponse> {
+    const { inferenceId, userId, goalVideoPath, currentVideoPath, params } =
       job.data;
 
     try {
-      logger.debug("Processing inference job aaaaaah diocan");
-      logger.debug("Inference Job Data", {
-        inferenceId,
-        parameters,
-      });
+      // Read video files
+      const [goalVideoBuffer, currentVideoBuffer] = await Promise.all([
+        FileSystemUtils.readVideoFile(goalVideoPath),
+        FileSystemUtils.readVideoFile(currentVideoPath),
+      ]);
 
-      await new Promise((resolve) => setTimeout(resolve, 3000)); // Simula inferenza
-      // // do inference
-      // const resultJson = await this.sendToFastAPI(
-      //   inferenceId,
-      //   parameters,
-      //   goalVideoBuffer,
-      //   currentVideoBuffer,
-      // );
-      // const resultZip = await this.downloadResultZip(resultJson.download_url);
-      // // Save results into DB
-      // await this.saveResultsToDatabase(inferenceId, resultJson, resultZip);
+      const resultJson = await this.sendToFastAPI(
+        inferenceId,
+        params,
+        goalVideoBuffer,
+        currentVideoBuffer,
+      );
+      const resultZip = await this.downloadResultZip(resultJson.download_url);
+
+      await this.saveResultsToDatabase(inferenceId, resultJson, resultZip);
+
+      return resultJson;
     } catch (error) {
+      logger.error(`Job ${inferenceId} failed with error: ${error}`);
       throw error;
     }
   }
@@ -61,33 +64,36 @@ export class InferenceJobProcessor {
   private async sendToFastAPI(
     inferenceId: string,
     parameters: InferenceParameters,
-    goalVideoBuffer: ArrayBuffer,
-    currentVideoBuffer: ArrayBuffer,
+    goalVideoBuffer: Buffer,
+    currentVideoBuffer: Buffer,
   ): Promise<CNSResponse> {
+    const baseUrl = `http://${enviroment.fastApiHost}:${enviroment.fastApiPort}`;
     const form = new FormData();
-    form.append("jobId", inferenceId);
-    form.append("device", parameters.useGpus ? "cuda:0" : "cpu");
-    form.append("detector", parameters.detector);
+
+    // Add all form fields at once
+    Object.entries({
+      jobId: inferenceId,
+      device: parameters.useGpus ? "cuda:0" : "cpu",
+      detector: parameters.detector,
+      goal_frame_idx: parameters.goalFrameId,
+      frame_step: parameters.frameStep,
+      start_frame: parameters.startFrame,
+      end_frame: parameters.endFrame,
+    }).forEach(([key, value]) => form.append(key, value));
+
+    // Add video buffers
     form.append("goal_video", goalVideoBuffer, { filename: "goal.mp4" });
     form.append("current_video", currentVideoBuffer, {
       filename: "current.mp4",
     });
-    form.append("goal_frame_idx", parameters.goalFrameId);
-    form.append("frame_step", parameters.frameStep);
-    form.append("start_frame", parameters.startFrame);
-    form.append("end_frame", parameters.endFrame);
 
-    const res = await axios.post<CNSResponse>(
-      `http://${enviroment.fastApiHost}:${enviroment.fastApiPort}/analyze`,
-      form,
-      {
-        headers: form.getHeaders(),
-        maxBodyLength: Infinity,
-        maxContentLength: Infinity,
-      },
-    );
+    const { data } = await axios.post<CNSResponse>(`${baseUrl}/analyze`, form, {
+      headers: form.getHeaders(),
+      maxBodyLength: Infinity,
+      maxContentLength: Infinity,
+    });
 
-    return res.data;
+    return data;
   }
 
   /**
@@ -96,11 +102,11 @@ export class InferenceJobProcessor {
    * @returns A promise that resolves to a Buffer containing the ZIP file data.
    */
   private async downloadResultZip(download_url: string): Promise<Buffer> {
-    const response = await axios.get<ArrayBuffer>(
-      `http://${enviroment.fastApiHost}:${enviroment.fastApiPort}${download_url}`,
-      { responseType: "arraybuffer" },
-    );
-    return Buffer.from(response.data);
+    const baseUrl = `http://${enviroment.fastApiHost}:${enviroment.fastApiPort}`;
+    const { data } = await axios.get<ArrayBuffer>(`${baseUrl}${download_url}`, {
+      responseType: "arraybuffer",
+    });
+    return Buffer.from(data);
   }
 
   /**
@@ -115,27 +121,23 @@ export class InferenceJobProcessor {
     resultZip: Buffer,
   ): Promise<void> {
     try {
-      // Existing result check
-      const existingResult =
-        await this.resultRepository.findByInferenceJobId(inferenceId);
+      // const existingResult =
+      //   await this.resultRepository.findByInferenceJobId(inferenceId);
 
-      if (existingResult) {
-        // Update existing result
-        await this.resultRepository.updateJsonResult(
-          existingResult.id,
-          resultJson,
-        );
-        await this.resultRepository.saveImageZip(existingResult.id, resultZip);
-      } else {
-        // Create new result
-        const resultId = await this.resultRepository.createResult({
-          inference_job_id: inferenceId,
-          json_res: resultJson,
-        } as any);
+      // if (existingResult) {
+      //   // Update existing result in parallel
+      //   await Promise.all([
+      //     this.resultRepository.updateJsonResult(existingResult.id, resultJson),
+      //     this.resultRepository.saveImageZip(existingResult.id, resultZip),
+      //   ]);
+      // } else {
+      // Create new result
+      const resultId = await this.resultRepository.createResult({
+        inferenceJob_Id: inferenceId,
+        json_res: resultJson,
+      } as any);
 
-        // Save ZIP file to filesystem
-        await this.resultRepository.saveImageZip(resultId, resultZip);
-      }
+      await this.resultRepository.saveImageZip(resultId, resultZip);
     } catch (error) {
       throw getError(ErrorEnum.GENERIC_ERROR);
     }

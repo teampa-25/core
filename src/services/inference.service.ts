@@ -9,7 +9,7 @@ import { VideoRepository } from "@/repositories/video.repository";
 import { getError } from "@/common/utils/api-error";
 import { ErrorEnum, InferenceJobStatus } from "@/common/enums";
 import { InferCreationAttributes } from "sequelize";
-import { InferenceParameters } from "@/common/types";
+import { InferenceJobData, InferenceParameters } from "@/common/types";
 import { FileSystemUtils } from "@/common/utils/file-system";
 import { INFERENCE } from "@/common/const";
 import { WebSocketService } from "./websocket.service";
@@ -49,8 +49,6 @@ export class InferenceJobService {
     parameters: InferenceParameters,
     range: string,
   ): Promise<string[]> => {
-    logger.debug("SOB: son of a bitch im here");
-
     // Validate dataset exists for user
     const dataset = await this.datasetRepository.findByIdAndUserId(
       datasetId,
@@ -64,11 +62,7 @@ export class InferenceJobService {
         ? await this.videoRepository.findByDatasetId(datasetId)
         : await this.getVideosByRange(datasetId, range);
 
-    logger.debug("SOB: ahaha porcoooooo");
-
-    if (!videos?.length) {
-      throw getError(ErrorEnum.BAD_REQUEST_ERROR);
-    }
+    if (!videos?.length) throw getError(ErrorEnum.BAD_REQUEST_ERROR);
 
     // Sort videos by creation date
     const sorted = videos.sort(
@@ -83,15 +77,12 @@ export class InferenceJobService {
       }
     }
 
-    logger.debug("SOB: mannaggia al clero tutto");
-
     // Calculate inference cost
     let inferenceCost = 0;
     if (sorted.length === 1) {
       inferenceCost = sorted[0].frame_count * INFERENCE.COST_OF_INFERENCE;
     } else {
       for (let i = 0; i < sorted.length; i++) {
-        logger.debug("SOB: anubi il dio"); //TODO remove before mancini see this
         inferenceCost += sorted[i].frame_count;
       }
       inferenceCost *= INFERENCE.COST_OF_INFERENCE;
@@ -105,13 +96,27 @@ export class InferenceJobService {
       inferenceCost,
     );
     if (!hasCredits) {
-      const err = getError(ErrorEnum.UNAUTHORIZED_ERROR).toJSON();
+      const abortedJobData = {
+        dataset_id: datasetId,
+        user_id: userId,
+        goal_id: sorted[0].id,
+        current_id: sorted[0].id,
+        params: parameters,
+        status: InferenceJobStatus.ABORTED,
+      } as InferCreationAttributes<InferenceJob>;
+
+      //Create aborted job
+      const abortedJobId =
+        await this.inferenceRepository.createInferenceJob(abortedJobData);
+      const err = getError(ErrorEnum.UNAUTHORIZED_ERROR).getErrorObj();
+
       this.wsService.notifyInferenceStatusUpdate(
         userId,
-        datasetId,
+        abortedJobId,
         InferenceJobStatus.ABORTED,
         err.msg,
       );
+      logger.error(`[BullMQ] Job ${abortedJobId} failed: ${err.msg}`);
       throw getError(ErrorEnum.UNAUTHORIZED_ERROR);
     }
 
@@ -137,13 +142,15 @@ export class InferenceJobService {
         await this.inferenceRepository.createInferenceJob(jobData);
       createdJobIds.push(inferenceId);
 
-      const videoBuffer = await FileSystemUtils.readVideoFile(video.file);
-      await inferenceQueue.add("run", {
+      const inferenceJobData: InferenceJobData = {
         inferenceId,
-        goalVideoBuffer: videoBuffer,
-        currentVideoBuffer: videoBuffer,
+        userId,
+        goalVideoPath: video.file,
+        currentVideoPath: video.file,
         params: parameters,
-      });
+      };
+
+      await inferenceQueue.add("run", inferenceJobData);
 
       return createdJobIds;
     }
@@ -165,17 +172,15 @@ export class InferenceJobService {
         await this.inferenceRepository.createInferenceJob(jobData);
       createdJobIds.push(inferenceId);
 
-      const [targetVideoBuffer, currentVideoBuffer] = await Promise.all([
-        FileSystemUtils.readVideoFile(target.file),
-        FileSystemUtils.readVideoFile(current.file),
-      ]);
-
-      await inferenceQueue.add("run", {
-        inferenceId,
-        goalVideoBuffer: targetVideoBuffer,
-        currentVideoBuffer: currentVideoBuffer,
+      const inferenceJobData: InferenceJobData = {
+        inferenceId: inferenceId,
+        userId: userId,
+        goalVideoPath: target.file,
+        currentVideoPath: current.file,
         params: parameters,
-      });
+      };
+
+      await inferenceQueue.add("run", inferenceJobData);
     }
 
     return createdJobIds;
@@ -187,13 +192,15 @@ export class InferenceJobService {
    * @returns the inference job status
    */
   getInferenceStatus = async (jobId: string): Promise<InferenceJobStatus> => {
-    const status = await this.inferenceRepository
-      .findById(jobId)
-      .then((inference) => {
-        if (!inference) throw getError(ErrorEnum.NOT_FOUND_ERROR);
-        return inference.status;
-      });
-    return status;
+    logger.info(
+      `[InferenceJobService] Getting status for job ${jobId} AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA`,
+    );
+    const inference = await this.inferenceRepository.findById(jobId);
+    if (!inference) throw getError(ErrorEnum.NOT_FOUND_ERROR);
+    logger.info(
+      `[InferenceJobService] Found inference job: ${inference.id} with status ${inference.status} FRAAAAADJDJDJDJDJDDJDJDHDHSDHJSD`,
+    );
+    return inference.status;
   };
 
   /**

@@ -10,6 +10,7 @@ const router = Router();
 const userController = new UserController();
 
 router.use(authenticate, authorize(UserRole.USER, UserRole.ADMIN));
+// get user's credits
 router.get("/credits", userController.credits);
 
 export default router;

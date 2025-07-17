@@ -1,3 +1,4 @@
+import { CNSResponse } from "@/common/types";
 import {
   DataTypes,
   Model,
@@ -5,6 +6,7 @@ import {
   InferCreationAttributes,
   ForeignKey,
   Sequelize,
+  CreationOptional,
 } from "sequelize";
 
 /**
@@ -17,12 +19,12 @@ export class Result extends Model<
   InferAttributes<Result>,
   InferCreationAttributes<Result>
 > {
-  declare id: string;
-  declare inference_job_id: ForeignKey<string>;
-  declare json_res: object;
-  declare image_zip: string;
-  declare created_at: Date;
-  declare updated_at: Date;
+  declare id: CreationOptional<string>;
+  declare inferenceJob_id: ForeignKey<string>;
+  declare json_res: CNSResponse;
+  declare image_zip: CreationOptional<string>;
+  declare created_at: CreationOptional<Date>;
+  declare updated_at: CreationOptional<Date>;
 
   static initModel(sequelize: Sequelize) {
     Result.init(
@@ -32,7 +34,7 @@ export class Result extends Model<
           defaultValue: DataTypes.UUIDV4,
           primaryKey: true,
         },
-        inference_job_id: {
+        inferenceJob_id: {
           type: DataTypes.UUID,
           allowNull: false,
           unique: true,
