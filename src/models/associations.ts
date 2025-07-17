@@ -42,11 +42,11 @@ export function setupAssociations() {
     foreignKey: "current_id",
     as: "currentVideo",
   });
-  InferenceJob.hasOne(Result, { foreignKey: "inferenceJob_id", as: "result" });
+  InferenceJob.hasOne(Result, { foreignKey: "inference_job_id", as: "result" });
 
   // Result associations
   Result.belongsTo(InferenceJob, {
-    foreignKey: "inferenceJob_id",
+    foreignKey: "inference_job_id",
     as: "inferenceJob",
   });
 }
