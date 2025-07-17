@@ -43,7 +43,7 @@ export class UserService {
       !foundUser.password ||
       !(await comparePass(password, foundUser.password))
     ) {
-      throw getError(ErrorEnum.NOT_FOUND_ERROR);
+      throw getError(ErrorEnum.UNAUTHORIZED_ERROR);
     }
 
     return JwtUtils.generateToken({
@@ -87,5 +87,18 @@ export class UserService {
     );
 
     return updatedUser?.credit!;
+  }
+
+  /**
+   * Delete User
+   * @param email The email of the user.
+   * @returns The updated number of credits, or null if the user was not found.
+   */
+  async delete(email: string): Promise<void> {
+    try {
+      await this.userRepo.delete(email);
+    } catch {
+      throw getError(ErrorEnum.GENERIC_ERROR).toJSON();
+    }
   }
 }

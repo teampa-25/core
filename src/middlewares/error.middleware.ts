@@ -1,6 +1,7 @@
 import { Response, Request, NextFunction } from "express";
 import { ErrorObj, getError } from "@/common/utils/api-error";
 import { ErrorEnum } from "@/common/enums";
+import { StatusCodes } from "http-status-codes";
 
 /**
  * Middleware function to handle 404 errors.
@@ -9,7 +10,9 @@ import { ErrorEnum } from "@/common/enums";
  */
 export const notFoundHandler = (req: Request, res: Response): void => {
   const errorObj = getError(ErrorEnum.NOT_FOUND_ERROR)!;
-  const { status, msg } = errorObj.getErrorObj();
+
+  const { status, msg } = errorObj.toJSON();
+
   res.status(status).json({
     success: false,
     error: `Route ${req.method} ${req.originalUrl} not found: ${msg}`,
@@ -22,23 +25,21 @@ export const notFoundHandler = (req: Request, res: Response): void => {
  * otherwise is converted to Generic error (500)
  */
 export const errorConverter = (
-  err: any,
+  err: ErrorObj | Error,
   req: Request,
   res: Response,
   next: NextFunction,
 ): void => {
-  if (err && typeof err.getErrorObj === "function") {
+  if (err instanceof ErrorObj) {
     return next(err);
-  }
-
-  const errorObj = getError(ErrorEnum.GENERIC_ERROR)!;
-  const { status, msg } = errorObj.getErrorObj();
-
-  const convertedError: ErrorObj = {
-    getErrorObj: () => ({ status, msg }),
-  };
-
-  next(convertedError);
+  } else if (err instanceof Error) {
+    const convertedError = new ErrorObj(
+      StatusCodes.INTERNAL_SERVER_ERROR,
+      err.message,
+      ErrorEnum.GENERIC_ERROR,
+    );
+    next(convertedError);
+  } else next(getError(ErrorEnum.GENERIC_ERROR));
 };
 
 /**
@@ -48,9 +49,10 @@ export const errorHandler = (
   err: ErrorObj,
   req: Request,
   res: Response,
+  next: NextFunction,
 ): void => {
-  if (err && typeof err.getErrorObj === "function") {
-    const { status, msg } = (err as ErrorObj).getErrorObj();
+  if (err instanceof ErrorObj) {
+    const { status, msg } = (err as ErrorObj).toJSON();
     res.status(status).json({
       success: false,
       error: msg,
@@ -58,5 +60,14 @@ export const errorHandler = (
       path: req.originalUrl,
       timestamp: new Date().toISOString(),
     });
+  } else {
+    res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
+      success: false,
+      error: "nobody knows what happend",
+      method: req.method,
+      path: req.originalUrl,
+      timestamp: new Date().toISOString(),
+    });
   }
+  next();
 };

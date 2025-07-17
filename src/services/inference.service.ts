@@ -105,7 +105,7 @@ export class InferenceJobService {
       inferenceCost,
     );
     if (!hasCredits) {
-      const err = getError(ErrorEnum.UNAUTHORIZED_ERROR).getErrorObj();
+      const err = getError(ErrorEnum.UNAUTHORIZED_ERROR).toJSON();
       this.wsService.notifyInferenceStatusUpdate(
         userId,
         datasetId,

@@ -18,4 +18,5 @@ router.post(
 );
 
 router.use("/queues", serverAdapter.getRouter());
+
 export default router;
