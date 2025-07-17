@@ -29,6 +29,10 @@ export const UserSchema = {
     email: Joi.string().email().required(),
     credits: Joi.number().min(0).required(),
   }),
+
+  delete: Joi.object({
+    email: Joi.string().email().required(),
+  }),
 };
 
 /**

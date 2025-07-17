@@ -2,6 +2,9 @@ import { Request, Response } from "express";
 import { StatusCodes } from "http-status-codes";
 import { UserService } from "@/services/user.service";
 import { catchAsync } from "@/common/utils/catchAsync";
+import { authorize } from "@/middlewares/authorize.middleware";
+import { ErrorEnum, UserRole } from "@/common/enums";
+import { getError } from "@/common/utils/api-error";
 
 /**
  * UserController is responsible for handling user-related operations.
@@ -35,7 +38,6 @@ export class UserController {
   login = catchAsync(async (req: Request, res: Response) => {
     const { email, password } = req.body;
     const token = await this.userService.login(email, password);
-
     return res.status(StatusCodes.OK).json({
       message: "Login successful",
       token,
@@ -74,5 +76,16 @@ export class UserController {
       message: "User's credits updated",
       newBalance: newBalance,
     });
+  });
+
+  /**
+   * Deletes a user
+   * @param req Request containing the user ID
+   * @param res Response result
+   * @returns
+   */
+  delete = catchAsync(async (req: Request, res: Response) => {
+    await this.userService.delete(req.body.email);
+    return res.status(StatusCodes.OK);
   });
 }

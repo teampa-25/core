@@ -16,7 +16,7 @@ export function authenticate(req: Request, res: Response, next: NextFunction) {
     const authHeader = req.headers.authorization;
 
     if (!authHeader) {
-      const error = getError(ErrorEnum.UNAUTHORIZED_ERROR);
+      const error = getError(ErrorEnum.BAD_REQUEST_ERROR);
       throw error;
     }
 
@@ -40,7 +40,7 @@ export function authenticate(req: Request, res: Response, next: NextFunction) {
 
     next();
   } catch (err) {
-    const error = getError(ErrorEnum.FORBIDDEN_ERROR).getErrorObj();
+    const error = getError(ErrorEnum.UNAUTHORIZED_ERROR).toJSON();
     res.status(error?.status || 403).json({
       message: error?.msg || "Invalid or expired token",
     });

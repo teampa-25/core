@@ -101,4 +101,14 @@ export class UserRepository {
     const newCreditAmount = user.credit - creditsToDeduct;
     return await this.userDAO.update(userId, { credit: newCreditAmount });
   }
+
+  /**
+   * Delete User
+   * @param email user email (which uniquely identifies a user)
+   */
+  async delete(email: string): Promise<void> {
+    const user = await this.userDAO.getByEmail(email);
+    // NOTE: why is id string | undefined? -beg
+    if (user) await this.userDAO.delete(user.id!);
+  }
 }

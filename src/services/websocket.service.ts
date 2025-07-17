@@ -113,7 +113,7 @@ export class WebSocketService {
         if (!ws.isAuthenticated) {
           this.sendError(
             ws,
-            getError(ErrorEnum.UNAUTHORIZED_ERROR).getErrorObj().msg,
+            getError(ErrorEnum.UNAUTHORIZED_ERROR).toJSON().msg,
           );
           return;
         }
@@ -161,10 +161,7 @@ export class WebSocketService {
         `Authentication failed for connection ${connectionId}:`,
         error,
       );
-      this.sendError(
-        ws,
-        getError(ErrorEnum.UNAUTHORIZED_ERROR).getErrorObj().msg,
-      );
+      this.sendError(ws, getError(ErrorEnum.UNAUTHORIZED_ERROR).toJSON().msg);
       ws.close(WEBSOCKET.POLICY_VIOLATION, "Authentication failed");
     }
   }
