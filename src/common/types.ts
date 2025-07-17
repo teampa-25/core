@@ -1,4 +1,4 @@
-import { Detector } from "@/common/enums";
+import { Detector, InferenceJobStatus } from "@/common/enums";
 
 /**
  * @description Interface for video information
@@ -64,6 +64,12 @@ interface InferenceJobData {
   params: InferenceParameters;
 }
 
+interface InferenceJobStatusResults {
+  status: InferenceJobStatus;
+  results?: CNSResponse;
+  failingReason?: string;
+}
+
 /**
  * @description Interface for WebSocket notification data
  */
@@ -110,4 +116,5 @@ export {
   InferenceJobData,
   WebSocketNotification,
   Enviroment,
+  InferenceJobStatusResults,
 };

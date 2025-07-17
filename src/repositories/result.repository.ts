@@ -5,6 +5,7 @@ import { FileSystemUtils } from "@/common/utils/file-system";
 import enviroment from "@/config/enviroment";
 import { getError } from "@/common/utils/api-error";
 import { ErrorEnum } from "@/common/enums";
+import { CNSResponse } from "@/common/types";
 
 /**
  * ResultRepository is responsible for managing result data.
@@ -112,7 +113,7 @@ export class ResultRepository {
    * @param jobId - The ID of the job
    * @returns A Promise that resolves to the JSON result data or null if not found
    */
-  async getJsonResult(jobId: string): Promise<object | null> {
+  async getJsonResult(jobId: string): Promise<CNSResponse | null> {
     const result = await this.resultDAO.getByInferenceJobId(jobId);
     return result ? result.json_res : null;
   }

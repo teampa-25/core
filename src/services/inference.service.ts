@@ -9,11 +9,17 @@ import { VideoRepository } from "@/repositories/video.repository";
 import { getError } from "@/common/utils/api-error";
 import { ErrorEnum, InferenceJobStatus } from "@/common/enums";
 import { InferCreationAttributes } from "sequelize";
-import { InferenceJobData, InferenceParameters } from "@/common/types";
+import {
+  CNSResponse,
+  InferenceJobData,
+  InferenceJobStatusResults,
+  InferenceParameters,
+} from "@/common/types";
 import { FileSystemUtils } from "@/common/utils/file-system";
 import { INFERENCE } from "@/common/const";
 import { WebSocketService } from "./websocket.service";
 import { logger } from "@/config/logger";
+import { Job } from "bullmq";
 
 /**
  * Class responsible for handling inference jobs.
@@ -192,15 +198,42 @@ export class InferenceJobService {
    * @returns the inference job status
    */
   getInferenceStatus = async (jobId: string): Promise<InferenceJobStatus> => {
-    logger.info(
-      `[InferenceJobService] Getting status for job ${jobId} AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA`,
-    );
     const inference = await this.inferenceRepository.findById(jobId);
     if (!inference) throw getError(ErrorEnum.NOT_FOUND_ERROR);
-    logger.info(
-      `[InferenceJobService] Found inference job: ${inference.id} with status ${inference.status} FRAAAAADJDJDJDJDJDDJDJDHDHSDHJSD`,
-    );
     return inference.status;
+  };
+
+  /**
+   * Retrieves the inference job status with results if completed or error if failed
+   * @param jobId The ID of the inference job.
+   * @returns Object containing status and results if completed or error if failed
+   */
+  getInferenceStatusWithResults = async (
+    jobId: string,
+  ): Promise<InferenceJobStatusResults> => {
+    const inference = await this.inferenceRepository.findById(jobId);
+    if (!inference) throw getError(ErrorEnum.NOT_FOUND_ERROR);
+
+    const response: InferenceJobStatusResults = {
+      status: inference.status,
+    };
+
+    if (inference.status === InferenceJobStatus.COMPLETED) {
+      const results = await this.resultRepository.getJsonResult(jobId);
+      if (!results) throw ErrorEnum.NOT_FOUND_ERROR;
+      response.results = results;
+    } else if (inference.status === InferenceJobStatus.FAILED) {
+      const queueJobs = await inferenceQueue.getJobs(["failed"]);
+      const failedJob = queueJobs.find((job) => job.data.inferenceId === jobId);
+      if (failedJob) {
+        const failedReason = await failedJob.failedReason();
+        response.failingReason = failedReason || "Unknown error";
+      } else {
+        response.failingReason = "Job failed but no error details available";
+      }
+    }
+
+    return response;
   };
 
   /**

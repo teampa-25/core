@@ -34,14 +34,21 @@ export class InferenceJobController {
 
   /**
    * Gets the status of an inference job
+   * is also returns JSON results if status is COMPLETED and failing reason if status is FAILED
    * @param req Request containing jobId parameter
    * @param res Response object to send back status
    * @returns Promise resolving to job status
    */
   getInferenceStatus = catchAsync(async (req: Request, res: Response) => {
     const { id } = req.params;
-    const status = await this.inferenceJobService.getInferenceStatus(id);
-    res.status(StatusCodes.OK).json({ status: status });
+    const result =
+      await this.inferenceJobService.getInferenceStatusWithResults(id);
+
+    if (result && result !== null) {
+      res.status(StatusCodes.OK).json(result);
+    } else {
+      res.status(StatusCodes.OK).json({ status: result });
+    }
   });
 
   /**
