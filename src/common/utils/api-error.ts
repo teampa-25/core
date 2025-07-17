@@ -60,7 +60,11 @@ const errorConfig: Record<ErrorEnum, { status: number; msg: string }> = {
   },
   [ErrorEnum.IM_A_TEAPOT]: {
     status: StatusCodes.IM_A_TEAPOT,
-    msg: "I'm a teapot",
+    msg: "I'm a teapot.",
+  },
+  [ErrorEnum.INSUFFICIENT_CREDIT]: {
+    status: StatusCodes.UNAUTHORIZED,
+    msg: "Insufficient credits.",
   },
 };
 

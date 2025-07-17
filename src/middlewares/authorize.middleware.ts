@@ -13,7 +13,7 @@ export function authorize(...allowedRoles: UserRole[]) {
     const user = <UserPayload>req.user;
 
     if (!user || !allowedRoles.includes(user.role as UserRole)) {
-      const error = getError(ErrorEnum.FORBIDDEN_ERROR).getErrorObj();
+      const error = getError(ErrorEnum.FORBIDDEN_ERROR).toJSON();
       return res.status(error.status).json({
         message: error.msg,
       });

@@ -108,7 +108,7 @@ export class InferenceJobService {
       //Create aborted job
       const abortedJobId =
         await this.inferenceRepository.createInferenceJob(abortedJobData);
-      const err = getError(ErrorEnum.UNAUTHORIZED_ERROR).getErrorObj();
+      const err = getError(ErrorEnum.INSUFFICIENT_CREDIT).toJSON();
 
       this.wsService.notifyInferenceStatusUpdate(
         userId,
