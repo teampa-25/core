@@ -43,14 +43,6 @@ export class InferenceJobProcessor {
         FileSystemUtils.readVideoFile(currentVideoPath),
       ]);
 
-      logger.info(
-        `Job ${inferenceId}: O LA VITTORIA O TUTTI ACCOPPATI! AVANTI FASTAPI!`,
-      );
-
-      logger.debug(
-        `Job ${inferenceId}: Sending inference request to FastAPI with those porcoddio parameters: ${JSON.stringify(params)}`,
-      );
-
       const resultJson = await this.sendToFastAPI(
         inferenceId,
         params,
