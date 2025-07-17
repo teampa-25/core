@@ -4,65 +4,58 @@
 
 ### Main Tables
 
-#### 1. Users
+#### 1. User
 
 - **id**: UUID (Primary Key)
-- **email**: String, unique, required
-- **password**: String, required
-- **role**: Enum ('user', 'admin'), default 'user'
-- **tokens**: Integer, default 100 (user credits)
-- **createdAt**: Date
-- **updatedAt**: Date
+- **email**: String, unique, required, validated as email
+- **password**: String, required (stored encrypted)
+- **role**: Enum ('user', 'admin'), required
+- **credit**: Integer, default 100, min 0
+- **created_at**: Date, auto-populated
+- **updated_at**: Date, auto-populated
 
-#### 2. Tags
-
-- **id**: UUID (Primary Key)
-- **name**: String, unique, required
-- **createdAt**: Date
-- **updatedAt**: Date
-
-#### 3. Datasets
+#### 2. Dataset
 
 - **id**: UUID (Primary Key)
-- **user_id**: UUID (Foreign Key → Users.id)
+- **user_id**: UUID (Foreign Key → User.id)
 - **name**: String, required
 - **tags**: Array of strings, default []
 - **deleted_at**: Date (nullable, for soft delete)
-- **created_at**: Date
-- **updatedAt**: Date
-  **Constraints:**
-- Unique constraint on (user_id, name) for non-logically deleted records
+- **created_at**: Date, auto-populated
+- **updated_at**: Date, auto-populated
+- **Constraints**: Unique constraint on (user_id, name)
 
-#### 4. Videos
+#### 3. Video
 
 - **id**: UUID (Primary Key)
-- **dataset_id**: UUID (Foreign Key → Datasets.id)
-- **file**: BLOB (video file content)
+- **dataset_id**: UUID (Foreign Key → Dataset.id)
+- **file**: String (path to video file), nullable
 - **name**: String, required
 - **frame_count**: Integer, required
-- **created_at**: Date
-- **updatedAt**: Date
+- **created_at**: Date, auto-populated
+- **updated_at**: Date, auto-populated
 
-#### 5. InferenceJobs
+#### 4. InferenceJob
 
 - **id**: UUID (Primary Key)
-- **dataset_id**: UUID (Foreign Key → Datasets.id)
-- **user_id**: UUID (Foreign Key → Users.id)
-- **video_id**: UUID (Foreign Key → Videos.id)
-- **status**: Enum ('PENDING', 'RUNNING', 'FAILED', 'ABORTED', 'COMPLETED')
+- **dataset_id**: UUID (Foreign Key → Dataset.id)
+- **user_id**: UUID (Foreign Key → User.id)
+- **goal_id**: UUID (Foreign Key → Video.id)
+- **current_id**: UUID (Foreign Key → Video.id)
+- **status**: Enum ('PENDING', 'RUNNING', 'FAILED', 'ABORTED', 'COMPLETED'), default 'PENDING'
 - **params**: JSON (inference parameters)
-- **carbon_footprint**: Integer (carbon footprint in grams)
-- **created_at**: Date
-- **updated_at**: Date
+- **carbon_footprint**: Integer, default 0
+- **created_at**: Date, auto-populated
+- **updated_at**: Date, auto-populated
 
-#### 6. Results
+#### 5. Result
 
 - **id**: UUID (Primary Key)
-- **inferenceJob_id**: UUID (Foreign Key → InferenceJobs.id, unique)
+- **inferenceJob_id**: UUID (Foreign Key → InferenceJob.id, unique)
 - **json_res**: JSON (inference results)
-- **image_zip**: BLOB (ZIP file with resulting images)
-- **created_at**: Date
-- **updatedAt**: Date
+- **image_zip**: String (path to ZIP file), nullable
+- **created_at**: Date, auto-populated
+- **updated_at**: Date, auto-populated
 
 ## Relationships
 
@@ -72,7 +65,8 @@
 - **User → InferenceJobs**: A user can have multiple inference jobs
 - **Dataset → Videos**: A dataset can contain multiple videos
 - **Dataset → InferenceJobs**: A dataset can have multiple inference jobs
-- **Video → InferenceJobs**: A video can have multiple inference jobs
+- **Video → InferenceJobs (as goal)**: A video can be the goal for multiple inference jobs
+- **Video → InferenceJobs (as current)**: A video can be the current for multiple inference jobs
 
 ### One-to-One
 
@@ -82,26 +76,35 @@
 
 The seeders include:
 
-- **3 users**: 1 admin with 1000 tokens, 2 users with 100 and 50 tokens
-- **5 predefined tags** to categorize datasets
-- **2 datasets** with different tags and one logically deleted
+- **Users**: 1 admin with 100,000 credits, 4 regular users with 100 credits each, plus 100 random users
+- **Datasets**: Multiple datasets per user with random names and tags
+- **Videos**: One video per dataset with random names and 1500 frames each
+- **InferenceJobs**: One job per video with random status
+- **Results**: One result per inference job with mock detection data
 
 ## System Costs
 
 According to the project specifications:
 
-- **Upload video**: 0.001 token per frame
-- **Inference**: 0.002 tokens per processed image
-  The system checks the available credits before allowing expensive operations.
+- **Upload video**: 0.001 credit per frame
+- **Inference**: 0.002 credits per processed frame
+
+The system checks the available credits before allowing expensive operations.
 
 ## Implementation Notes
 
-- The models use UUID as primary keys for greater security
-- Datasets support soft delete (deleted_at)
-- Video files and results are stored as BLOB in the database
-- Relationships are managed through foreign keys with CASCADE
+- All models use UUID as primary keys for greater security
+- Datasets support soft delete (deleted_at) with paranoid mode enabled
+- Video files are stored as paths to the filesystem, not as BLOBs
+- Result ZIP files are stored as paths to the filesystem, not as BLOBs
+- All relationships are managed through foreign keys with CASCADE
+- Timestamps are automatically managed with created_at and updated_at fields
 - Inference parameters are stored as JSON for flexibility
+
+## Database Connection
+
+The database connection is managed through a singleton Database class that provides a Sequelize instance. The connection parameters are loaded from environment variables.
 
 ## Workflow to Interact with DB Objects
 
-Controller -> Service -> Repository -> DAO -> Database
+Controller → Service → Repository → DAO → Database
