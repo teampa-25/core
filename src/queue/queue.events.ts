@@ -25,7 +25,6 @@ const inferenceRepo = new InferenceJobRepository();
  * each events update inference job status in db and notify the user via websocket
  */
 queueEvents.on("waiting", async ({ jobId }) => {
-  logger.info(`[BullMQ] Job ${jobId} pending`);
   const job = await inferenceQueue.getJob(jobId);
   if (!job) return;
 

@@ -5,8 +5,6 @@ import { UserController } from "@/controllers/user.controller";
 import { UserRole } from "@/common/enums";
 import { UserSchema } from "@/common/utils/validation-schema";
 import { Router } from "express";
-import { serverAdapter } from "@/config/bull-board";
-import { logger } from "@/config/logger";
 
 const router = Router();
 const userController = new UserController();
@@ -19,8 +17,4 @@ router.post(
   userController.recharge,
 );
 
-router.use("/queues", (req, res, next) => {
-  logger.info(`Accesso alla Bull Board: ${req.url}`);
-  serverAdapter.getRouter()(req, res, next);
-});
 export default router;
