@@ -145,6 +145,7 @@ export class InferenceJobService {
       const videoBuffer = await FileSystemUtils.readVideoFile(video.file);
       await inferenceQueue.add("run", {
         inferenceId,
+        userId,
         goalVideoBuffer: videoBuffer,
         currentVideoBuffer: videoBuffer,
         params: parameters,
@@ -177,6 +178,7 @@ export class InferenceJobService {
 
       await inferenceQueue.add("run", {
         inferenceId,
+        userId,
         goalVideoBuffer: targetVideoBuffer,
         currentVideoBuffer: currentVideoBuffer,
         params: parameters,
