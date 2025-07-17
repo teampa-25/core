@@ -66,7 +66,7 @@ describe("Authenticate middleware", () => {
     expect(res.statusCode).toBe(StatusCodes.UNAUTHORIZED);
   });
 
-  it("should reject invalid invalid password", async () => {
+  it("should reject invalid password", async () => {
     const res = await request(app).post("/api/auth/login").send({
       email: user_email,
       password: "vera_baddie_is_not_the_password",
