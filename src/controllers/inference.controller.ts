@@ -39,8 +39,8 @@ export class InferenceJobController {
    * @returns Promise resolving to job status
    */
   getInferenceStatus = catchAsync(async (req: Request, res: Response) => {
-    const { jobId } = req.params;
-    const status = await this.inferenceJobService.getInferenceStatus(jobId);
+    const { id } = req.params;
+    const status = await this.inferenceJobService.getInferenceStatus(id);
     res.status(StatusCodes.OK).json({ status: status });
   });
 
@@ -51,8 +51,8 @@ export class InferenceJobController {
    * @returns Promise resolving to job results in JSON format
    */
   getInferenceJSONResults = catchAsync(async (req: Request, res: Response) => {
-    const { jobId } = req.params;
-    const json = await this.inferenceJobService.getInferenceJSONResults(jobId);
+    const { id } = req.params;
+    const json = await this.inferenceJobService.getInferenceJSONResults(id);
     res.status(StatusCodes.OK).json({ results: json });
   });
 
@@ -63,8 +63,8 @@ export class InferenceJobController {
    * @returns Promise resolving to job results in ZIP format
    */
   getInferenceZIPResults = catchAsync(async (req: Request, res: Response) => {
-    const { jobId } = req.params;
-    const zip = await this.inferenceJobService.getInferenceZIPResults(jobId);
+    const { id } = req.params;
+    const zip = await this.inferenceJobService.getInferenceZIPResults(id);
     res.status(StatusCodes.OK).json({ results: zip });
   });
 }

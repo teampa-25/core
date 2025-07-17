@@ -8,6 +8,7 @@ import { ErrorEnum } from "@/common/enums";
 import { getError } from "@/common/utils/api-error";
 import { logger } from "@/config/logger";
 import { FileSystemUtils } from "@/common/utils/file-system";
+import { Result } from "@/models";
 
 /**
  * Class responsible for processing inference jobs.
@@ -120,24 +121,23 @@ export class InferenceJobProcessor {
     resultZip: Buffer,
   ): Promise<void> {
     try {
-      const existingResult =
-        await this.resultRepository.findByInferenceJobId(inferenceId);
+      // const existingResult =
+      //   await this.resultRepository.findByInferenceJobId(inferenceId);
 
-      if (existingResult) {
-        // Update existing result in parallel
-        await Promise.all([
-          this.resultRepository.updateJsonResult(existingResult.id, resultJson),
-          this.resultRepository.saveImageZip(existingResult.id, resultZip),
-        ]);
-      } else {
-        // Create new result
-        const resultId = await this.resultRepository.createResult({
-          inferenceJobId: inferenceId,
-          json_res: resultJson,
-        } as any);
+      // if (existingResult) {
+      //   // Update existing result in parallel
+      //   await Promise.all([
+      //     this.resultRepository.updateJsonResult(existingResult.id, resultJson),
+      //     this.resultRepository.saveImageZip(existingResult.id, resultZip),
+      //   ]);
+      // } else {
+      // Create new result
+      const resultId = await this.resultRepository.createResult({
+        inferenceJob_Id: inferenceId,
+        json_res: resultJson,
+      } as any);
 
-        await this.resultRepository.saveImageZip(resultId, resultZip);
-      }
+      await this.resultRepository.saveImageZip(resultId, resultZip);
     } catch (error) {
       throw getError(ErrorEnum.GENERIC_ERROR);
     }

@@ -3,6 +3,7 @@ import { IDAO } from "./interfaces/idao";
 import { Result } from "@/models";
 import { ErrorEnum } from "@/common/enums";
 import { getError } from "@/common/utils/api-error";
+import { logger } from "@/config/logger";
 
 /**
  * ResultDAO class implements IDAO interface for Result model
@@ -101,9 +102,17 @@ export class ResultDAO implements IDAO<Result> {
     try {
       const newResult = await Result.create(data);
 
+      logger.debug(
+        `[ResultDAO] Created new result with ID: ${newResult.id} UIIIIIIIIII`,
+      );
+
       if (!newResult.id) {
         throw getError(ErrorEnum.GENERIC_ERROR);
       }
+
+      logger.debug(
+        `[ResultDAO] Successfully created result with ID: ${newResult.id} superporcodiooooo`,
+      );
 
       return newResult.id;
     } catch (error) {

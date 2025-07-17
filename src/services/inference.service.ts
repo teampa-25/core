@@ -192,13 +192,15 @@ export class InferenceJobService {
    * @returns the inference job status
    */
   getInferenceStatus = async (jobId: string): Promise<InferenceJobStatus> => {
-    const status = await this.inferenceRepository
-      .findById(jobId)
-      .then((inference) => {
-        if (!inference) throw getError(ErrorEnum.NOT_FOUND_ERROR);
-        return inference.status;
-      });
-    return status;
+    logger.info(
+      `[InferenceJobService] Getting status for job ${jobId} AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA`,
+    );
+    const inference = await this.inferenceRepository.findById(jobId);
+    if (!inference) throw getError(ErrorEnum.NOT_FOUND_ERROR);
+    logger.info(
+      `[InferenceJobService] Found inference job: ${inference.id} with status ${inference.status} FRAAAAADJDJDJDJDJDDJDJDHDHSDHJSD`,
+    );
+    return inference.status;
   };
 
   /**
