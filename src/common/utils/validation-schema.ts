@@ -74,8 +74,9 @@ export const InferenceSchema = {
       startFrame: Joi.number().integer().min(0).required(),
       endFrame: Joi.number().integer().min(0).required(),
       frameStep: Joi.number().integer().min(1).required(),
+      goalFrameId: Joi.number().integer().min(0).required(),
       detector: Joi.string().valid("AKAZE", "SIFT", "ORB").required(),
-      useDevice: Joi.boolean().required(),
+      useGpus: Joi.boolean().required(),
     }).required(),
     range: Joi.string()
       .pattern(/^all$|^\d+-\d+$/)

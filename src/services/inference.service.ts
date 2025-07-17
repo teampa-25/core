@@ -142,12 +142,11 @@ export class InferenceJobService {
         await this.inferenceRepository.createInferenceJob(jobData);
       createdJobIds.push(inferenceId);
 
-      const videoBuffer = await FileSystemUtils.readVideoFile(video.file);
       await inferenceQueue.add("run", {
         inferenceId,
         userId,
-        goalVideoBuffer: videoBuffer,
-        currentVideoBuffer: videoBuffer,
+        goalVideoPath: video.file,
+        currentVideoPath: video.file,
         params: parameters,
       });
 
@@ -171,16 +170,11 @@ export class InferenceJobService {
         await this.inferenceRepository.createInferenceJob(jobData);
       createdJobIds.push(inferenceId);
 
-      const [targetVideoBuffer, currentVideoBuffer] = await Promise.all([
-        FileSystemUtils.readVideoFile(target.file),
-        FileSystemUtils.readVideoFile(current.file),
-      ]);
-
       await inferenceQueue.add("run", {
         inferenceId,
         userId,
-        goalVideoBuffer: targetVideoBuffer,
-        currentVideoBuffer: currentVideoBuffer,
+        goalVideoPath: target.file,
+        currentVideoPath: current.file,
         params: parameters,
       });
     }

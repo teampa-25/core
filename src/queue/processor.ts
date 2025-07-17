@@ -7,6 +7,7 @@ import enviroment from "@/config/enviroment";
 import { ErrorEnum } from "@/common/enums";
 import { getError } from "@/common/utils/api-error";
 import { logger } from "@/config/logger";
+import { FileSystemUtils } from "@/common/utils/file-system";
 
 /**
  * Class responsible for processing inference jobs.
@@ -24,44 +25,42 @@ export class InferenceJobProcessor {
    * @param job The job to process.
    */
   async processInference(job: Job): Promise<any> {
-    const { inferenceId, parameters, goalVideoBuffer, currentVideoBuffer } =
+    const { inferenceId, userId, goalVideoPath, currentVideoPath, params } =
       job.data;
 
     try {
-      logger.info(`Processing inference job ${inferenceId}`);
-      logger.debug("Inference Job Data", {
+      logger.debug("Processing inference job", {
         inferenceId,
-        parameters,
+        userId,
+        goalVideoPath,
+        currentVideoPath,
+        params,
       });
 
-      // Simulate processing
-      logger.info(`Job ${inferenceId}: Starting simulation`);
-      await new Promise((resolve) => setTimeout(resolve, 3000));
-      logger.info(`Job ${inferenceId}: Simulation completed`);
+      // Read video files
+      const [goalVideoBuffer, currentVideoBuffer] = await Promise.all([
+        FileSystemUtils.readVideoFile(goalVideoPath),
+        FileSystemUtils.readVideoFile(currentVideoPath),
+      ]);
 
-      // Return a mock result for testing
-      const mockResult = {
-        requestId: inferenceId,
-        velocity: [
-          [0.1, 0.2],
-          [0.3, 0.4],
-        ],
-        carbon_footprint: 25,
-        download_url: "/mock/download/url",
-        message: "Simulation completed successfully",
-      };
+      logger.info(
+        `Job ${inferenceId}: O LA VITTORIA O TUTTI ACCOPPATI! AVANTI FASTAPI!`,
+      );
 
-      // In production, uncomment this code:
-      // const resultJson = await this.sendToFastAPI(
-      //   inferenceId,
-      //   parameters,
-      //   goalVideoBuffer,
-      //   currentVideoBuffer,
-      // );
-      // const resultZip = await this.downloadResultZip(resultJson.download_url);
-      // await this.saveResultsToDatabase(inferenceId, resultJson, resultZip);
+      logger.debug(
+        `Job ${inferenceId}: Sending inference request to FastAPI with those porcoddio parameters: ${JSON.stringify(params)}`,
+      );
 
-      return mockResult;
+      const resultJson = await this.sendToFastAPI(
+        inferenceId,
+        params,
+        goalVideoBuffer,
+        currentVideoBuffer,
+      );
+      const resultZip = await this.downloadResultZip(resultJson.download_url);
+      await this.saveResultsToDatabase(inferenceId, resultJson, resultZip);
+
+      return resultJson;
     } catch (error) {
       logger.error(`Job ${inferenceId} failed with error: ${error}`);
       throw error;
@@ -79,8 +78,8 @@ export class InferenceJobProcessor {
   private async sendToFastAPI(
     inferenceId: string,
     parameters: InferenceParameters,
-    goalVideoBuffer: ArrayBuffer,
-    currentVideoBuffer: ArrayBuffer,
+    goalVideoBuffer: Buffer,
+    currentVideoBuffer: Buffer,
   ): Promise<CNSResponse> {
     const baseUrl = `http://${enviroment.fastApiHost}:${enviroment.fastApiPort}`;
     const form = new FormData();
