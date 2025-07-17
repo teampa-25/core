@@ -173,8 +173,8 @@ export class InferenceJobService {
       createdJobIds.push(inferenceId);
 
       const inferenceJobData: InferenceJobData = {
-        inferenceId,
-        userId,
+        inferenceId: inferenceId,
+        userId: userId,
         goalVideoPath: target.file,
         currentVideoPath: current.file,
         params: parameters,

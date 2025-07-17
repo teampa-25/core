@@ -58,15 +58,15 @@ export class ResultRepository {
     return result || null;
   }
 
-  /**
-   * Updates the JSON result data
-   * @param id - The ID of the result
-   * @param jsonRes - The JSON result data
-   * @returns A Promise that resolves to the updated result or null if not found
-   */
-  async updateJsonResult(id: string, jsonRes: object): Promise<Result | null> {
-    return await this.resultDAO.update(id, { json_res: jsonRes });
-  }
+  // /**
+  //  * Updates the JSON result data
+  //  * @param id - The ID of the result
+  //  * @param jsonRes - The JSON result data
+  //  * @returns A Promise that resolves to the updated result or null if not found
+  //  */
+  // async updateJsonResult(id: string, jsonRes: object): Promise<Result | null> {
+  //   return await this.resultDAO.update(id, { json_res: jsonRes });
+  // }
 
   /**
    * Updates the image ZIP data

@@ -25,7 +25,7 @@ export class InferenceJobProcessor {
    * Process an inference job.
    * @param job The job to process.
    */
-  async processInference(job: Job): Promise<any> {
+  async processInference(job: Job): Promise<CNSResponse> {
     const { inferenceId, userId, goalVideoPath, currentVideoPath, params } =
       job.data;
 

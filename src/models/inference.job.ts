@@ -8,6 +8,7 @@ import {
   CreationOptional,
 } from "sequelize";
 import { InferenceJobStatus } from "@/common/enums";
+import { InferenceParameters } from "@/common/types";
 
 /**
  * InferenceJob Model Definition
@@ -25,7 +26,7 @@ export class InferenceJob extends Model<
   declare goal_id: ForeignKey<string>;
   declare current_id: ForeignKey<string>;
   declare status: CreationOptional<InferenceJobStatus>;
-  declare params: object;
+  declare params: InferenceParameters;
   declare carbon_footprint: CreationOptional<number>;
   declare created_at: CreationOptional<Date>;
   declare updated_at: CreationOptional<Date>;

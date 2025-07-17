@@ -1,3 +1,4 @@
+import { CNSResponse } from "@/common/types";
 import {
   DataTypes,
   Model,
@@ -5,6 +6,7 @@ import {
   InferCreationAttributes,
   ForeignKey,
   Sequelize,
+  CreationOptional,
 } from "sequelize";
 
 /**
@@ -17,12 +19,12 @@ export class Result extends Model<
   InferAttributes<Result>,
   InferCreationAttributes<Result>
 > {
-  declare id: string;
+  declare id: CreationOptional<string>;
   declare inferenceJob_id: ForeignKey<string>;
-  declare json_res: object;
-  declare image_zip: string;
-  declare created_at: Date;
-  declare updated_at: Date;
+  declare json_res: CNSResponse;
+  declare image_zip: CreationOptional<string>;
+  declare created_at: CreationOptional<Date>;
+  declare updated_at: CreationOptional<Date>;
 
   static initModel(sequelize: Sequelize) {
     Result.init(
