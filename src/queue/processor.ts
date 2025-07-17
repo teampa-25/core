@@ -44,7 +44,12 @@ export class InferenceJobProcessor {
       );
       const resultZip = await this.downloadResultZip(resultJson.download_url);
 
-      await this.saveResultsToDatabase(inferenceId, resultJson, resultZip);
+      await this.saveResultsToDatabase(
+        inferenceId,
+        userId,
+        resultJson,
+        resultZip,
+      );
 
       return resultJson;
     } catch (error) {
@@ -112,32 +117,32 @@ export class InferenceJobProcessor {
   /**
    * Save inference results to the database.
    * @param inferenceId The ID of the inference job.
+   * @param userId The user ID.
    * @param resultJson The JSON result of the inference.
    * @param resultZip The ZIP file containing the result images.
    */
   private async saveResultsToDatabase(
     inferenceId: string,
+    userId: string,
     resultJson: CNSResponse,
     resultZip: Buffer,
   ): Promise<void> {
     try {
-      // const existingResult =
-      //   await this.resultRepository.findByInferenceJobId(inferenceId);
-
-      // if (existingResult) {
-      //   // Update existing result in parallel
-      //   await Promise.all([
-      //     this.resultRepository.updateJsonResult(existingResult.id, resultJson),
-      //     this.resultRepository.saveImageZip(existingResult.id, resultZip),
-      //   ]);
-      // } else {
       // Create new result
       const resultId = await this.resultRepository.createResult({
-        inferenceJob_Id: inferenceId,
+        inferenceJob_id: inferenceId, // Cambiato da inferenceJob_Id a inferenceJob_id
         json_res: resultJson,
-      } as any);
+      } as Result);
 
-      await this.resultRepository.saveImageZip(resultId, resultZip);
+      const savedResult = await this.resultRepository.saveImageZip(
+        resultId,
+        resultZip,
+        userId,
+      );
+
+      if (!savedResult) {
+        throw getError(ErrorEnum.GENERIC_ERROR);
+      }
     } catch (error) {
       throw getError(ErrorEnum.GENERIC_ERROR);
     }
