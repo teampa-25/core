@@ -223,10 +223,10 @@ export class InferenceJobService {
       if (!results) throw ErrorEnum.NOT_FOUND_ERROR;
       response.results = results;
     } else if (inference.status === InferenceJobStatus.FAILED) {
-      const queueJobs = await inferenceQueue.getJobs(["failed"]);
+      const queueJobs: Job[] = await inferenceQueue.getFailed();
       const failedJob = queueJobs.find((job) => job.data.inferenceId === jobId);
       if (failedJob) {
-        const failedReason = await failedJob.failedReason();
+        const failedReason = failedJob.failedReason;
         response.failingReason = failedReason || "Unknown error";
       } else {
         response.failingReason = "Job failed but no error details available";
