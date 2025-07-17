@@ -140,16 +140,21 @@ export class ResultRepository {
    * Saves the image ZIP data to the filesystem and updates the result
    * @param id - The ID of the result
    * @param imageZip - The image ZIP buffer
-   * @param basePath - The base path where to save the file (optional)
+   * @param userId - The user ID to determine the save path
    * @returns A Promise that resolves to the updated result or null if not found
    */
   async saveImageZip(
     id: string,
     imageZip: Buffer,
-    basePath: string = enviroment.resultsBasePath,
+    userId: string,
   ): Promise<Result | null> {
+    // Use the user-specific results directory
+    const basePath = FileSystemUtils.getResultsDirectoryPath(userId);
     const zipFileName = `result_${id}_${Date.now()}.zip`;
     const zipFilePath = `${basePath}/${zipFileName}`;
+
+    // Ensure user directories exist
+    await FileSystemUtils.ensureUserDirectories(userId);
 
     // Save ZIP file to filesystem
     await FileSystemUtils.writeZipFile(zipFilePath, imageZip);

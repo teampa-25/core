@@ -102,17 +102,9 @@ export class ResultDAO implements IDAO<Result> {
     try {
       const newResult = await Result.create(data);
 
-      logger.debug(
-        `[ResultDAO] Created new result with ID: ${newResult.id} UIIIIIIIIII`,
-      );
-
       if (!newResult.id) {
         throw getError(ErrorEnum.GENERIC_ERROR);
       }
-
-      logger.debug(
-        `[ResultDAO] Successfully created result with ID: ${newResult.id} superporcodiooooo`,
-      );
 
       return newResult.id;
     } catch (error) {
