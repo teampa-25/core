@@ -9,7 +9,7 @@ module.exports = {
         defaultValue: Sequelize.UUIDV4,
         primaryKey: true,
       },
-      inference_job_id: {
+      inferenceJob_id: {
         type: Sequelize.UUID,
         allowNull: false,
         unique: true,

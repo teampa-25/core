@@ -31,7 +31,7 @@ export class ResultDAO implements IDAO<Result> {
   async getByInferenceJobId(inferenceJobId: string): Promise<Result | null> {
     try {
       return await Result.findOne({
-        where: { inference_job_id: inferenceJobId },
+        where: { inferenceJob_id: inferenceJobId },
       });
     } catch (error) {
       throw getError(ErrorEnum.NOT_FOUND_ERROR);

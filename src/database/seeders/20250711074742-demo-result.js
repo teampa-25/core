@@ -15,7 +15,7 @@ module.exports = {
     await qi.bulkInsert("Result", [
       {
         id: uuidv4(),
-        inference_job_id: e.id, // InferenceJob 1
+        inferenceJob_id: e.id, // InferenceJob 1
         json_res: JSON.stringify({ detections }),
         image_zip: "fake-zip-path.zip", // Changed from Buffer to string path
         created_at: new Date(),
