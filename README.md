@@ -1,4 +1,4 @@
-# InferNode - Node Backend for BAM
+# InferNode - Node Backend for Boost-A-Model
 
 <div style="height:400px; overflow:hidden; margin:auto">
   <img src="./public/InferNode.png" style="width:100%; height:100%; object-fit:cover; object-position:center;" />
