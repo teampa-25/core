@@ -99,7 +99,7 @@ The system checks the available credits before allowing expensive operations.
 - Result ZIP files are stored as paths to the filesystem, not as BLOBs
 - All relationships are managed through foreign keys with CASCADE
 - Timestamps are automatically managed with created_at and updated_at fields
-- Inference parameters are stored as JSON for flexibility
+- Inference parameters are stored as JSON
 
 ## Database Connection
 
