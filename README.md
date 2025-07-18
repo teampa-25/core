@@ -10,11 +10,11 @@
   <sub>Built with ❤️ and probably too much caffeine</sub>
 </div>
 
-## Introduction
+# Introduction
 
 InferNode is a Node.js backend service designed for running inferences on CNS (Correspondence Encoded Neural Image Servo Policy) model. It provides a comprehensive API for managing datasets, videos, and inference jobs with a focus on performance and security.
 
-## Features
+# Features
 
 - **User Authentication & Authorization**
   - JWT-based authentication with RS256 algorithm
@@ -49,7 +49,29 @@ InferNode is a Node.js backend service designed for running inferences on CNS (C
   - Detailed logging with Winston
   - Health check endpoints
 
-## Technology Stack
+- **Git Hooks with Husky and Conventional Commits**
+  - The project leverages Husky to automate code quality enforcement through Git hooks
+  - Pre-commit hooks automatically run:
+    - ESLint for static code analysis and error detection
+    - Prettier for consistent code formatting across the codebase
+    - Commit message validation to ensure they follow conventional commit format
+  - This ensures all code meets quality standards before being committed
+  - Prevents bad commits from entering the codebase
+  - Maintains consistent code style and commit history
+  - Reduces code review friction by catching issues early
+
+    ### Commit types
+    - feat: A new feature
+    - fix: A bug fix
+    - docs: Documentation changes
+    - style: Code style changes (formatting, etc)
+    - refactor: Code changes that neither fix bugs nor add features
+    - perf: Performance improvements
+    - test: Adding or modifying tests
+    - chore: Changes to build process or auxiliary tools
+    - ci: Changes to CI configuration files and scripts
+
+# Technology Stack
 
 - **Backend**: Node.js, Express, TypeScript
 - **Database**: PostgreSQL, Sequelize ORM
@@ -61,15 +83,15 @@ InferNode is a Node.js backend service designed for running inferences on CNS (C
 - **Documentation**: Swagger/OpenAPI
 - **Testing**: Jest
 
-## Installation
+# Installation
 
-### Prerequisites
+## Prerequisites
 
 - Docker and Docker Compose
 - Node.js 18+ (for local development)
 - npm or yarn
 
-### Environment Setup
+## Environment Setup
 
 Create a `.env` file in the root directory with the following variables:
 
@@ -103,15 +125,15 @@ JWT_ALGORITHM=RS256
 SALT_ROUNDS=12
 ```
 
-### Generate JWT Keys
+## Generate JWT Keys
 
 ```bash
 npm run keys
 ```
 
-### Docker Setup
+## Docker Setup
 
-#### First Launch or Rebuild
+### First Launch or Rebuild
 
 ```bash
 docker compose up --build
@@ -119,14 +141,7 @@ docker compose up --build
 docker compose up --build -d
 ```
 
-After the containers are running, initialize the database:
-
-```bash
-docker exec -it infernode-app npx sequelize-cli db:migrate
-docker exec -it infernode-app npx sequelize-cli db:seed:all
-```
-
-#### Subsequent Launches
+### Subsequent Launches
 
 ```bash
 docker compose up
@@ -134,7 +149,7 @@ docker compose up
 docker compose up -d
 ```
 
-### Development Setup
+## Development Setup
 
 The Docker configuration mounts `src` and `tsconfig.json` as volumes, so changes to these files are automatically synced to the container. Changes to other files require a rebuild.
 
@@ -145,13 +160,13 @@ docker exec -it infernode-app npm install package-name
 docker exec -it infernode-app npm uninstall package-name
 ```
 
-## API Documentation
+# API Documentation
 
 Complete API documentation is available at `/api/docs` when the server is running. It provides an interactive interface to explore all endpoints, request/response formats, and authentication requirements.
 
-### API Reference
+## API Reference
 
-#### Authentication
+### Authentication
 
 - **POST `/api/auth/register`**: Register a new user
   - Body: Email and password
@@ -192,7 +207,7 @@ Complete API documentation is available at `/api/docs` when the server is runnin
     }
     ```
 
-#### User Management
+### User Management
 
 - **GET `/api/user/credits`**: Get current user's credit balance
   - Auth: Bearer token required
@@ -222,7 +237,7 @@ Complete API documentation is available at `/api/docs` when the server is runnin
     }
     ```
 
-#### Dataset Management
+### Dataset Management
 
 - **POST `/api/dataset`**: Create a new dataset
   - Auth: Bearer token required
@@ -351,7 +366,7 @@ Complete API documentation is available at `/api/docs` when the server is runnin
     }
     ```
 
-#### Inference Jobs
+### Inference Jobs
 
 - **POST `/api/inference`**: Create and enqueue inference job
   - Auth: Bearer token required
@@ -413,7 +428,7 @@ Complete API documentation is available at `/api/docs` when the server is runnin
   - Returns: ZIP file binary data
   - Note: This endpoint returns a binary file download, not JSON
 
-#### WebSocket
+### WebSocket
 
 - **GET `/api/websocket/stats`**: Get WebSocket connection statistics
   - Auth: Bearer token required
@@ -446,7 +461,7 @@ Complete API documentation is available at `/api/docs` when the server is runnin
     }
     ```
 
-#### Health Check
+### Health Check
 
 - **GET `/api/health`**: Check if server is running
   - Returns: Status and timestamp
@@ -458,7 +473,7 @@ Complete API documentation is available at `/api/docs` when the server is runnin
     }
     ```
 
-## Database Structure
+# Database Structure
 
 The application uses PostgreSQL with the following main tables:
 
@@ -470,11 +485,11 @@ The application uses PostgreSQL with the following main tables:
 
 For detailed database documentation, see [DATABASE_DOC.md](./DATABASE_DOC.md).
 
-## Architecture & Design Patterns
+# Architecture & Design Patterns
 
 InferNode implements a multi-layered architecture with some design patterns to ensure maintainability and separation of concerns.
 
-### Layered Architecture
+## Layered Architecture
 
 The application follows a layered architecture pattern with separation of responsibilities:
 
@@ -503,9 +518,9 @@ The workflow for handling requests follows this path:
 5. **DAO (Data Access Objects)**: Execute database operations and handle queries
 6. **Models**: Define database schema, relationships, and data structures
 
-### Design Patterns Implementation
+## Design Patterns Implementation
 
-#### 1. **Singleton Pattern**
+### 1. **Singleton Pattern**
 
 - **Database Connection**: Ensures single database connection instance across the application
 
@@ -529,7 +544,7 @@ The workflow for handling requests follows this path:
   }
   ```
 
-#### 2. **Repository Pattern**
+### 2. **Repository Pattern**
 
 - **Consistent Interface**: Each repository provides uniform CRUD operations
 - **Example**: `DatasetRepository` encapsulates all dataset-related data operations
@@ -541,7 +556,7 @@ The workflow for handling requests follows this path:
   }
   ```
 
-#### 3. **Data Access Object (DAO) Pattern**
+### 3. **Data Access Object (DAO) Pattern**
 
 - **Interface Implementation**: All DAOs implement the `IDAO<T>` interface for consistency
 
@@ -555,7 +570,7 @@ The workflow for handling requests follows this path:
   }
   ```
 
-#### 4. **Dependency Injection Pattern**
+### 4. **Dependency Injection Pattern**
 
 - **Constructor Injection**: Services inject their dependencies through constructors
 - **Loose Coupling**: Components depend on abstractions rather than concrete implementations
@@ -571,7 +586,7 @@ The workflow for handling requests follows this path:
   }
   ```
 
-#### 5. **Factory Pattern**
+### 5. **Factory Pattern**
 
 - **Error Factory**: Centralized error creation with consistent formatting
 
@@ -581,34 +596,7 @@ The workflow for handling requests follows this path:
   }
   ```
 
-### Architectural Principles
-
-#### **Separation of Concerns**
-
-- Each layer has a single, well-defined responsibility
-- Business logic is isolated from data access and presentation layers
-- Cross-cutting concerns are handled by middleware
-
-#### **Dependency Inversion**
-
-- High-level modules don't depend on low-level modules
-- Both depend on abstractions (interfaces)
-- Facilitates testing and maintainability
-
-#### **Single Responsibility Principle**
-
-- Each class has one reason to change
-- Controllers handle only HTTP concerns
-- Services contain only business logic
-- DAOs handle only data persistence
-
-#### **Open/Closed Principle**
-
-- System is open for extension but closed for modification
-- New features can be added without changing existing code
-- Interface-based design supports extensibility
-
-### Queue System Architecture
+## Queue System Architecture
 
 InferNode implements a queue-based processing system:
 
@@ -619,27 +607,27 @@ InferNode implements a queue-based processing system:
 - **Error Handling**: Automatic retry mechanisms with exponential backoff
 - **Monitoring**: Bull Board dashboard for queue visualization, available at `/api/admin/queues`
 
-### Security Patterns
+## Security Patterns
 
-#### **Authentication & Authorization**
+### **Authentication & Authorization**
 
 - **JWT with RS256**: Asymmetric key encryption for token security
 - **Role-Based Access Control (RBAC)**: User and admin role separation
 - **Middleware-based Security**: Authentication required for protected routes
 
-#### **Data Validation**
+### **Data Validation**
 
 - **Input Sanitization**: Request validation middleware
 - **Type Safety**: TypeScript interfaces ensure data consistency
 - **Schema Validation**: Structured data validation patterns
 
-## Design
+# Design
 
-### UML etc
+## UML etc
 
 [This section will be filled with UML diagrams and architectural designs]
 
-## Contributing
+# Contributing
 
 1. Fork the repository
 2. Create a feature branch: `git checkout -b feature/amazing-feature`
@@ -647,11 +635,11 @@ InferNode implements a queue-based processing system:
 4. Push to the branch: `git push origin feature/amazing-feature`
 5. Open a Pull Request
 
-## License
+# License
 
 This project is licensed under the MIT License - see the LICENSE file for details.
 
-## Acknowledgements
+# Acknowledgements
 
 - [Express](https://expressjs.com/)
 - [Sequelize](https://sequelize.org/)
