@@ -136,7 +136,7 @@ export class VideoAnalyzer {
    */
   private static parseFrameRate(frameRateStr: string): number {
     if (!frameRateStr || frameRateStr === "N/A") {
-      return 30; // TODO: checks if correct => default fallback
+      return 30;
     }
 
     const parts = frameRateStr.split("/");

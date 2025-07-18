@@ -23,7 +23,7 @@
 - **deleted_at**: Date (nullable, for soft delete)
 - **created_at**: Date, auto-populated
 - **updated_at**: Date, auto-populated
-- **Constraints**: Unique constraint on (user_id, name)
+- **Constraints**: Unique constraint on (user_id, name) where deleted_at is null
 
 #### 3. Video
 
