@@ -24,7 +24,7 @@ router.delete(
 );
 
 // Get the list of all datasets or filtered
-router.get("/", validate(DatasetSchema.get), datasetController.getAll);
+router.get("/", validate(DatasetSchema.get, "query"), datasetController.getAll);
 
 // Update a dataset
 router.put(

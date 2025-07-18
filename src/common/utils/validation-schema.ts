@@ -16,8 +16,6 @@ export const UserSchema = {
   register: Joi.object({
     email: Joi.string().email().required(),
     password: Joi.string().required(),
-    // credits: Joi.number().min(0).required(),
-    // role: Joi.string().equal(UserRole).required(),
   }),
 
   login: Joi.object({
@@ -40,7 +38,10 @@ export const UserSchema = {
  */
 export const DatasetSchema = {
   get: Joi.object({
-    tags: Joi.array().items(Joi.string()).optional(),
+    tags: Joi.alternatives()
+      .try(Joi.array().items(Joi.string()), Joi.string())
+      .optional()
+      .custom((value) => (Array.isArray(value) ? value : [value])),
   }),
   create: Joi.object({
     name: Joi.string().required(),

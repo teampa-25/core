@@ -35,7 +35,11 @@ export const validate = (
     }
 
     // replace original data with validated/sanitized data
-    req[target] = value;
+    if (target === "query") {
+      Object.assign(req.query, value);
+    } else {
+      req[target] = value;
+    }
     next();
   };
 };

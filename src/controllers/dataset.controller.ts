@@ -60,10 +60,11 @@ export class DatasetController {
    */
   getAll = catchAsync(async (req: Request, res: Response) => {
     const userId = req.user!.id;
-    const { tags } = req.body;
-    const filters = tags
-      ? { tags: Array.isArray(tags) ? (tags as string[]) : [tags as string] }
-      : undefined;
+    const { tags } = req.query;
+
+    const tagList = tags ? (Array.isArray(tags) ? tags : [tags]) : [];
+    const filters =
+      tagList.length > 0 ? { tags: tagList as string[] } : undefined;
 
     const datasets = await this.datasetService.getDatasets(userId, filters);
 

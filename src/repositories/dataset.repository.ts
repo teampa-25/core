@@ -42,12 +42,10 @@ export class DatasetRepository {
     },
   ): Promise<Dataset[]> {
     if (filters?.tags && filters.tags.length > 0) {
-      // Usa il metodo filterByTags del DAO e filtra per user_id
       const datasets = await this.datasetDAO.filterByTags(filters.tags);
       return datasets.filter((dataset) => dataset.user_id === userId);
     }
 
-    // Se non ci sono filtri per tag, ottieni tutti i dataset dell'utente
     const allDatasets = await this.datasetDAO.getAll();
     return allDatasets.filter((dataset) => dataset.user_id === userId);
   }
