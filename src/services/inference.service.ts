@@ -193,17 +193,6 @@ export class InferenceJobService {
   };
 
   /**
-   * Retrieves the inference job status
-   * @param jobId The ID of the inference job.
-   * @returns the inference job status
-   */
-  getInferenceStatus = async (jobId: string): Promise<InferenceJobStatus> => {
-    const inference = await this.inferenceRepository.findById(jobId);
-    if (!inference) throw getError(ErrorEnum.NOT_FOUND_ERROR);
-    return inference.status;
-  };
-
-  /**
    * Retrieves the inference job status with results if completed or error if failed
    * @param jobId The ID of the inference job.
    * @returns Object containing status and results if completed or error if failed
@@ -214,23 +203,15 @@ export class InferenceJobService {
     const inference = await this.inferenceRepository.findById(jobId);
     if (!inference) throw getError(ErrorEnum.NOT_FOUND_ERROR);
 
-    const response: InferenceJobStatusResults = {
-      status: inference.status,
-    };
+    const response: InferenceJobStatusResults = { status: inference.status };
 
     if (inference.status === InferenceJobStatus.COMPLETED) {
-      const results = await this.resultRepository.getJsonResult(jobId);
-      if (!results) throw ErrorEnum.NOT_FOUND_ERROR;
-      response.results = results;
+      const completedJob = await this.findJobInQueue(jobId, "completed");
+      response.results = completedJob?.returnvalue;
     } else if (inference.status === InferenceJobStatus.FAILED) {
-      const queueJobs: Job[] = await inferenceQueue.getFailed();
-      const failedJob = queueJobs.find((job) => job.data.inferenceId === jobId);
-      if (failedJob) {
-        const failedReason = failedJob.failedReason;
-        response.failingReason = failedReason || "Unknown error";
-      } else {
-        response.failingReason = "Job failed but no error details available";
-      }
+      const failedJob = await this.findJobInQueue(jobId, "failed");
+      response.failingReason =
+        failedJob?.failedReason || "Job failed but no error details available";
     }
 
     return response;
@@ -256,6 +237,24 @@ export class InferenceJobService {
     const results = await this.resultRepository.getImageZip(jobId);
     if (!results) throw getError(ErrorEnum.NOT_FOUND_ERROR);
     return results;
+  };
+
+  /**
+   * Helper method to find a job in the queue by its inference ID
+   * @param jobId The inference job ID
+   * @param queueType The type of queue to search ('completed' or 'failed')
+   * @returns The found job or undefined
+   */
+  private findJobInQueue = async (
+    jobId: string,
+    queueType: "completed" | "failed",
+  ): Promise<Job | undefined> => {
+    const queueJobs: Job[] =
+      queueType === "completed"
+        ? await inferenceQueue.getCompleted()
+        : await inferenceQueue.getFailed();
+
+    return queueJobs.find((job) => job.data.inferenceId === jobId);
   };
 
   /**
