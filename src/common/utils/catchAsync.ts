@@ -1,5 +1,4 @@
 import type { NextFunction, Request, RequestHandler, Response } from "express";
-import { StatusCodes } from "http-status-codes";
 
 /**
  * This utils function helps to catch async errors in express routes
