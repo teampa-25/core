@@ -57,6 +57,7 @@ InferNode is a robust Node.js backend service designed for running inferences on
 - **Authentication**: JWT with RS256
 - **Queue Management**: Redis, BullMQ
 - **Real-time Communication**: WebSockets
+- **Inference**: Torch, FastAPI
 - **Containerization**: Docker, Docker Compose
 - **Documentation**: Swagger/OpenAPI
 - **Testing**: Jest (planned)
@@ -98,7 +99,7 @@ REDIS_HOST=localhost
 REDIS_PORT=6379
 
 # FastAPI configuration
-FASTAPI_HOST=localhost
+FASTAPI_HOST=cns
 FASTAPI_PORT=8000
 ```
 
@@ -467,13 +468,17 @@ The application uses PostgreSQL with the following main tables:
 - **InferenceJob**: Processing jobs with status tracking
 - **Result**: Outputs from inference jobs
 
-For detailed database documentation, see [DATABASE_MODELS.md](./DATABASE_MODELS.md).
+For detailed database documentation, see [DATABASE_DOC.md](./DATABASE_DOC.md).
 
-## Architecture
+## Architecture & Design Patterns
 
-The application follows a layered architecture with a clear separation of concerns:
+InferNode implements a sophisticated multi-layered architecture with several well-established design patterns to ensure scalability, maintainability, and separation of concerns.
 
-```
+### Layered Architecture
+
+The application follows a strict layered architecture pattern with clear separation of responsibilities:
+
+```text
 ┌─────────────────────────────────────────────────────┐
 │                     Router                          │ ← Route definitions
 ├─────────────────────────────────────────────────────┤
@@ -498,14 +503,138 @@ The workflow for handling requests follows this path:
 5. **DAO (Data Access Objects)**: Execute database operations and handle queries
 6. **Models**: Define database schema, relationships, and data structures
 
-### Queue System
+### Design Patterns Implementation
 
-InferNode uses BullMQ with Redis for reliable job processing:
+#### 1. **Singleton Pattern**
 
-- Jobs are added to the queue when inference requests are made
-- Workers process jobs asynchronously
-- Real-time status updates are sent via WebSockets
-- Bull Board provides a UI for monitoring queue status
+- **Database Connection**: Ensures single database connection instance across the application
+
+  ```typescript
+  export class Database {
+    private static instance: Database;
+    public static getInstance(): Sequelize {
+      /* ... */
+    }
+  }
+  ```
+
+- **WebSocket Service**: Maintains single WebSocket server instance for real-time communication
+
+  ```typescript
+  export class WebSocketService {
+    private static instance: WebSocketService;
+    public static getInstance(): WebSocketService {
+      /* ... */
+    }
+  }
+  ```
+
+#### 2. **Repository Pattern**
+
+- **Data Access Abstraction**: Repositories abstract database operations from business logic
+- **Consistent Interface**: Each repository provides uniform CRUD operations
+- **Example**: `DatasetRepository` encapsulates all dataset-related data operations
+
+  ```typescript
+  export class DatasetRepository {
+    async create(datasetData: {...}): Promise<string> { /* ... */ }
+    async findByUserId(userId: string, filters?: {...}): Promise<Dataset[]> { /* ... */ }
+  }
+  ```
+
+#### 3. **Data Access Object (DAO) Pattern**
+
+- **Database Layer Isolation**: DAOs handle direct database interactions
+- **Interface Implementation**: All DAOs implement the `IDAO<T>` interface for consistency
+- **Type Safety**: Leverages TypeScript generics for type-safe database operations
+
+  ```typescript
+  export interface IDAO<T extends Model> {
+    get(id: string): Promise<T | null>;
+    getAll(): Promise<T[]>;
+    update(id: string, data: Partial<T>): Promise<T | null>;
+    delete(id: string): Promise<boolean>;
+    create(data: InferCreationAttributes<T>): Promise<T | string>;
+  }
+  ```
+
+#### 4. **Dependency Injection Pattern**
+
+- **Constructor Injection**: Services inject their dependencies through constructors
+- **Loose Coupling**: Components depend on abstractions rather than concrete implementations
+- **Example**: `DatasetService` injects repositories
+
+  ```typescript
+  export class DatasetService {
+    constructor() {
+      this.datasetRepository = new DatasetRepository();
+      this.videoRepository = new VideoRepository();
+      this.userRepository = new UserRepository();
+    }
+  }
+  ```
+
+#### 5. **Factory Pattern**
+
+- **Error Factory**: Centralized error creation with consistent formatting
+
+  ```typescript
+  export function getError(errorType: ErrorEnum): ApiError {
+    // Error object creation based on type
+  }
+  ```
+
+### Architectural Principles
+
+#### **Separation of Concerns**
+
+- Each layer has a single, well-defined responsibility
+- Business logic is isolated from data access and presentation layers
+- Cross-cutting concerns are handled by middleware
+
+#### **Dependency Inversion**
+
+- High-level modules don't depend on low-level modules
+- Both depend on abstractions (interfaces)
+- Facilitates testing and maintainability
+
+#### **Single Responsibility Principle**
+
+- Each class has one reason to change
+- Controllers handle only HTTP concerns
+- Services contain only business logic
+- DAOs handle only data persistence
+
+#### **Open/Closed Principle**
+
+- System is open for extension but closed for modification
+- New features can be added without changing existing code
+- Interface-based design supports extensibility
+
+### Queue System Architecture
+
+InferNode implements an advanced queue-based processing system:
+
+- **BullMQ Integration**: Redis-backed job queue for reliability
+- **Asynchronous Processing**: Non-blocking inference job execution
+- **Job Persistence**: Jobs survive application restarts
+- **Real-time Updates**: WebSocket notifications for job status changes
+- **Error Handling**: Automatic retry mechanisms with exponential backoff
+- **Monitoring**: Bull Board dashboard for queue visualization
+
+### Security Patterns
+
+#### **Authentication & Authorization**
+
+- **JWT with RS256**: Asymmetric key encryption for token security
+- **Role-Based Access Control (RBAC)**: User and admin role separation
+- **Middleware-based Security**: Authentication required for protected routes
+
+#### **Data Validation**
+
+- **Input Sanitization**: Request validation middleware
+- **Type Safety**: TypeScript interfaces ensure data consistency
+- **Schema Validation**: Structured data validation patterns
 
 ## Design
 
