@@ -73,9 +73,6 @@ export class UserRepository {
     if (!user || user.credit === undefined) {
       return false;
     }
-    logger.debug(
-      `Checking credits for user ${userId}: ${user.credit} available, ${requiredCredits} required?`,
-    );
     return user.credit >= requiredCredits;
   }
 

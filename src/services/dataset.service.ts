@@ -74,14 +74,12 @@ export class DatasetService {
 
     await this.videoRepository.update(videoId, { file: fileName });
 
+    //REFACTOR:
     try {
-      logger.info("checking if file exists");
       await access(fileName, constants.F_OK);
-      logger.info("file exists - throwing error");
       throw getError(ErrorEnum.FORBIDDEN_ERROR); // TODO: find another error to throw that better explains this - this should never happen anyways
     } catch {
       await writeFile(fileName, video);
-      logger.info(`written video in ${fileName}`);
     }
 
     return videoId;
@@ -270,7 +268,6 @@ export class DatasetService {
         }
 
         await this.userRepository.deductCredits(userId, cost);
-        logger.info(`credits deducted ${cost} from ${userId}`);
 
         //TODO: fix message
         return {
@@ -301,8 +298,6 @@ export class DatasetService {
           frameCount,
         );
         await this.userRepository.deductCredits(userId, cost);
-
-        logger.info(`credits deducted ${cost} from ${userId}`);
 
         return {
           message: `${name} - ${r} - video added`,

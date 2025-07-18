@@ -3,6 +3,7 @@ import { IDAO } from "./interfaces/idao";
 import { Video } from "@/models";
 import { getError } from "@/common/utils/api-error";
 import { ErrorEnum } from "@/common/enums";
+import { logger } from "@/config/logger";
 
 /**
  * VideoDAO class implements IDAO interface for Video model

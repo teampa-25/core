@@ -104,7 +104,6 @@ interface Enviroment {
   jwtExpiresIn: string;
   jwtAlgorithm: string;
   saltRounds: number;
-  resultsBasePath: string;
 }
 
 export {

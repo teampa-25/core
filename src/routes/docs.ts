@@ -1,4 +1,4 @@
-import { loadYaml } from "@/docs/swagget";
+import { loadYaml } from "@/docs/swagger";
 import { Router } from "express";
 import swaggerUi from "swagger-ui-express";
 

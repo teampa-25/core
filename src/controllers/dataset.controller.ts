@@ -2,8 +2,6 @@ import { Request, Response } from "express";
 import { StatusCodes } from "http-status-codes";
 import { DatasetService } from "@/services/dataset.service";
 import { catchAsync } from "@/common/utils/catchAsync";
-import { getError } from "@/common/utils/api-error";
-import { ErrorEnum } from "@/common/enums";
 
 /**
  * Dataset Controller where all the dataset-related endpoints are defined.

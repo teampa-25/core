@@ -12,10 +12,6 @@ import {
 } from "@/middlewares/error.middleware";
 import { WebSocketService } from "@/services/websocket.service";
 import helmet from "helmet";
-import { serverAdapter } from "@/config/bull-board";
-import { UserRole } from "./common/enums";
-import { authenticate } from "./middlewares/authenticate.middleware";
-import { authorize } from "./middlewares/authorize.middleware";
 
 /**
  * App and Websocket setup
@@ -33,8 +29,6 @@ app.use(
 app.use(morganMiddleware);
 app.use(express.json());
 
-app.use("/admin/queues", serverAdapter.getRouter());
-app.use("/admin/queues/api", authenticate, authorize(UserRole.ADMIN));
 app.use("/api", routes);
 
 app.use(notFoundHandler);
