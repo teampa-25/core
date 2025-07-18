@@ -50,6 +50,10 @@ const errorConfig: Record<ErrorEnum, { status: number; msg: string }> = {
     status: StatusCodes.CONFLICT,
     msg: "A dataset with the same name already exists for this user.",
   },
+  [ErrorEnum.CONFLICT_ERROR]: {
+    status: StatusCodes.CONFLICT,
+    msg: "File path already exists",
+  },
   [ErrorEnum.INVALID_FILE_FORMAT_ERROR]: {
     status: StatusCodes.UNSUPPORTED_MEDIA_TYPE,
     msg: "Uploaded file format is not supported. Only video or ZIP files are allowed.",

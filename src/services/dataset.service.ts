@@ -5,18 +5,12 @@ import { Dataset } from "@/models";
 import { getError } from "@/common/utils/api-error";
 import { ErrorEnum } from "@/common/enums";
 import { VideoAnalyzer } from "@/common/utils/video-analyzer";
-import { unzipBuffer } from "@/common/utils/unzip";
 import { FileSystemUtils } from "@/common/utils/file-system";
-import { faker } from "@faker-js/faker";
 import { INFERENCE } from "@/common/const";
-
 import * as path from "path";
-import { mkdir, writeFile, access } from "fs/promises";
-import { constants } from "fs";
-
+import { writeFile } from "fs/promises";
 import { logger } from "@/config/logger";
 import decompress from "decompress";
-import { file } from "pdfkit";
 
 /**
  * Service for managing datasets, including creation, retrieval, updating, and deletion.
@@ -48,39 +42,40 @@ export class DatasetService {
 
   /**
    * Adds a video to the repository.
-   * @param userId The ID of the user.
-   * @param videoName The name of the video.
-   * @param video The video file buffer.
-   * @param id The ID of the dataset.
-   * @param frameCount The number of frames in the video.
-   * @returns The ID of the created video.
+   * @param userId User ID
+   * @param videoName Video name
+   * @param video Video buffer
+   * @param datasetId Dataset ID
+   * @param frameCount Frame count
+   * @returns Video ID
    */
   private async addVideoToRepo(
     userId: string,
     videoName: string,
     video: Buffer,
-    id: string,
+    datasetId: string,
     frameCount: number,
   ): Promise<string> {
-    await FileSystemUtils.ensureUserDirectories(userId);
+    //create directories and DB entry in parallel
+    const [videoId] = await Promise.all([
+      this.videoRepository.create({
+        datasetId,
+        name: videoName,
+        frameCount,
+      }),
+      FileSystemUtils.ensureUserDirectories(userId),
+    ]);
 
-    const videoId = await this.videoRepository.create({
-      datasetId: id,
-      name: videoName,
-      frameCount: frameCount,
-    });
+    const filePath = FileSystemUtils.getVideoFilePath(userId, videoId);
 
-    const fileName = FileSystemUtils.getVideoFilePath(userId, videoId);
+    await this.videoRepository.update(videoId, { file: filePath });
 
-    await this.videoRepository.update(videoId, { file: fileName });
-
-    //REFACTOR:
-    try {
-      await access(fileName, constants.F_OK);
-      throw getError(ErrorEnum.FORBIDDEN_ERROR); // TODO: find another error to throw that better explains this - this should never happen anyways
-    } catch {
-      await writeFile(fileName, video);
+    const exists = FileSystemUtils.fileExists(filePath);
+    if (exists) {
+      throw getError(ErrorEnum.CONFLICT_ERROR);
     }
+
+    await writeFile(filePath, video);
 
     return videoId;
   }
@@ -215,96 +210,74 @@ export class DatasetService {
     content: Buffer,
     name: string,
     type: string,
-  ): Promise<any> {
-    // const supportedFormats = ["video/mp4"]; // better somewhere else, i think -beg
+  ): Promise<{ message: string; id: string; costDeducted: number }> {
     const dataset = await this.datasetRepository.findByIdAndUserId(id, userId);
     if (!dataset) throw getError(ErrorEnum.NOT_FOUND_ERROR);
 
     let cost = 0;
+    let videoIds: string[] = [];
 
-    if (type === "zip") {
-      // if (path.extname(filename) !== "zip") throw getError(ErrorEnum.BAD_REQUEST_ERROR);
-      // if (mime !== "application/zip") throw getError(ErrorEnum.BAD_REQUEST_ERROR);
+    try {
+      if (type === "zip") {
+        const files = await decompress(content, {
+          filter: (file) =>
+            path.extname(file.path) === ".mp4" &&
+            !file.path.includes("__MACOSX"),
+        });
 
-      // const files = await unzipBuffer(content, name); // ................................................................
-      const files = await decompress(content, {
-        filter: (file) =>
-          path.extname(file.path) == ".mp4" && !file.path.includes("__MACOSX"),
-      });
+        if (files.length === 0) throw getError(ErrorEnum.BAD_REQUEST_ERROR);
 
-      let totalFrames = 0;
-
-      // TODO: NEEDS REFACTORING AND CHECKING FOR FILETYPES !!!!!!
-      for (const file in files) {
-        const frameCount = await this.calcFrameCount(
-          files[file].data,
-          files[file].path,
+        // Calculate total frames in one pass
+        const frameCountPromises = files.map((file) =>
+          this.calcFrameCount(file.data, file.path),
         );
-        totalFrames = totalFrames + frameCount;
-      }
+        const frameCounts = await Promise.all(frameCountPromises);
+        const totalFrames = frameCounts.reduce((sum, count) => sum + count, 0);
+        cost = Math.ceil(this.calculateCost(totalFrames));
 
-      cost = Math.ceil(this.calculateCost(totalFrames));
-
-      const hasEnoughCredits = await this.userRepository.hasEnoughCredits(
-        userId,
-        cost,
-      );
-      if (!hasEnoughCredits) throw getError(ErrorEnum.UNAUTHORIZED_ERROR);
-      else {
-        for (const file in files) {
-          const frameCount = await this.calcFrameCount(
-            files[file].data,
-            `${name}-${faker.string.alphanumeric(10)}`,
-          );
-
-          // TODO: Should make a constructor for this
-          await this.addVideoToRepo(
-            userId,
-            name,
-            files[file].data,
-            id,
-            frameCount,
-          );
+        // Check credits before processing
+        if (!(await this.userRepository.hasEnoughCredits(userId, cost))) {
+          throw getError(ErrorEnum.INSUFFICIENT_CREDIT);
         }
 
+        // Process all files
+        const uploadPromises = files.map(async (file, index) => {
+          return this.addVideoToRepo(
+            userId,
+            `${name}-${index + 1}`,
+            file.data,
+            id,
+            frameCounts[index],
+          );
+        });
+
+        videoIds = await Promise.all(uploadPromises);
         await this.userRepository.deductCredits(userId, cost);
+      } else if (type === "video") {
+        const frameCount = await this.calcFrameCount(content, name);
+        cost = Math.ceil(this.calculateCost(frameCount));
 
-        //TODO: fix message
-        return {
-          message: "videos added",
-          id,
-          costDeducted: cost,
-        };
-      }
-    } else if (type === "video") {
-      // if (path.extname(filename) !== "mp4") throw getError(ErrorEnum.BAD_REQUEST_ERROR).getErrorObj();
-      // if (mime !== "video/mp4") throw getError(ErrorEnum.BAD_REQUEST_ERROR).getErrorObj();
+        if (!(await this.userRepository.hasEnoughCredits(userId, cost))) {
+          throw getError(ErrorEnum.INSUFFICIENT_CREDIT);
+        }
 
-      const frameCount = await this.calcFrameCount(content, name);
-      cost = Math.ceil(this.calculateCost(frameCount));
-
-      const hasEnoughCredits = await this.userRepository.hasEnoughCredits(
-        userId,
-        cost,
-      );
-
-      if (!hasEnoughCredits) throw getError(ErrorEnum.UNAUTHORIZED_ERROR);
-      else {
-        const r = await this.addVideoToRepo(
-          userId,
-          name,
-          content,
-          id,
-          frameCount,
-        );
+        await this.addVideoToRepo(userId, name, content, id, frameCount);
         await this.userRepository.deductCredits(userId, cost);
-
-        return {
-          message: `${name} - ${r} - video added`,
-          id,
-          costDeducted: cost,
-        };
+      } else {
+        throw getError(ErrorEnum.BAD_REQUEST_ERROR);
       }
+
+      return {
+        message:
+          videoIds.length > 1
+            ? `${videoIds.length} videos added`
+            : `${name} added`,
+        id,
+        costDeducted: cost,
+      };
+    } catch (error) {
+      logger.error(`Error uploading video: ${error}`);
+      throw getError(ErrorEnum.GENERIC_ERROR);
     }
   }
 }

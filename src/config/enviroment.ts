@@ -12,7 +12,7 @@ const enviroment: Enviroment = {
   redisPort: Number(process.env.REDIS_PORT) || 6379,
   redisHost: process.env.REDIS_HOST || "redis",
   fastApiPort: Number(process.env.FASTAPI_PORT) || 8000,
-  fastApiHost: process.env.FASTAPI_HOST || "localhost",
+  fastApiHost: process.env.FASTAPI_HOST || "cns",
   postgresPort: Number(process.env.POSTGRES_PORT) || 5432,
   postgresHost: process.env.POSTGRES_HOST || "postgres",
   postgresUser: process.env.POSTGRES_USER || "admin",

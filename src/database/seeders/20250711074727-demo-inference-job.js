@@ -4,14 +4,58 @@ const crypt = require("bcrypt");
 const { randomInt } = require("crypto");
 const { v4: uuidv4 } = require("uuid");
 
+function estimateCarbonFootprint({ model, device, durationMinutes }) {
+  const base = MODEL_EMISSIONS[model] || 0.5;
+  const multiplier = DEVICE_MULTIPLIER[device] || 1;
+  const time = durationMinutes || 10;
+  return Math.round(base * multiplier * time);
+}
+
+function generateFrames() {
+  // Generate startFrame between 0 and 1000
+  const startFrame = faker.number.int({ min: 0, max: 900 });
+
+  // Generate endFrame greater than startFrame by at least 1
+  const endFrame = faker.number.int({
+    min: startFrame + 1,
+    max: startFrame + 100,
+  });
+
+  // Generate frameStep > 1, say between 2 and 10
+  const frameStep = faker.number.int({ min: 2, max: 10 });
+
+  // goalFrameId strictly between start and end
+  const goalFrameId = faker.number.int({
+    min: startFrame + 1,
+    max: endFrame - 1,
+  });
+
+  return {
+    startFrame,
+    endFrame,
+    frameStep,
+    goalFrameId,
+  };
+}
+
 /** @type {import('sequelize-cli').Migration} */
 module.exports = {
   async insert(qi, s, ids) {
-    // NOTE: I know this is not ideal, but for some reason it doesn't work outside... -beg
     const { faker } = require("@faker-js/faker");
-    // NOTE: this should be an Enum -beg
-    const statuses = ["PENDING", "RUNNING", "FAILED", "ABORTED", "COMPLETED"];
 
+    const statuses = ["PENDING", "RUNNING", "FAILED", "ABORTED", "COMPLETED"];
+    const detectors = ["AKAZE, ORB, SIFT"];
+    const fakeFrames = generateFrames();
+    const MODEL_EMISSIONS = {
+      cns: 0.6, // gCO₂ per minute
+    };
+    const DEVICE_MULTIPLIER = {
+      cpu: 1,
+      gpu: 1.8,
+    };
+    const durationMinutes = randomInt(1, 60);
+    const model = faker.helpers.arrayElement(MODEL_EMISSIONS);
+    const device = faker.helpers.arrayElement(DEVICE_MULTIPLIER);
     await qi.bulkInsert("InferenceJob", [
       {
         id: uuidv4(),
@@ -21,10 +65,18 @@ module.exports = {
         current_id: ids.video_id,
         status: faker.helpers.arrayElement(statuses),
         params: JSON.stringify({
-          threshold: 0.5,
-          model: "cns",
+          startFrame: fakeFrames.startFrame,
+          endFrame: fakeFrames.endFrame,
+          frameStep: fakeFrames.frameStep,
+          goalFrameId: fakeFrames.goalFrameId,
+          detector: faker.helpers.arrayElement(detectors),
+          useGpus: faker.datatype.boolean(0.7),
         }),
-        carbon_footprint: 25, // TODO: write a function that actually calculates it
+        carbon_footprint: estimateCarbonFootprint({
+          model,
+          device,
+          durationMinutes,
+        }),
         created_at: new Date(),
         updated_at: new Date(),
       },
