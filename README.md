@@ -1,4 +1,4 @@
-# InferNode - Node Backend for BAM
+# InferNode - Node Backend for FastCNS.
 
 <div style="height:400px; overflow:hidden; margin:auto">
   <img src="./public/InferNode.png" style="width:100%; height:100%; object-fit:cover; object-position:center;" />
@@ -12,7 +12,7 @@
 
 ## Introduction
 
-InferNode is a robust Node.js backend service designed for running inferences on CNS(Correspondence Encoded Neural Image Servo Policy) model. It provides a comprehensive API for managing datasets, videos, and inference jobs with a focus on performance and security.
+InferNode is a Node.js backend service designed for running inferences on CNS (Correspondence Encoded Neural Image Servo Policy) model. It provides a comprehensive API for managing datasets, videos, and inference jobs with a focus on performance and security.
 
 ## Features
 
@@ -27,7 +27,7 @@ InferNode is a robust Node.js backend service designed for running inferences on
   - Soft deletion support
 
 - **Video Processing**
-  - Upload and manage videos within datasets
+  - Upload and manage videos and zip within datasets
   - Automatic frame counting
   - File system storage with database references
 
@@ -39,7 +39,6 @@ InferNode is a robust Node.js backend service designed for running inferences on
 - **Results Management**
   - JSON results storage
   - ZIP file management for image outputs
-  - One-to-one relationship with inference jobs
 
 - **API Documentation**
   - Swagger UI for interactive API exploration
@@ -55,12 +54,12 @@ InferNode is a robust Node.js backend service designed for running inferences on
 - **Backend**: Node.js, Express, TypeScript
 - **Database**: PostgreSQL, Sequelize ORM
 - **Authentication**: JWT with RS256
-- **Queue Management**: Redis, BullMQ
+- **Queue Management**: Redis, BullMQ, Bull Dashboard
 - **Real-time Communication**: WebSockets
 - **Inference**: Torch, FastAPI
 - **Containerization**: Docker, Docker Compose
 - **Documentation**: Swagger/OpenAPI
-- **Testing**: Jest (planned)
+- **Testing**: Jest
 
 ## Installation
 
@@ -75,32 +74,33 @@ InferNode is a robust Node.js backend service designed for running inferences on
 Create a `.env` file in the root directory with the following variables:
 
 ```env
-# Server configurations
-PORT=3000
+# InferNode API Configurations
+API_PORT=3000
 NODE_ENV=development
-API_VERSION=v1
 
-# JWT Configuration
-JWT_EXPIRATION=24h
-JWT_PRIVATE_KEY_PATH=./keys/private.key
-JWT_PUBLIC_KEY_PATH=./keys/public.key
-JWT_ALGORITHM=RS256
-
-# Database configuration
-DB_HOST=localhost
-DB_PORT=5432
-DB_USERNAME=postgres
-DB_PASSWORD=password
-DB_NAME=InferNode
-DB_DIALECT=postgres
-
-# Redis configuration
-REDIS_HOST=localhost
-REDIS_PORT=6379
-
-# FastAPI configuration
+# CNS Configurations
 FASTAPI_HOST=cns
 FASTAPI_PORT=8000
+
+# Redis Configuration
+REDIS_HOST=redis
+REDIS_PORT=6379
+
+#PostgreSQL Configuration
+POSTGRES_USER=admin
+POSTGRES_PASSWORD=admin
+POSTGRES_DB=db
+POSTGRES_PORT=5432
+POSTGRES_HOST=postgres
+
+# JWT Configuration
+JWT_PRIVATE_KEY_PATH=./keys/private.key
+JWT_PUBLIC_KEY_PATH=./keys/public.key
+JWT_EXPIRES_IN=1h
+JWT_ALGORITHM=RS256
+
+# Number of salt rounds for bcrypt hashing
+SALT_ROUNDS=12
 ```
 
 ### Generate JWT Keys
@@ -472,11 +472,11 @@ For detailed database documentation, see [DATABASE_DOC.md](./DATABASE_DOC.md).
 
 ## Architecture & Design Patterns
 
-InferNode implements a sophisticated multi-layered architecture with several well-established design patterns to ensure scalability, maintainability, and separation of concerns.
+InferNode implements a multi-layered architecture with some design patterns to ensure maintainability and separation of concerns.
 
 ### Layered Architecture
 
-The application follows a strict layered architecture pattern with clear separation of responsibilities:
+The application follows a layered architecture pattern with separation of responsibilities:
 
 ```text
 ┌─────────────────────────────────────────────────────┐
@@ -531,7 +531,6 @@ The workflow for handling requests follows this path:
 
 #### 2. **Repository Pattern**
 
-- **Data Access Abstraction**: Repositories abstract database operations from business logic
 - **Consistent Interface**: Each repository provides uniform CRUD operations
 - **Example**: `DatasetRepository` encapsulates all dataset-related data operations
 
@@ -544,9 +543,7 @@ The workflow for handling requests follows this path:
 
 #### 3. **Data Access Object (DAO) Pattern**
 
-- **Database Layer Isolation**: DAOs handle direct database interactions
 - **Interface Implementation**: All DAOs implement the `IDAO<T>` interface for consistency
-- **Type Safety**: Leverages TypeScript generics for type-safe database operations
 
   ```typescript
   export interface IDAO<T extends Model> {
@@ -613,14 +610,14 @@ The workflow for handling requests follows this path:
 
 ### Queue System Architecture
 
-InferNode implements an advanced queue-based processing system:
+InferNode implements a queue-based processing system:
 
 - **BullMQ Integration**: Redis-backed job queue for reliability
 - **Asynchronous Processing**: Non-blocking inference job execution
 - **Job Persistence**: Jobs survive application restarts
 - **Real-time Updates**: WebSocket notifications for job status changes
 - **Error Handling**: Automatic retry mechanisms with exponential backoff
-- **Monitoring**: Bull Board dashboard for queue visualization
+- **Monitoring**: Bull Board dashboard for queue visualization, available at `/api/admin/queues`
 
 ### Security Patterns
 
