@@ -1,4 +1,3 @@
-import { UserRole } from "@/common/enums";
 import Joi from "joi";
 
 /**
