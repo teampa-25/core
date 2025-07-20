@@ -82,9 +82,58 @@ export const InferenceSchema = {
       goalFrameId: Joi.number().integer().min(0).required(),
       detector: Joi.string().valid("AKAZE", "SIFT", "ORB").required(),
       useGpus: Joi.boolean().required(),
-    }).required(),
+    })
+      .required()
+      .custom((value, helpers) => {
+        // Checks that startFrame is less than endFrame
+        if (value.startFrame >= value.endFrame) {
+          return helpers.error("parameters.startFrame.lessThanEndFrame");
+        }
+
+        // Checks that goalFrameId is within the frame range
+        if (
+          value.goalFrameId < value.startFrame ||
+          value.goalFrameId >= value.endFrame
+        ) {
+          return helpers.error("parameters.goalFrameId.outOfRange");
+        }
+
+        // Checks that frameStep is compatible with the frame range
+        const frameRange = value.endFrame - value.startFrame;
+        if (value.frameStep >= frameRange) {
+          return helpers.error("parameters.frameStep.tooLarge");
+        }
+
+        return value;
+      }),
     range: Joi.string()
       .pattern(/^all$|^\d+-\d+$/)
       .required(),
-  }),
+  })
+    .custom((value, helpers) => {
+      // Validate the video range format
+      if (value.range !== "all") {
+        const rangeMatch = value.range.match(/^(\d+)-(\d+)$/);
+        if (rangeMatch) {
+          const rangeStart = parseInt(rangeMatch[1], 10);
+          const rangeEnd = parseInt(rangeMatch[2], 10);
+
+          // Check that the video range is valid (start < end)
+          if (rangeStart >= rangeEnd) {
+            return helpers.error("range.invalidVideoRange");
+          }
+        }
+      }
+      return value;
+    }, "Inference validation")
+    .messages({
+      "parameters.startFrame.lessThanEndFrame":
+        "startFrame must be less than endFrame",
+      "parameters.goalFrameId.outOfRange":
+        "goalFrameId must be within the range [startFrame, endFrame)",
+      "parameters.frameStep.tooLarge":
+        "frameStep must be smaller than the frame range (endFrame - startFrame)",
+      "range.invalidVideoRange":
+        "Video range must have the format start-end where start < end",
+    }),
 };
