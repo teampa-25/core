@@ -1,7 +1,5 @@
 import { UserRole } from "@/common/enums";
 import { hashPassSync } from "@/common/utils/encryption";
-import { User } from "@/models";
-import { faker } from "@faker-js/faker";
 
 class TestMemory {
   static adminPassword = "vera_baddie";

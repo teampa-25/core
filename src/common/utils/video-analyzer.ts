@@ -3,7 +3,7 @@ import { promisify } from "util";
 import * as fs from "fs";
 import * as path from "path";
 import * as os from "os";
-import { getError } from "./api-error";
+import { ErrorObj, getError } from "./api-error";
 import { ErrorEnum } from "@/common/enums";
 import { VideoInfo } from "@/common/types";
 
@@ -88,6 +88,9 @@ export class VideoAnalyzer {
         frameRate,
       };
     } catch (error) {
+      if (error instanceof ErrorObj) {
+        throw error;
+      }
       throw getError(ErrorEnum.GENERIC_ERROR);
     } finally {
       // Clean up temporary file
@@ -124,6 +127,9 @@ export class VideoAnalyzer {
     try {
       await fs.promises.unlink(filePath);
     } catch (error) {
+      if (error instanceof ErrorObj) {
+        throw error;
+      }
       throw getError(ErrorEnum.GENERIC_ERROR);
     }
   }

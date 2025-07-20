@@ -63,7 +63,7 @@ export const errorHandler = (
   } else {
     res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
       success: false,
-      error: "nobody knows what happend",
+      error: "Nobody knows what happened",
       method: req.method,
       path: req.originalUrl,
       timestamp: new Date().toISOString(),

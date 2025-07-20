@@ -13,6 +13,7 @@ export default [
       "@typescript-eslint": tseslint,
     },
     rules: {
+      ...tseslint.configs.recommended.rules,
       semi: ["error", "always"],
       quotes: ["error", "double"],
     },

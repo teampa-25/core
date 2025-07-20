@@ -1,3 +1,5 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
+/* eslint-disable @typescript-eslint/no-require-imports */
 // Import the middleware function
 import { Request, Response, NextFunction } from "express";
 import { authenticate } from "@/middlewares/authenticate.middleware";
@@ -5,7 +7,6 @@ import { ErrorEnum, UserRole } from "@/common/enums";
 import { UserPayload } from "@/common/types";
 import { JwtUtils } from "@/common/utils/jwt";
 import { authorize } from "@/middlewares/authorize.middleware";
-import { User } from "@/models";
 
 // Mock external dependencies
 jest.mock("@/common/utils/api-error"); // Update path

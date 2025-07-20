@@ -29,7 +29,6 @@ export function authenticate(req: Request, res: Response, next: NextFunction) {
     // decode jwt and extract payload (converted into UserPayload)
     const payload = JwtUtils.verifyToken(token);
     req.user = <UserPayload>payload;
-    throw new Error("strange");
 
     next();
   } catch (err) {

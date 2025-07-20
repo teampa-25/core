@@ -4,7 +4,7 @@ import enviroment from "@/config/enviroment";
 import path from "path";
 import { ErrorEnum } from "../enums";
 import { getError } from "./api-error";
-import { logger } from "@/config/logger";
+import { UserPayload } from "../types";
 
 /**
  * Utility class for JWT operations
@@ -32,8 +32,8 @@ export class JwtUtils {
   private static loadKey(pathStr: string): string {
     try {
       return fs.readFileSync(path.resolve(pathStr), "utf8");
-    } catch {
-      throw getError(ErrorEnum.GENERIC_ERROR);
+    } catch (error) {
+      throw error;
     }
   }
 
@@ -42,14 +42,14 @@ export class JwtUtils {
    * @param payload the payload to sign
    * @returns the generated JWT token or throw an error
    */
-  static generateToken(payload: object): string {
+  static generateToken(payload: UserPayload): string {
     try {
       return jwt.sign(payload, this.privateKey, {
         algorithm: this.algorithm,
         expiresIn: this.expiresIn,
       });
-    } catch (err) {
-      throw getError(ErrorEnum.GENERIC_ERROR);
+    } catch (error) {
+      throw error;
     }
   }
 
@@ -69,7 +69,7 @@ export class JwtUtils {
       }
 
       return payload;
-    } catch (err) {
+    } catch {
       throw getError(ErrorEnum.UNAUTHORIZED_ERROR);
     }
   }

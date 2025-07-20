@@ -13,7 +13,7 @@ const router = Router();
 /**
  * Array object that define all api routes
  */
-const routes: Array<{ path: string; route: any }> = [
+const routes: Array<{ path: string; route: Router }> = [
   {
     path: "/auth",
     route: authRoute,

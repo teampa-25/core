@@ -1,4 +1,5 @@
 import { Detector, InferenceJobStatus } from "@/common/enums";
+import Joi from "joi";
 
 /**
  * @description Interface for video information
@@ -26,7 +27,7 @@ interface UserPayload {
 interface ValidationError {
   field: string;
   message: string;
-  value?: any;
+  value?: Joi.ValidationErrorItem;
   type: string;
 }
 
@@ -76,12 +77,23 @@ interface InferenceJobStatusResults {
 interface WebSocketNotification {
   type: string;
   data: {
-    inferenceId: string;
-    status: string;
-    result?: any;
+    inferenceId?: string;
+    status?: string;
+    result?: CNSResponse | string;
     errorMessage?: string;
+    message?: string;
+    success?: boolean;
+    userId?: string;
   };
   timestamp: Date;
+}
+
+/**
+ * @description Interface for message sent to websocket
+ */
+interface WebSocketAuthMessage {
+  type: string;
+  token: string;
 }
 
 /**
@@ -114,6 +126,7 @@ export {
   InferenceParameters,
   InferenceJobData,
   WebSocketNotification,
+  WebSocketAuthMessage,
   Enviroment,
   InferenceJobStatusResults,
 };
