@@ -46,8 +46,8 @@
   },
   "lint-staged": {
     "*.{ts,js}": [
-      "eslint",
       "eslint --fix",
+      "eslint",
       "prettier --write"
     ],
     "*.{json,md}": [
@@ -81,6 +81,7 @@
     "express": "^5.1.0",
     "husky": "^9.1.7",
     "install": "^0.13.0",
+    "jest": "^30.0.4",
     "lint-staged": "^16.1.2",
     "node-mocks-http": "^1.17.2",
     "nodemon": "^3.1.10",
