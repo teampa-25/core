@@ -549,7 +549,7 @@ The workflow for handling requests follows this path:
 
   ```typescript
   export class DatasetRepository {
-    async create(datasetData: {...}): Promise<string> { /* ... */ }
+    async create(datasetData: {...}): Promise<Dataset> { /* ... */ }
     async findByUserId(userId: string, filters?: {...}): Promise<Dataset[]> { /* ... */ }
   }
   ```
@@ -560,11 +560,11 @@ The workflow for handling requests follows this path:
 
   ```typescript
   export interface IDAO<T extends Model> {
-    get(id: string): Promise<T | null>;
+    get(id: string): Promise<T>;
     getAll(): Promise<T[]>;
-    update(id: string, data: Partial<T>): Promise<T | null>;
-    delete(id: string): Promise<boolean>;
-    create(data: InferCreationAttributes<T>): Promise<T | string>;
+    update(id: string, data: Partial<T>): Promise<T>;
+    delete(id: string): Promise<void>;
+    create(data: InferCreationAttributes<T>): Promise<T>;
   }
   ```
 
@@ -589,7 +589,7 @@ The workflow for handling requests follows this path:
 - **Error Factory**: Centralized error creation with consistent formatting
 
   ```typescript
-  export function getError(errorType: ErrorEnum): ApiError {
+  export function getError(type: ErrorEnum): ErrorObj {
     // Error object creation based on type
   }
   ```
