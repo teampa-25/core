@@ -23,7 +23,7 @@ export class User extends Model<
   public email!: string;
   public password!: string;
   public role!: UserRole;
-  public credit?: number;
+  public credit!: number;
   public created_at?: Date;
   public updated_at?: Date;
 

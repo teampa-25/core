@@ -1,5 +1,7 @@
 import { Dataset } from "@/models";
 import { DatasetDAO } from "@/dao/dataset.dao";
+import { getError } from "@/common/utils/api-error";
+import { ErrorEnum } from "@/common/enums";
 
 /**
  * DatasetRepository is responsible for managing dataset data.
@@ -21,7 +23,7 @@ export class DatasetRepository {
     userId: string;
     name: string;
     tags?: string[];
-  }): Promise<string> {
+  }): Promise<Dataset> {
     return await this.datasetDAO.create({
       user_id: datasetData.userId,
       name: datasetData.name,
@@ -53,9 +55,9 @@ export class DatasetRepository {
   /**
    * Finds a dataset by ID
    * @param id
-   * @returns a Promise that resolves to the dataset or null if not found
+   * @returns a Promise that resolves to the dataset
    */
-  async findById(id: string): Promise<Dataset | null> {
+  async findById(id: string): Promise<Dataset> {
     return await this.datasetDAO.get(id);
   }
 
@@ -63,14 +65,15 @@ export class DatasetRepository {
    * Finds a dataset by ID and user ID
    * @param id
    * @param userId
-   * @returns a Promise that resolves to the dataset or null if not found
+   * @throws NOT FOUND ERROR
+   * @returns a Promise that resolves to the dataset
    */
-  async findByIdAndUserId(id: string, userId: string): Promise<Dataset | null> {
+  async findByIdAndUserId(id: string, userId: string): Promise<Dataset> {
     const dataset = await this.datasetDAO.get(id);
-    if (dataset && dataset.user_id === userId) {
+    if (dataset.user_id === userId) {
       return dataset;
     }
-    return null;
+    throw getError(ErrorEnum.NOT_FOUND_ERROR);
   }
 
   /**
@@ -99,7 +102,7 @@ export class DatasetRepository {
    * Updates a dataset
    * @param id
    * @param updateData
-   * @returns a Promise that resolves to the updated dataset or null if not found
+   * @returns a Promise that resolves to the updated dataset
    */
   async update(
     id: string,
@@ -107,16 +110,15 @@ export class DatasetRepository {
       name?: string;
       tags?: string[];
     },
-  ): Promise<Dataset | null> {
+  ): Promise<Dataset> {
     return await this.datasetDAO.update(id, updateData);
   }
 
   /**
    * Soft deletes a dataset
    * @param id
-   * @returns a Promise that resolves to true if the dataset was deleted, false otherwise
    */
-  async softDelete(id: string): Promise<boolean> {
-    return await this.datasetDAO.delete(id);
+  async softDelete(id: string): Promise<void> {
+    await this.datasetDAO.delete(id);
   }
 }

@@ -9,15 +9,6 @@ import { ErrorEnum } from "@/common/enums";
  * Provides methods to create, retrieve, update, and delete datasets
  */
 export class DatasetDAO implements IDAO<Dataset> {
-  async create(data: InferCreationAttributes<Dataset>): Promise<string> {
-    try {
-      const createdDataset = await Dataset.create(data);
-      return createdDataset.id;
-    } catch (error) {
-      throw getError(ErrorEnum.GENERIC_ERROR);
-    }
-  }
-
   /**
    * Filters datasets by tags
    * @param tags - Array of tags to filter by
@@ -35,16 +26,17 @@ export class DatasetDAO implements IDAO<Dataset> {
       });
       return datasets;
     } catch (error) {
-      throw getError(ErrorEnum.NOT_FOUND_ERROR);
+      throw error;
     }
   }
 
   /**
    * Retrieves a dataset by its ID
    * @param id - The ID of the dataset to retrieve
-   * @returns Promise<Dataset | null> - The dataset if found, null otherwise
+   * @param userId - the id of the dataset's owner
+   * @returns Promise<Dataset> - The dataset if found
    */
-  async get(id: string): Promise<Dataset | null> {
+  async get(id: string): Promise<Dataset> {
     try {
       const dataset = await Dataset.findOne({
         where: {
@@ -52,9 +44,10 @@ export class DatasetDAO implements IDAO<Dataset> {
           deleted_at: null,
         },
       });
+      if (!dataset) throw getError(ErrorEnum.NOT_FOUND_ERROR);
       return dataset;
     } catch (error) {
-      throw getError(ErrorEnum.NOT_FOUND_ERROR);
+      throw error;
     }
   }
 
@@ -71,7 +64,7 @@ export class DatasetDAO implements IDAO<Dataset> {
       });
       return datasets;
     } catch (error) {
-      throw getError(ErrorEnum.NOT_FOUND_ERROR);
+      throw error;
     }
   }
 
@@ -79,28 +72,22 @@ export class DatasetDAO implements IDAO<Dataset> {
    * Updates a dataset by its ID
    * @param id - The ID of the dataset to update
    * @param data - The new data for the dataset
-   * @returns Promise<Dataset | null> - The updated dataset if found, null otherwise
+   * @returns Promise<Dataset> - The updated dataset if found
    */
-  async update(id: string, data: Partial<Dataset>): Promise<Dataset | null> {
+  async update(id: string, data: Partial<Dataset>): Promise<Dataset> {
     try {
       const dataset = await this.get(id);
-
-      if (!dataset) {
-        return null;
-      }
-
       return await dataset.update(data);
     } catch (error) {
-      throw getError(ErrorEnum.GENERIC_ERROR);
+      throw error;
     }
   }
 
   /**
    * Deletes a dataset by its ID
    * @param id - The ID of the dataset to delete
-   * @returns Promise<boolean> - True if the dataset was deleted, false otherwise
    */
-  async delete(id: string): Promise<boolean> {
+  async delete(id: string): Promise<void> {
     try {
       const [updatedRowsCount] = await Dataset.update(
         { deleted_at: new Date() },
@@ -112,9 +99,23 @@ export class DatasetDAO implements IDAO<Dataset> {
         },
       );
 
-      return updatedRowsCount > 0;
+      if (updatedRowsCount == 0) throw getError(ErrorEnum.GENERIC_ERROR);
     } catch (error) {
-      throw getError(ErrorEnum.NOT_FOUND_ERROR);
+      throw error;
+    }
+  }
+
+  /**
+   * Creates a new Dataset
+   * @param data - The data for the new dataset
+   * @returns A Promise that resolves to the created dataset
+   * @throws Error if the creation operation fails
+   */
+  async create(data: InferCreationAttributes<Dataset>): Promise<Dataset> {
+    try {
+      return await Dataset.create(data);
+    } catch (error) {
+      throw error;
     }
   }
 }

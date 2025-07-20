@@ -3,7 +3,6 @@ import { IDAO } from "./interfaces/idao";
 import { Video } from "@/models";
 import { getError } from "@/common/utils/api-error";
 import { ErrorEnum } from "@/common/enums";
-import { logger } from "@/config/logger";
 
 /**
  * VideoDAO class implements IDAO interface for Video model
@@ -13,14 +12,16 @@ export class VideoDAO implements IDAO<Video> {
   /**
    * Retrieves a video by its ID
    * @param id - The ID of the video to retrieve
-   * @returns A Promise that resolves to the video or null if not found
+   * @returns A Promise that resolves to the video
    * @throws Error if the retrieval operation fails
    */
-  async get(id: string): Promise<Video | null> {
+  async get(id: string): Promise<Video> {
     try {
-      return await Video.findByPk(id);
+      const video = await Video.findByPk(id);
+      if (!video) throw getError(ErrorEnum.NOT_FOUND_ERROR);
+      return video;
     } catch (error) {
-      throw getError(ErrorEnum.NOT_FOUND_ERROR);
+      throw error;
     }
   }
 
@@ -33,7 +34,7 @@ export class VideoDAO implements IDAO<Video> {
     try {
       return await Video.findAll();
     } catch (error) {
-      throw getError(ErrorEnum.GENERIC_ERROR);
+      throw error;
     }
   }
 
@@ -60,7 +61,7 @@ export class VideoDAO implements IDAO<Video> {
         order: [["created_at", "ASC"]],
       });
     } catch (error) {
-      throw getError(ErrorEnum.GENERIC_ERROR);
+      throw error;
     }
   }
 
@@ -68,61 +69,43 @@ export class VideoDAO implements IDAO<Video> {
    * Updates a video by its ID
    * @param id - The ID of the video to update
    * @param data - The new data for the video
-   * @returns A Promise that resolves to the updated video or null if not found
+   * @returns A Promise that resolves to the updated video
    * @throws Error if the update operation fails
    */
-  async update(id: string, data: Partial<Video>): Promise<Video | null> {
+  async update(id: string, data: Partial<Video>): Promise<Video> {
     try {
       const updateVideo = await this.get(id);
-
-      if (!updateVideo) {
-        return null;
-      }
-
       return await updateVideo.update(data);
     } catch (error) {
-      throw getError(ErrorEnum.GENERIC_ERROR);
+      throw error;
     }
   }
 
   /**
    * Deletes a video by its ID
    * @param id - The ID of the video to delete
-   * @returns A Promise that resolves to true if the video was deleted, false otherwise
    * @throws Error if the delete operation fails
    */
-  async delete(id: string): Promise<boolean> {
+  async delete(id: string): Promise<void> {
     try {
       const deleteVideo = await this.get(id);
-
-      if (!deleteVideo) {
-        return false;
-      }
-
       await deleteVideo.destroy();
-      return true;
     } catch (error) {
-      throw getError(ErrorEnum.NOT_FOUND_ERROR);
+      throw error;
     }
   }
 
   /**
    * Creates a new video
    * @param data - The data for the new video
-   * @returns A Promise that resolves to the ID of the created video
+   * @returns A Promise that resolves to the created video
    * @throws Error if the creation operation fails
    */
-  async create(data: InferCreationAttributes<Video>): Promise<string> {
+  async create(data: InferCreationAttributes<Video>): Promise<Video> {
     try {
-      const newVideo = await Video.create(data);
-
-      if (!newVideo.id) {
-        throw getError(ErrorEnum.GENERIC_ERROR);
-      }
-
-      return newVideo.id;
+      return await Video.create(data);
     } catch (error) {
-      throw getError(ErrorEnum.GENERIC_ERROR);
+      throw error;
     }
   }
 }

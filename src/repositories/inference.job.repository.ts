@@ -17,20 +17,20 @@ export class InferenceJobRepository {
   /**
    * Creates a new inference job
    * @param inferenceJobData - The data for the new inference job
-   * @returns A Promise that resolves to the inference job ID
+   * @returns A Promise that resolves the inference job
    */
   async createInferenceJob(
     inferenceJobData: InferCreationAttributes<InferenceJob>,
-  ): Promise<string> {
+  ): Promise<InferenceJob> {
     return await this.inferenceJobDAO.create(inferenceJobData);
   }
 
   /**
    * Finds an inference job by ID
    * @param id - The ID of the inference job
-   * @returns A Promise that resolves to the inference job or null if not found
+   * @returns A Promise that resolves to the inference job
    */
-  async findById(id: string): Promise<InferenceJob | null> {
+  async findById(id: string): Promise<InferenceJob> {
     return await this.inferenceJobDAO.get(id);
   }
 
@@ -46,12 +46,12 @@ export class InferenceJobRepository {
    * Updates an inference job
    * @param id - The ID of the inference job to update
    * @param updateData - The data to update
-   * @returns A Promise that resolves to the updated inference job or null if not found
+   * @returns A Promise that resolves to the updated inference job
    */
   async updateInferenceJob(
     id: string,
     updateData: Partial<InferenceJob>,
-  ): Promise<InferenceJob | null> {
+  ): Promise<InferenceJob> {
     return await this.inferenceJobDAO.update(id, updateData);
   }
 
@@ -59,22 +59,21 @@ export class InferenceJobRepository {
    * Updates the status of an inference job
    * @param id - The ID of the inference job
    * @param status - The new status
-   * @returns A Promise that resolves to the updated inference job or null if not found
+   * @returns A Promise that resolves to the updated inference job
    */
   async updateStatus(
     id: string,
     status: InferenceJobStatus,
-  ): Promise<InferenceJob | null> {
+  ): Promise<InferenceJob> {
     return await this.inferenceJobDAO.update(id, { status });
   }
 
   /**
    * Deletes an inference job
    * @param id - The ID of the inference job to delete
-   * @returns A Promise that resolves to true if deleted, false otherwise
    */
-  async deleteInferenceJob(id: string): Promise<boolean> {
-    return await this.inferenceJobDAO.delete(id);
+  async deleteInferenceJob(id: string): Promise<void> {
+    await this.inferenceJobDAO.delete(id);
   }
 
   /**

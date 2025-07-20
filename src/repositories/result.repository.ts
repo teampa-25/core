@@ -2,10 +2,9 @@ import { Result } from "@/models";
 import { ResultDAO } from "@/dao/result.dao";
 import { InferCreationAttributes } from "sequelize";
 import { FileSystemUtils } from "@/common/utils/file-system";
-import enviroment from "@/config/enviroment";
+import { CNSResponse } from "@/common/types";
 import { getError } from "@/common/utils/api-error";
 import { ErrorEnum } from "@/common/enums";
-import { CNSResponse } from "@/common/types";
 
 /**
  * ResultRepository is responsible for managing result data.
@@ -21,20 +20,20 @@ export class ResultRepository {
   /**
    * Creates a new result
    * @param resultData - The data for the new result
-   * @returns A Promise that resolves to the result ID
+   * @returns A Promise that resolves the result
    */
   async createResult(
     resultData: InferCreationAttributes<Result>,
-  ): Promise<string> {
+  ): Promise<Result> {
     return await this.resultDAO.create(resultData);
   }
 
   /**
    * Finds a result by ID
    * @param id - The ID of the result
-   * @returns A Promise that resolves to the result or null if not found
+   * @returns A Promise that resolves to the result
    */
-  async findById(id: string): Promise<Result | null> {
+  async findById(id: string): Promise<Result> {
     return await this.resultDAO.get(id);
   }
 
@@ -49,36 +48,19 @@ export class ResultRepository {
   /**
    * Finds a result by inference job ID
    * @param inferenceJobId - The inference job ID
-   * @returns A Promise that resolves to the result or null if not found
+   * @returns A Promise that resolves to the result
    */
-  async findByInferenceJobId(inferenceJobId: string): Promise<Result | null> {
-    const allResults = await this.resultDAO.getAll();
-    const result = allResults.find(
-      (result) => result.inferenceJob_id === inferenceJobId,
-    );
-    return result || null;
+  async findByInferenceJobId(inferenceJobId: string): Promise<Result> {
+    return await this.resultDAO.getByInferenceJobId(inferenceJobId);
   }
-
-  // /**
-  //  * Updates the JSON result data
-  //  * @param id - The ID of the result
-  //  * @param jsonRes - The JSON result data
-  //  * @returns A Promise that resolves to the updated result or null if not found
-  //  */
-  // async updateJsonResult(id: string, jsonRes: object): Promise<Result | null> {
-  //   return await this.resultDAO.update(id, { json_res: jsonRes });
-  // }
 
   /**
    * Updates the image ZIP data
    * @param id - The ID of the result
    * @param imageZipPath - The path to the image ZIP file
-   * @returns A Promise that resolves to the updated result or null if not found
+   * @returns A Promise that resolves to the updated result
    */
-  async updateImageZip(
-    id: string,
-    imageZipPath: string,
-  ): Promise<Result | null> {
+  async updateImageZip(id: string, imageZipPath: string): Promise<Result> {
     // Get the current result to check if it has an existing ZIP file
     const currentResult = await this.findById(id);
 
@@ -91,7 +73,7 @@ export class ResultRepository {
       try {
         await FileSystemUtils.deleteFile(currentResult.image_zip);
       } catch (error) {
-        throw getError(ErrorEnum.GENERIC_ERROR);
+        throw error;
       }
     }
 
@@ -99,37 +81,26 @@ export class ResultRepository {
   }
 
   /**
-   * Checks if a result exists for a specific inference job
-   * @param inferenceJobId - The inference job ID
-   * @returns A Promise that resolves to true if a result exists for the job, false otherwise
-   */
-  async existsForInferenceJob(inferenceJobId: string): Promise<boolean> {
-    const result = await this.findByInferenceJobId(inferenceJobId);
-    return result !== null;
-  }
-
-  /**
    * Gets the JSON result data for a specific result
    * @param jobId - The ID of the job
-   * @returns A Promise that resolves to the JSON result data or null if not found
+   * @returns A Promise that resolves to the JSON result data
    */
-  async getJsonResult(jobId: string): Promise<CNSResponse | null> {
+  async getJsonResult(jobId: string): Promise<CNSResponse> {
     const result = await this.resultDAO.getByInferenceJobId(jobId);
-    return result ? result.json_res : null;
+    return result.json_res;
   }
 
   /**
    * Gets the image ZIP data for a specific result
    * @param jobId - The ID of the job
-   * @returns A Promise that resolves to the image ZIP buffer or null if not found
+   * @returns A Promise that resolves to the image ZIP buffer
    */
-  async getImageZip(jobId: string): Promise<Buffer | null> {
+  async getImageZip(jobId: string): Promise<Buffer> {
     const result = await this.resultDAO.getByInferenceJobId(jobId);
-    if (!result || !result.image_zip) return null;
 
     // Check if file exists
     if (!FileSystemUtils.fileExists(result.image_zip)) {
-      return null;
+      throw getError(ErrorEnum.NOT_FOUND_ERROR);
     }
 
     // Read and return file as buffer
@@ -141,13 +112,13 @@ export class ResultRepository {
    * @param id - The ID of the result
    * @param imageZip - The image ZIP buffer
    * @param userId - The user ID to determine the save path
-   * @returns A Promise that resolves to the updated result or null if not found
+   * @returns A Promise that resolves to the updated result
    */
   async saveImageZip(
     id: string,
     imageZip: Buffer,
     userId: string,
-  ): Promise<Result | null> {
+  ): Promise<Result> {
     // Use the user-specific results directory
     const basePath = FileSystemUtils.getResultsDirectoryPath(userId);
     const zipFileName = `result_${id}_${Date.now()}.zip`;

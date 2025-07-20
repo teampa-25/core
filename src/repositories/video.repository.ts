@@ -15,13 +15,13 @@ export class VideoRepository {
   /**
    * Create a new video in the dataset
    * @param videoData
-   * @returns a Promise that resolves to the ID of the created video
+   * @returns a Promise that resolves the created video
    */
   async create(videoData: {
     datasetId: string;
     name: string;
     frameCount: number;
-  }): Promise<string> {
+  }): Promise<Video> {
     return await this.videoDAO.create({
       dataset_id: videoData.datasetId,
       name: videoData.name,
@@ -39,6 +39,13 @@ export class VideoRepository {
     return allVideos.filter((video) => video.dataset_id === datasetId);
   }
 
+  /**
+   * Finds videos by range
+   * @param datasetId - The dataset ID
+   * @param offset - The offset for range
+   * @param limit - The limit for range
+   * @returns array of video into the range
+   */
   async findByRange(
     datasetId: string,
     offset: number,
@@ -50,26 +57,25 @@ export class VideoRepository {
   /**
    * Finds a video by ID
    * @param id
-   * @returns a Promise that resolves to the video or null if not found
+   * @returns a Promise that resolves to the video
    */
-  async findById(id: string): Promise<Video | null> {
+  async findById(id: string): Promise<Video> {
     return await this.videoDAO.get(id);
   }
 
   /**
    * Deletes a video
    * @param id
-   * @returns a Promise that resolves to true if the video was deleted, false otherwise
    */
-  async delete(id: string): Promise<boolean> {
-    return await this.videoDAO.delete(id);
+  async delete(id: string): Promise<void> {
+    await this.videoDAO.delete(id);
   }
 
   /**
    * Updates a video
    * @param id
    * @param updateData
-   * @returns a Promise that resolves to the updated video or null if not found
+   * @returns a Promise that resolves to the updated video
    */
   async update(
     id: string,
@@ -78,7 +84,7 @@ export class VideoRepository {
       frame_count?: number;
       file?: string;
     },
-  ): Promise<Video | null> {
+  ): Promise<Video> {
     return await this.videoDAO.update(id, updateData);
   }
 }

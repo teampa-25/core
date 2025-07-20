@@ -4,8 +4,6 @@ import { ResultRepository } from "@/repositories/result.repository";
 import axios from "axios";
 import FormData from "form-data";
 import enviroment from "@/config/enviroment";
-import { ErrorEnum } from "@/common/enums";
-import { getError } from "@/common/utils/api-error";
 import { logger } from "@/config/logger";
 import { FileSystemUtils } from "@/common/utils/file-system";
 import { Result } from "@/models";
@@ -129,22 +127,14 @@ export class InferenceJobProcessor {
   ): Promise<void> {
     try {
       // Create new result
-      const resultId = await this.resultRepository.createResult({
+      const result = await this.resultRepository.createResult({
         inferenceJob_id: inferenceId, // Cambiato da inferenceJob_Id a inferenceJob_id
         json_res: resultJson,
       } as Result);
 
-      const savedResult = await this.resultRepository.saveImageZip(
-        resultId,
-        resultZip,
-        userId,
-      );
-
-      if (!savedResult) {
-        throw getError(ErrorEnum.GENERIC_ERROR);
-      }
+      await this.resultRepository.saveImageZip(result.id, resultZip, userId);
     } catch (error) {
-      throw getError(ErrorEnum.GENERIC_ERROR);
+      throw error;
     }
   }
 }
