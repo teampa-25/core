@@ -1,6 +1,10 @@
 # Database & Models Documentation
 
 ## Database Structure
+### Entity / Relationship Diagram
+<div style="height:200px; overflow:hidden; margin:auto;" align="center">
+  <img src="./public/E-R.png" style="width:70%; height:70%; object-fit:cover; object-position:center;" />
+</div>
 
 ### Main Tables
 
