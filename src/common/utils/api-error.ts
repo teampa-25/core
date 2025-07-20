@@ -1,12 +1,13 @@
 import { StatusCodes } from "http-status-codes";
 import { ErrorEnum } from "@/common/enums";
 
-export class ErrorObj {
+export class ErrorObj extends Error {
   status: number;
   msg: string;
   type: ErrorEnum;
 
   constructor(status: number, msg: string, type: ErrorEnum) {
+    super();
     this.status = status;
     this.msg = msg;
     this.type = type;

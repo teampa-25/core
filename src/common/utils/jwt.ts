@@ -4,6 +4,7 @@ import enviroment from "@/config/enviroment";
 import path from "path";
 import { ErrorEnum } from "../enums";
 import { getError } from "./api-error";
+import { logger } from "@/config/logger";
 
 /**
  * Utility class for JWT operations

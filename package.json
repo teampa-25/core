@@ -4,7 +4,8 @@
     "prepare": "husky",
     "keys": "ts-node src/common/utils/generateKeys.ts",
     "keys-force": "ts-node src/common/utils/generateKeys.ts --force",
-    "test": "jest"
+    "test": "jest",
+    "silent-test": "jest --silent"
   },
   "dependencies": {
     "@bull-board/api": "^6.11.0",

@@ -10,15 +10,16 @@ import { UserPayload } from "@/common/types";
  */
 export function authorize(...allowedRoles: UserRole[]) {
   return (req: Request, res: Response, next: NextFunction) => {
-    const user = <UserPayload>req.user;
+    try {
+      const user = <UserPayload>req.user;
 
-    if (!user || !allowedRoles.includes(user.role as UserRole)) {
-      const error = getError(ErrorEnum.FORBIDDEN_ERROR).toJSON();
-      return res.status(error.status).json({
-        message: error.msg,
-      });
+      if (!user || !allowedRoles.includes(user.role as UserRole)) {
+        throw getError(ErrorEnum.FORBIDDEN_ERROR);
+      }
+
+      next();
+    } catch (err) {
+      next(err);
     }
-
-    next();
   };
 }

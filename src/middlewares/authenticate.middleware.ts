@@ -15,35 +15,24 @@ export function authenticate(req: Request, res: Response, next: NextFunction) {
     // get authorization header and perform every check on jwt format
     const authHeader = req.headers.authorization;
 
-    if (!authHeader) {
-      const error = getError(ErrorEnum.BAD_REQUEST_ERROR);
-      throw error;
-    }
+    if (!authHeader) throw getError(ErrorEnum.BAD_REQUEST_ERROR);
 
     const tokenParts = authHeader.split(" ");
 
-    if (tokenParts.length !== 2 || tokenParts[0] !== "Bearer") {
-      const error = getError(ErrorEnum.INVALID_JWT_FORMAT);
-      throw error;
-    }
+    if (tokenParts.length !== 2 || tokenParts[0] !== "Bearer")
+      throw getError(ErrorEnum.BAD_REQUEST_ERROR);
 
     const token = tokenParts[1];
 
-    if (!token) {
-      const error = getError(ErrorEnum.UNAUTHORIZED_ERROR);
-      throw error;
-    }
+    if (!token) throw getError(ErrorEnum.UNAUTHORIZED_ERROR);
 
     // decode jwt and extract payload (converted into UserPayload)
     const payload = JwtUtils.verifyToken(token);
     req.user = <UserPayload>payload;
+    throw new Error("strange");
 
     next();
   } catch (err) {
-    const error = getError(ErrorEnum.UNAUTHORIZED_ERROR).toJSON();
-    res.status(error?.status || 403).json({
-      message: error?.msg || "Invalid or expired token",
-    });
     next(err);
   }
 }

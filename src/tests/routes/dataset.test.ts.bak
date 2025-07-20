@@ -1,0 +1,124 @@
+import request from "supertest";
+import app from "@/app";
+import { UserService } from "@/services/user.service";
+import { StatusCodes } from "http-status-codes";
+import TestMemory from "./shared";
+
+
+describe("Dataset testing", () => {
+
+  beforeAll(async () => {
+    let res = await request(app).post("/api/auth/login").send({
+      email: TestMemory.user1.email,
+      password: TestMemory.user1.password,
+    });
+
+    TestMemory.runtime.user1Token = res.body.token;
+
+    res = await request(app).post("/api/auth/login").send({
+      email: TestMemory.user2.email,
+      password: TestMemory.user2.password,
+    });
+
+    TestMemory.runtime.user2Token = res.body.token;
+    TestMemory.disableReset = true;
+  });
+
+  afterAll(async () => {
+    TestMemory.disableReset = false;
+    TestMemory.reset();
+  });
+
+  it("should not let any incoming request that is unauthenticated", async () => {
+    let res = await request(app)
+      .post("/api/dataset/")
+      .send({ name: TestMemory.dataset1.name, tags: TestMemory.dataset1.tags });
+    expect(res.statusCode).toBe(StatusCodes.UNAUTHORIZED);
+
+
+    res = await request(app)
+      .get("/api/dataset/")
+      .send();
+    expect(res.statusCode).toBe(StatusCodes.UNAUTHORIZED);
+  });
+
+
+  it("should create and update a dataset on user account", async () => {
+    let res = await request(app).post("/api/dataset/")
+      .set("Authorization", `Bearer ${TestMemory.runtime.user1Token}`)
+      .send({ name: TestMemory.dataset1.name, tags: TestMemory.dataset1.tags });
+
+    expect(res.statusCode).toBe(StatusCodes.CREATED);
+
+    res = await request(app)
+      .get("/api/dataset/")
+      .set("Authorization", `Bearer ${TestMemory.runtime.user1Token}`)
+      .send({ tags: [] });
+
+    // NOTE: is this expected behavior? 
+    // If no filters needed, we should not ask for that in the body.
+
+    expect(res.statusCode).toBe(StatusCodes.OK);
+    expect(typeof res.body.datasets).toBeTruthy();
+
+    // there should be only one and the first result 
+    // should be exactly the one we just created
+    expect(res.body.datasets[0].name).toBe(TestMemory.dataset1.name);
+    expect(res.body.datasets[0].tags).toStrictEqual(TestMemory.dataset1.tags);
+
+    TestMemory.runtime.dataset1Id = res.body.datasets[0].id;
+
+    res = await request(app).put(`/api/dataset/${TestMemory.runtime.dataset1Id}`)
+      .set("Authorization", `Bearer ${TestMemory.runtime.user1Token}`)
+      .send({ name: TestMemory.dataset2.name, tags: TestMemory.dataset2.tags });
+
+    expect(res.statusCode).toBe(StatusCodes.OK);
+
+    // check if response is correct
+    expect(res.body.dataset).toBeTruthy();
+    expect(res.body.dataset.name).toBe(TestMemory.dataset2.name);
+    expect(res.body.dataset.tags).toStrictEqual(TestMemory.dataset2.tags);
+
+    res = await request(app)
+      .get("/api/dataset/")
+      .set("Authorization", `Bearer ${TestMemory.runtime.user1Token}`)
+      .send({ tags: [] });
+
+    // check if it actually did the job
+    expect(res.statusCode).toBe(StatusCodes.OK);
+    expect(typeof res.body.datasets).toBe(Array);
+
+    // there should be only one and the first result 
+    // should be exactly the one we just updated
+    expect(res.body.datasets[0].name).toBe(TestMemory.dataset2.name);
+    expect(res.body.datasets[0].tags).toBe(TestMemory.dataset2.name);
+  });
+
+  it("should allow access only on owned datasets", async () => {
+    let res = await request(app).post("/api/dataset/")
+      .set("Authorization", `Bearer ${TestMemory.runtime.user2Token}`)
+      .send({ name: TestMemory.dataset3.name });
+
+    expect(res.statusCode).toBe(StatusCodes.CREATED);
+    TestMemory.runtime.dataset2Id = res.body.dataset.id;
+
+    res = await request(app)
+      .get(`/api/dataset/${TestMemory.runtime.dataset2Id}`)
+      .set("Authorization", `Bearer ${TestMemory.runtime.user2Token}`)
+      .send({ tags: [] });
+
+    expect(res.statusCode).toBe(StatusCodes.NOT_FOUND);
+  });
+
+
+  it("should add video to dataset", async () => {
+    // TODO: this is tricky to implement because it needs a dummy video file
+    // and a dummy zip file. Will look into this after
+    expect(true).toBeTruthy();
+  });
+
+
+
+
+
+});

@@ -12,6 +12,16 @@ export async function hashPass(pass: string): Promise<string> {
 }
 
 /**
+ * Hash a password using bcrypt with a salt rounds from enviroment
+ * @param pass the plain password to hash
+ * @returns the hashed password
+ */
+export function hashPassSync(pass: string): string {
+  const SALT_ROUNDS = enviroment.saltRounds;
+  return bcrypt.hashSync(pass, SALT_ROUNDS);
+}
+
+/**
  *
  * @param plainPass the plain password
  * @param hashPass the hashed password
