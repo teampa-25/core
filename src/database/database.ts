@@ -3,12 +3,10 @@ import enviroment from "@/config/enviroment";
 import { logger } from "@/config/logger";
 
 /**
- * Database connection
- *
+ * Database connection manager using Sequelize.
  * @class Database
  * @property {Sequelize} sequelize - The Sequelize instance managing the database connection.
  */
-
 export class Database {
   private static instance: Database;
   private readonly sequelize: Sequelize;
@@ -30,7 +28,6 @@ export class Database {
 
   /**
    * Get the singleton instance of the Database class.
-   *
    * @returns {Sequelize} The Sequelize instance managing the database connection.
    */
   public static getInstance(): Sequelize {
