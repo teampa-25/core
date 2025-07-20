@@ -668,9 +668,36 @@ InferNode implements a queue-based processing system:
 
 # Design
 
-## UML etc
+## Actors Diagram
+<div style="height:200px; overflow:hidden; margin:auto;" align="center">
+  <img src="./public/Actors.png" style="width:50%; height:50%; object-fit:cover; object-position:center;" />
+</div>
 
-[This section will be filled with UML diagrams and architectural designs]
+## Use Cases
+<div style="height:200px; overflow:hidden; margin:auto;" align="center">
+  <img src="./public/UseCase.png" style="width:70%; height:70%; object-fit:cover; object-position:center;" />
+</div>
+
+## Sequence Diagrams
+### Middlewares
+<div style="height:200px; overflow:hidden; margin:auto;" align="center">
+  <img src="./public/SequenceDiagram-Middlewares.png" style="width:70%; height:70%; object-fit:cover; object-position:center;" />
+</div>
+
+### Check token
+<div style="height:200px; overflow:hidden; margin:auto;" align="center">
+  <img src="./public/SequenceDiagram-checkToken.png" style="width:70%; height:70%; object-fit:cover; object-position:center;" />
+</div>
+
+### Start inference
+<div style="height:200px; overflow:hidden; margin:auto;" align="center">
+  <img src="./public/SequenceDiagram-startInference.png" style="width:70%; height:70%; object-fit:cover; object-position:center;" />
+</div>
+
+### Retrieve process status
+<div style="height:200px; overflow:hidden; margin:auto;" align="center">
+  <img src="./public/SequenceDiagram-getProcessStatus.png" style="width:70%; height:70%; object-fit:cover; object-position:center;" />
+</div>
 
 # Contributing
 
