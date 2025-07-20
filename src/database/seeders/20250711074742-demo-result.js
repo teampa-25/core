@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-require-imports */
 "use strict";
 
 const { v4: uuidv4 } = require("uuid");
@@ -5,7 +6,7 @@ const { faker } = require("@faker-js/faker");
 
 /** @type {import("sequelize-cli").Seed} */
 module.exports = {
-  async insert(qi, s, e) {
+  async insert(qi, e) {
     const detections = Array.from({ length: 100 }, (_, i) => ({
       frame: i + 1,
       velocity_norm: faker.number.float({ min: 0, max: 9, precision: 1e-10 }),
@@ -31,7 +32,7 @@ module.exports = {
       await module.exports.insert(qi, s, element);
     }
   },
-  async down(queryInterface, Sequelize) {
+  async down(queryInterface) {
     await queryInterface.bulkDelete("Result", null, {});
   },
 };

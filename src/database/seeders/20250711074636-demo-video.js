@@ -1,10 +1,11 @@
+/* eslint-disable @typescript-eslint/no-require-imports */
 "use strict";
 
 const { v4: uuidv4 } = require("uuid");
 
 /** @type {import("sequelize-cli").Seed} */
 module.exports = {
-  async up(qi, _) {
+  async up(qi) {
     const { faker } = require("@faker-js/faker");
 
     const [results] = await qi.sequelize.query(`
@@ -29,7 +30,7 @@ module.exports = {
     }
   },
 
-  async down(qi, _) {
+  async down(qi) {
     await qi.bulkDelete("Video", null, {});
   },
 };

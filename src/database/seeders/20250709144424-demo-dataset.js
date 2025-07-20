@@ -1,6 +1,6 @@
+/* eslint-disable @typescript-eslint/no-require-imports */
 "use strict";
 
-const crypt = require("bcrypt");
 const { randomInt } = require("crypto");
 const { v4: uuidv4 } = require("uuid");
 
@@ -67,7 +67,7 @@ module.exports = {
       }
     }
   },
-  down: async (qi, Sequelize) => {
+  down: async (qi) => {
     await qi.bulkDelete("Dataset", null, {});
   },
 };

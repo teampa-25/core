@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-require-imports */
 "use strict";
 
 const { randomInt } = require("crypto");
@@ -6,7 +7,7 @@ const { faker } = require("@faker-js/faker");
 
 /** @type {import('sequelize-cli').Migration} */
 module.exports = {
-  async insert(qi, s, ids) {
+  async insert(qi, ids) {
     const estimateCarbonFootprint = ({ model, device, durationMinutes }) => {
       const base = MODEL_EMISSIONS[model] || 0.5;
       const multiplier = DEVICE_MULTIPLIER[device] || 1;
@@ -93,7 +94,7 @@ module.exports = {
     }
   },
 
-  async down(queryInterface, Sequelize) {
+  async down(queryInterface) {
     await queryInterface.bulkDelete("InferenceJob", null, {});
   },
 };

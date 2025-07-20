@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-require-imports */
 const crypt = require("bcrypt");
 const { v4: uuidv4 } = require("uuid");
 const saltRounds = 10;
@@ -23,7 +24,7 @@ module.exports = {
     await module.exports.add_user(qi, email, hash, role, credit, id);
   },
 
-  up: async (qi, s) => {
+  up: async (qi) => {
     const admin_password = "verabaddie";
     const user_password = "chainconilmioname";
     const random_users_num = 100;
@@ -75,7 +76,7 @@ module.exports = {
     }
   },
 
-  down: async (qi, s) => {
+  down: async (qi) => {
     await qi.bulkDelete("User", null, {});
   },
 };

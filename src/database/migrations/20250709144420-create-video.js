@@ -46,7 +46,7 @@ module.exports = {
     await queryInterface.addIndex("Video", ["dataset_id"]);
   },
 
-  async down(queryInterface, Sequelize) {
+  async down(queryInterface) {
     await queryInterface.dropTable("Video");
   },
 };
