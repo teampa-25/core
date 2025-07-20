@@ -1,4 +1,4 @@
-# Database Models Documentation
+# Database & Models Documentation
 
 ## Database Structure
 
@@ -95,8 +95,8 @@ The system checks the available credits before allowing expensive operations.
 
 - All models use UUID as primary keys for greater security
 - Datasets support soft delete (deleted_at) with paranoid mode enabled
-- Video files are stored as paths to the filesystem, not as BLOBs
-- Result ZIP files are stored as paths to the filesystem, not as BLOBs
+- Video files are stored as paths to the filesystem
+- Result ZIP files are stored as paths to the filesystem
 - All relationships are managed through foreign keys with CASCADE
 - Timestamps are automatically managed with created_at and updated_at fields
 - Inference parameters are stored as JSON
