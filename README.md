@@ -4,7 +4,6 @@
   <img src="./public/InferNode.png" style="width:50%; height:50%; object-fit:cover; object-position:center;" />
 </div>
 
-
 > _"I can see it... the code." - Neo, The Matrix (1999)_
 
 <div align="center">
@@ -268,11 +267,9 @@ Complete API documentation is available at `/api/docs` when the server is runnin
 - **GET `/api/dataset`**: Get all user's datasets
   - Auth: Bearer token required
   - Optional: Tag filters
-  - Example Request Body (optional):
-    ```json
-    {
-      "tags": ["traffic", "urban"]
-    }
+  - Example URL with query parameters:
+    ```
+    /api/dataset?tags=traffic&tags=urban
     ```
   - Example Response:
     ```json
@@ -344,7 +341,7 @@ Complete API documentation is available at `/api/docs` when the server is runnin
   - Example Response:
     ```json
     {
-      "message": "Dataset deleted successfully"
+      "message": "Dataset 550e8400-e29b-41d4-a716-446655440000 deleted successfully"
     }
     ```
 
@@ -669,32 +666,39 @@ InferNode implements a queue-based processing system:
 # Design
 
 ## Actors Diagram
+
 <div style="height:200px; overflow:hidden; margin:auto;" align="center">
   <img src="./public/Actors.png" style="width:50%; height:50%; object-fit:cover; object-position:center;" />
 </div>
 
 ## Use Cases
+
 <div style="height:200px; overflow:hidden; margin:auto;" align="center">
   <img src="./public/UseCase.png" style="width:70%; height:70%; object-fit:cover; object-position:center;" />
 </div>
 
 ## Sequence Diagrams
+
 ### Middlewares
+
 <div style="height:200px; overflow:hidden; margin:auto;" align="center">
   <img src="./public/SequenceDiagram-Middlewares.png" style="width:70%; height:70%; object-fit:cover; object-position:center;" />
 </div>
 
 ### Check token
+
 <div style="height:200px; overflow:hidden; margin:auto;" align="center">
   <img src="./public/SequenceDiagram-checkToken.png" style="width:70%; height:70%; object-fit:cover; object-position:center;" />
 </div>
 
 ### Start inference
+
 <div style="height:200px; overflow:hidden; margin:auto;" align="center">
   <img src="./public/SequenceDiagram-startInference.png" style="width:70%; height:70%; object-fit:cover; object-position:center;" />
 </div>
 
 ### Retrieve process status
+
 <div style="height:200px; overflow:hidden; margin:auto;" align="center">
   <img src="./public/SequenceDiagram-getProcessStatus.png" style="width:70%; height:70%; object-fit:cover; object-position:center;" />
 </div>

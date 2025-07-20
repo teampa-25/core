@@ -235,16 +235,16 @@ paths:
       security:
         - bearerAuth: []
       parameters:
-        - in: body
-          name: filters
+        - in: query
+          name: tags
           schema:
-            type: object
-            properties:
-              tags:
-                type: array
-                items:
-                  type: string
-                example: ["tag1", "tag2"]
+            type: array
+            items:
+              type: string
+          style: form
+          explode: true
+          description: Filter datasets by tags
+          example: tag1
       responses:
         '200':
           description: Datasets retrieved successfully
@@ -259,6 +259,7 @@ paths:
                       $ref: '#/components/schemas/Dataset'
         '401':
           description: Unauthorized
+
  
   /api/dataset/{id}:
     get:
