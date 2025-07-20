@@ -1,6 +1,6 @@
 import * as fs from "fs";
 import * as path from "path";
-import { ErrorObj, getError } from "./api-error";
+import { getError } from "./api-error";
 import { ErrorEnum } from "@/common/enums";
 
 /**
@@ -22,10 +22,7 @@ export class FileSystemUtils {
       // Read file and return as buffer
       return await fs.promises.readFile(filePath);
     } catch (error) {
-      if (error instanceof ErrorObj) {
-        throw error;
-      }
-      throw getError(ErrorEnum.GENERIC_ERROR);
+      throw error;
     }
   }
 
@@ -38,16 +35,13 @@ export class FileSystemUtils {
     try {
       // Check if file exists
       if (!fs.existsSync(filePath)) {
-        throw new Error(`ZIP file not found: ${filePath}`);
+        throw getError(ErrorEnum.NOT_FOUND_ERROR);
       }
 
       // Read file and return as buffer
       return await fs.promises.readFile(filePath);
     } catch (error) {
-      if (error instanceof ErrorObj) {
-        throw error;
-      }
-      throw getError(ErrorEnum.GENERIC_ERROR);
+      throw error;
     }
   }
 
@@ -68,10 +62,7 @@ export class FileSystemUtils {
       // Write file
       await fs.promises.writeFile(filePath, buffer);
     } catch (error) {
-      if (error instanceof ErrorObj) {
-        throw error;
-      }
-      throw getError(ErrorEnum.GENERIC_ERROR);
+      throw error;
     }
   }
 
@@ -93,10 +84,7 @@ export class FileSystemUtils {
     try {
       return await fs.promises.stat(filePath);
     } catch (error) {
-      if (error instanceof ErrorObj) {
-        throw error;
-      }
-      throw getError(ErrorEnum.GENERIC_ERROR);
+      throw error;
     }
   }
 
@@ -111,10 +99,7 @@ export class FileSystemUtils {
         await fs.promises.unlink(filePath);
       }
     } catch (error) {
-      if (error instanceof ErrorObj) {
-        throw error;
-      }
-      throw getError(ErrorEnum.GENERIC_ERROR);
+      throw error;
     }
   }
 

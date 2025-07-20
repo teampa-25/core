@@ -3,8 +3,6 @@ import { promisify } from "util";
 import * as fs from "fs";
 import * as path from "path";
 import * as os from "os";
-import { ErrorObj, getError } from "./api-error";
-import { ErrorEnum } from "@/common/enums";
 import { VideoInfo } from "@/common/types";
 
 const execAsync = promisify(exec);
@@ -47,19 +45,6 @@ export class VideoAnalyzer {
       tempFilePath = await this.createTempFile(videoBuffer, filename);
 
       const command = `${this.ffprobe_command} "${tempFilePath}"`;
-      /* OUTPUT FOR REFERENCE
-       *  {
-       *    "programs": [],
-       *    "stream_groups": [],
-       *    "streams": [{
-       *          "width": 640,
-       *          "height": 480,
-       *          "avg_frame_rate": "10/1",
-       *          "duration": "10.000000",
-       *          "nb_read_frames": "100"
-       *        }]
-       *  }
-       */
 
       const { stdout } = await execAsync(command);
       if (!stdout) throw new Error("No ffprobe output");
@@ -77,9 +62,6 @@ export class VideoAnalyzer {
       const frameRateStr = stream.avg_frame_rate || "0/1";
       const frameRate = this.parseFrameRate(frameRateStr);
 
-      // dont need this i think, its a redundant calculation, we already have that value from nb_read_frames
-      // const finalFrameCount = frameCount > 0 ? frameCount : Math.floor(duration * frameRate);
-
       return {
         frameCount,
         duration,
@@ -88,10 +70,7 @@ export class VideoAnalyzer {
         frameRate,
       };
     } catch (error) {
-      if (error instanceof ErrorObj) {
-        throw error;
-      }
-      throw getError(ErrorEnum.GENERIC_ERROR);
+      throw error;
     } finally {
       // Clean up temporary file
       if (tempFilePath) {
@@ -127,10 +106,7 @@ export class VideoAnalyzer {
     try {
       await fs.promises.unlink(filePath);
     } catch (error) {
-      if (error instanceof ErrorObj) {
-        throw error;
-      }
-      throw getError(ErrorEnum.GENERIC_ERROR);
+      throw error;
     }
   }
 
