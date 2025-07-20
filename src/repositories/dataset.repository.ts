@@ -67,7 +67,7 @@ export class DatasetRepository {
    */
   async findByIdAndUserId(id: string, userId: string): Promise<Dataset | null> {
     const dataset = await this.datasetDAO.get(id);
-    if (dataset && dataset.user_id === userId && dataset.deleted_at === null) {
+    if (dataset && dataset.user_id === userId) {
       return dataset;
     }
     return null;
