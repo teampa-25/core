@@ -39,17 +39,17 @@ export class DatasetController {
    * Deletes a dataset
    * @param req Request containing the dataset ID
    * @param res Response object to send back the deletion status
-   * @returns a response indicating success or failure
+   * @returns the id of the deleted dataset
    */
   delete = catchAsync(async (req: Request, res: Response) => {
     const userId = req.user!.id;
 
     const { id } = req.params;
-    const deleted = await this.datasetService.deleteDataset(id, userId);
+    const deleteId = await this.datasetService.deleteDataset(id, userId);
 
     return res
       .status(StatusCodes.OK)
-      .json({ message: "Dataset deleted successfully" });
+      .json({ message: `Dataset ${deleteId} deleted successfully` });
   });
 
   /**

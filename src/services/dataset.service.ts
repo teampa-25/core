@@ -187,12 +187,14 @@ export class DatasetService {
    * @param userId user id
    * @returns a Promise that resolves to true if the dataset was deleted, false otherwise
    */
-  async deleteDataset(id: string, userId: string): Promise<boolean> {
+  async deleteDataset(id: string, userId: string): Promise<string> {
     // Checks if the dataset belongs to the user
     const dataset = await this.datasetRepository.findByIdAndUserId(id, userId);
     if (!dataset) throw getError(ErrorEnum.NOT_FOUND_ERROR);
 
-    return await this.datasetRepository.softDelete(id);
+    const deleted = await this.datasetRepository.softDelete(id);
+    if (!deleted) throw getError(ErrorEnum.GENERIC_ERROR);
+    return id;
   }
 
   /**
@@ -221,7 +223,7 @@ export class DatasetService {
       if (type === "zip") {
         const files = await decompress(content, {
           filter: (file) =>
-            path.extname(file.path) === ".mp4" &&
+            path.extname(file.path) === INFERENCE.SUPPORTED_VIDEO_FORMATS &&
             !file.path.includes("__MACOSX"),
         });
 
