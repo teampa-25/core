@@ -1,4 +1,4 @@
-import { User, Video } from "@/models";
+import { Video } from "@/models";
 import { InferenceJob } from "@/models";
 import { inferenceQueue } from "@/queue/queue";
 import { DatasetRepository } from "@/repositories/dataset.repository";
@@ -56,19 +56,13 @@ export class InferenceJobService {
     range: string,
   ): Promise<string[]> => {
     // Validate dataset exists for user
-    const dataset = await this.datasetRepository.findByIdAndUserId(
-      datasetId,
-      userId,
-    );
-    if (!dataset) throw getError(ErrorEnum.NOT_FOUND_ERROR);
+    await this.datasetRepository.findByIdAndUserId(datasetId, userId);
 
     // Get videos based on range
     const videos =
       range === "all"
         ? await this.videoRepository.findByDatasetId(datasetId)
         : await this.getVideosByRange(datasetId, range);
-
-    if (!videos?.length) throw getError(ErrorEnum.BAD_REQUEST_ERROR);
 
     // Sort videos by creation date
     const sorted = videos.sort(
@@ -112,24 +106,22 @@ export class InferenceJobService {
       } as InferCreationAttributes<InferenceJob>;
 
       //Create aborted job
-      const abortedJobId =
+      const abortedJob =
         await this.inferenceRepository.createInferenceJob(abortedJobData);
       const err = getError(ErrorEnum.INSUFFICIENT_CREDIT).toJSON();
 
       this.wsService.notifyInferenceStatusUpdate(
         userId,
-        abortedJobId,
+        abortedJob.id,
         InferenceJobStatus.ABORTED,
+        undefined,
         err.msg,
       );
-      logger.error(`[BullMQ] Job ${abortedJobId} failed: ${err.msg}`);
+      logger.error(`[BullMQ] Job ${abortedJob.id} failed: ${err.msg}`);
       throw getError(ErrorEnum.UNAUTHORIZED_ERROR);
     }
 
-    const user = await this.userRepository.deductCredits(userId, inferenceCost);
-    if (!user) {
-      throw getError(ErrorEnum.GENERIC_ERROR);
-    }
+    await this.userRepository.deductCredits(userId, inferenceCost);
 
     const createdJobIds: string[] = [];
 
@@ -144,12 +136,13 @@ export class InferenceJobService {
         params: parameters,
       } as InferCreationAttributes<InferenceJob>;
 
-      const inferenceId =
+      const inference =
         await this.inferenceRepository.createInferenceJob(jobData);
-      createdJobIds.push(inferenceId);
+
+      createdJobIds.push(inference.id);
 
       const inferenceJobData: InferenceJobData = {
-        inferenceId,
+        inferenceId: inference.id,
         userId,
         goalVideoPath: video.file,
         currentVideoPath: video.file,
@@ -174,12 +167,12 @@ export class InferenceJobService {
         params: parameters,
       } as InferCreationAttributes<InferenceJob>;
 
-      const inferenceId =
+      const inference =
         await this.inferenceRepository.createInferenceJob(jobData);
-      createdJobIds.push(inferenceId);
+      createdJobIds.push(inference.id);
 
       const inferenceJobData: InferenceJobData = {
-        inferenceId: inferenceId,
+        inferenceId: inference.id,
         userId: userId,
         goalVideoPath: target.file,
         currentVideoPath: current.file,
@@ -201,8 +194,6 @@ export class InferenceJobService {
     jobId: string,
   ): Promise<InferenceJobStatusResults> => {
     const inference = await this.inferenceRepository.findById(jobId);
-    if (!inference) throw getError(ErrorEnum.NOT_FOUND_ERROR);
-
     const response: InferenceJobStatusResults = { status: inference.status };
 
     if (inference.status === InferenceJobStatus.COMPLETED) {
@@ -220,12 +211,10 @@ export class InferenceJobService {
   /**
    * Retrieves the JSON file containing the inference results.
    * @param jobId The ID of the inference job.
-   * @returns The JSON file as object.
+   * @returns The JSON file as CNSResponse.
    */
-  getInferenceJSONResults = async (jobId: string): Promise<object> => {
-    const results = await this.resultRepository.getJsonResult(jobId);
-    if (!results) throw getError(ErrorEnum.NOT_FOUND_ERROR);
-    return results;
+  getInferenceJSONResults = async (jobId: string): Promise<CNSResponse> => {
+    return await this.resultRepository.getJsonResult(jobId);
   };
 
   /**
@@ -234,9 +223,7 @@ export class InferenceJobService {
    * @returns The ZIP file as a Buffer.
    */
   getInferenceZIPResults = async (jobId: string): Promise<Buffer> => {
-    const results = await this.resultRepository.getImageZip(jobId);
-    if (!results) throw getError(ErrorEnum.NOT_FOUND_ERROR);
-    return results;
+    return await this.resultRepository.getImageZip(jobId);
   };
 
   /**
@@ -270,11 +257,6 @@ export class InferenceJobService {
     const [startStr, endStr] = range.split("-");
     const start = parseInt(startStr, 10);
     const end = parseInt(endStr, 10);
-
-    if (end < start) {
-      throw getError(ErrorEnum.BAD_REQUEST_ERROR);
-    }
-
     const limit = end - start + 1;
     const offset = start;
 

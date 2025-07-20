@@ -9,7 +9,6 @@ import { FileSystemUtils } from "@/common/utils/file-system";
 import { INFERENCE } from "@/common/const";
 import * as path from "path";
 import { writeFile } from "fs/promises";
-import { logger } from "@/config/logger";
 import decompress from "decompress";
 
 /**
@@ -57,7 +56,7 @@ export class DatasetService {
     frameCount: number,
   ): Promise<string> {
     //create directories and DB entry in parallel
-    const [videoId] = await Promise.all([
+    const [videoCreated] = await Promise.all([
       this.videoRepository.create({
         datasetId,
         name: videoName,
@@ -66,9 +65,9 @@ export class DatasetService {
       FileSystemUtils.ensureUserDirectories(userId),
     ]);
 
-    const filePath = FileSystemUtils.getVideoFilePath(userId, videoId);
+    const filePath = FileSystemUtils.getVideoFilePath(userId, videoCreated.id);
 
-    await this.videoRepository.update(videoId, { file: filePath });
+    await this.videoRepository.update(videoCreated.id, { file: filePath });
 
     const exists = FileSystemUtils.fileExists(filePath);
     if (exists) {
@@ -77,7 +76,7 @@ export class DatasetService {
 
     await writeFile(filePath, video);
 
-    return videoId;
+    return videoCreated.id;
   }
 
   /**
@@ -98,7 +97,7 @@ export class DatasetService {
   async createDataset(
     userId: string,
     datasetData: { name: string; tags?: string[] },
-  ): Promise<Dataset | ErrorEnum> {
+  ): Promise<Dataset> {
     const exists = await this.datasetRepository.existsByNameAndUserId(
       datasetData.name,
       userId,
@@ -112,14 +111,10 @@ export class DatasetService {
       tags: datasetData.tags || [],
     };
 
-    const id = await this.datasetRepository.create(datasetCreate);
+    const dataset = await this.datasetRepository.create(datasetCreate);
 
     // Retrieves the created dataset to return it
-    const createdDataset = await this.datasetRepository.findById(id);
-
-    if (!createdDataset) throw getError(ErrorEnum.GENERIC_ERROR);
-
-    return createdDataset;
+    return await this.datasetRepository.findById(dataset.id);
   }
 
   /**
@@ -139,16 +134,10 @@ export class DatasetService {
    * Retrieves a dataset by its ID.
    * @param id The ID of the dataset.
    * @param userId The ID of the user.
-   * @returns A Promise that resolves to the dataset or null if not found.
+   * @returns A Promise that resolves to the dataset
    */
   async getDatasetById(id: string, userId: string): Promise<Dataset> {
-    const dataset = await this.datasetRepository.findByIdAndUserId(id, userId);
-
-    if (!dataset) {
-      throw getError(ErrorEnum.NOT_FOUND_ERROR);
-    }
-
-    return dataset;
+    return await this.datasetRepository.findByIdAndUserId(id, userId);
   }
 
   /**
@@ -156,16 +145,15 @@ export class DatasetService {
    * @param id dataset id
    * @param userId user id
    * @param updateData name and tags to be updated
-   * @returns a Promise that resolves to the updated dataset or null if not found
+   * @returns a Promise that resolves to the updated dataset
    */
   async updateDataset(
     id: string,
     userId: string,
     updateData: { name?: string; tags?: string[] },
-  ): Promise<Dataset | null> {
+  ): Promise<Dataset> {
     // Checks if the dataset belongs to the user
     const dataset = await this.datasetRepository.findByIdAndUserId(id, userId);
-    if (!dataset) throw getError(ErrorEnum.NOT_FOUND_ERROR);
 
     // If updating the name, check for uniqueness
     if (updateData.name && updateData.name !== dataset.name) {
@@ -177,8 +165,7 @@ export class DatasetService {
       if (exists) throw getError(ErrorEnum.DATASET_NAME_CONFLICT_ERROR);
     }
 
-    const updatedDataset = await this.datasetRepository.update(id, updateData);
-    return updatedDataset;
+    return await this.datasetRepository.update(id, updateData);
   }
 
   /**
@@ -189,11 +176,8 @@ export class DatasetService {
    */
   async deleteDataset(id: string, userId: string): Promise<string> {
     // Checks if the dataset belongs to the user
-    const dataset = await this.datasetRepository.findByIdAndUserId(id, userId);
-    if (!dataset) throw getError(ErrorEnum.NOT_FOUND_ERROR);
-
-    const deleted = await this.datasetRepository.softDelete(id);
-    if (!deleted) throw getError(ErrorEnum.GENERIC_ERROR);
+    await this.datasetRepository.findByIdAndUserId(id, userId);
+    await this.datasetRepository.softDelete(id);
     return id;
   }
 
@@ -213,8 +197,7 @@ export class DatasetService {
     name: string,
     type: string,
   ): Promise<{ message: string; id: string; costDeducted: number }> {
-    const dataset = await this.datasetRepository.findByIdAndUserId(id, userId);
-    if (!dataset) throw getError(ErrorEnum.NOT_FOUND_ERROR);
+    await this.datasetRepository.findByIdAndUserId(id, userId);
 
     let cost = 0;
     let videoIds: string[] = [];
@@ -278,8 +261,7 @@ export class DatasetService {
         costDeducted: cost,
       };
     } catch (error) {
-      logger.error(`Error uploading video: ${error}`);
-      throw getError(ErrorEnum.GENERIC_ERROR);
+      throw error;
     }
   }
 }

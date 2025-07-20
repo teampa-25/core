@@ -1,10 +1,13 @@
 import { WebSocketServer, WebSocket } from "ws";
 import { Server as HttpServer } from "http";
-import { WebSocketNotification } from "@/common/types";
+import {
+  CNSResponse,
+  WebSocketAuthMessage,
+  WebSocketNotification,
+} from "@/common/types";
 import { ErrorEnum, InferenceJobStatus } from "@/common/enums";
 import { getError } from "@/common/utils/api-error";
 import { logger } from "@/config/logger";
-import { IncomingMessage } from "http";
 import { WEBSOCKET } from "@/common/const";
 import { JwtUtils } from "@/common/utils/jwt";
 
@@ -52,43 +55,40 @@ export class WebSocketService {
    * Setup event handlers for WebSocket connections
    */
   private setupEventHandlers(): void {
-    this.wss.on(
-      "connection",
-      (ws: AuthenticatedWebSocket, req: IncomingMessage) => {
-        const connectionId = this.generateConnectionId();
-        logger.info(`New WebSocket connection: ${connectionId}`);
+    this.wss.on("connection", (ws: AuthenticatedWebSocket) => {
+      const connectionId = this.generateConnectionId();
+      logger.info(`New WebSocket connection: ${connectionId}`);
 
-        ws.isAuthenticated = false;
-        ws.on("message", (data: Buffer) => {
-          try {
-            const message = JSON.parse(data.toString());
-            this.handleMessage(ws, message, connectionId);
-          } catch (error) {
-            logger.error(`Error parsing message from ${connectionId}:`, error);
-            this.sendError(ws, "Invalid JSON message format");
-          }
-        });
+      ws.isAuthenticated = false;
+      ws.on("message", (data: Buffer) => {
+        try {
+          const message: WebSocketAuthMessage = JSON.parse(data.toString());
+          this.handleMessage(ws, message, connectionId);
+        } catch (error) {
+          logger.error(`Error parsing message from ${connectionId}:`, error);
+          this.sendError(ws, "Invalid JSON message format");
+        }
+      });
 
-        // Handle disconnection
-        ws.on("close", () => {
-          this.handleDisconnection(ws, connectionId);
-        });
+      // Handle disconnection
+      ws.on("close", () => {
+        this.handleDisconnection(ws, connectionId);
+      });
 
-        // Handle connection errors
-        ws.on("error", (error: Error) => {
-          logger.error(`WebSocket error on ${connectionId}:`, error);
-        });
+      // Handle connection errors
+      ws.on("error", (error: Error) => {
+        logger.error(`WebSocket error on ${connectionId}:`, error);
+      });
 
-        // Send initial connection message
-        this.sendMessage(ws, {
-          type: "connection",
-          data: {
-            message: "WebSocket connection established. Please authenticate.",
-          },
-          timestamp: new Date(),
-        });
-      },
-    );
+      // Send initial connection message
+      this.sendMessage(ws, {
+        type: "connection",
+        data: {
+          message: "WebSocket connection established. Please authenticate.",
+        },
+        timestamp: new Date(),
+      });
+    });
   }
 
   /**
@@ -99,7 +99,7 @@ export class WebSocketService {
    */
   private handleMessage(
     ws: AuthenticatedWebSocket,
-    message: any,
+    message: WebSocketAuthMessage,
     connectionId: string,
   ): void {
     switch (message.type) {
@@ -200,7 +200,7 @@ export class WebSocketService {
    * @param ws - WebSocket connection
    * @param message - Message to send
    */
-  private sendMessage(ws: WebSocket, message: any): void {
+  private sendMessage(ws: WebSocket, message: WebSocketNotification): void {
     if (ws.readyState === WebSocket.OPEN) {
       ws.send(JSON.stringify(message));
     }
@@ -214,7 +214,7 @@ export class WebSocketService {
   private sendError(ws: WebSocket, errorMessage: string): void {
     this.sendMessage(ws, {
       type: "error",
-      data: { error: errorMessage },
+      data: { errorMessage },
       timestamp: new Date(),
     });
   }
@@ -264,7 +264,7 @@ export class WebSocketService {
     userId: string,
     inferenceId: string,
     status: string,
-    result?: any,
+    result?: CNSResponse | string,
     errorMessage?: string,
   ): void {
     const notification: WebSocketNotification = {
