@@ -1,8 +1,9 @@
 # InferNode - Node Backend for FastCNS.
 
-<div style="height:400px; overflow:hidden; margin:auto">
-  <img src="./public/InferNode.png" style="width:100%; height:100%; object-fit:cover; object-position:center;" />
+<div style="height:200px; overflow:hidden; margin:auto;" align="center">
+  <img src="./public/InferNode.png" style="width:50%; height:50%; object-fit:cover; object-position:center;" />
 </div>
+
 
 > _"I can see it... the code." - Neo, The Matrix (1999)_
 
