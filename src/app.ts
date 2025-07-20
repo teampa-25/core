@@ -21,11 +21,7 @@ const httpServer = createServer(app);
 const wsService = WebSocketService.getInstance();
 wsService.initialize(httpServer);
 
-app.use(
-  helmet({
-    contentSecurityPolicy: false,
-  }),
-);
+app.use(helmet());
 app.use(morganMiddleware);
 app.use(express.json());
 

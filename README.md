@@ -596,6 +596,50 @@ The workflow for handling requests follows this path:
   }
   ```
 
+### 6. **Chain of Responsibility Pattern**
+
+- **Middleware Pipeline**: Express middleware implements a chain where each middleware can process the request and decide whether to pass it to the next handler
+- **Request Processing Flow**: Authentication → Authorization → Validation → Business Logic → Error Handling
+
+  ```typescript
+  // Middleware chain example in routes
+  router.post(
+    "/api/admin/recharge",
+    authenticate, // 1. JWT token check
+    authorize("admin"), // 2. Check admin role
+    validate(rechargeSchema), // 3. Validate request data
+    adminController.recharge, // 4. Execute business logic
+  );
+  ```
+
+- **Error Handling Chain**: Multi-layered error processing with different responsibilities
+
+  ```typescript
+  // Error processing chain
+  app.use(notFoundHandler); // Handle 404 routes
+  app.use(errorConverter); // Convert errors to standard format
+  app.use(errorHandler); // Handle and respond with errors
+  ```
+
+- **Validation Chain**: Request validation with different targets and schemas
+
+  ```typescript
+  export const validate = (
+    schema: Joi.ObjectSchema,
+    target: "body" | "params" | "query" | "headers",
+  ) => {
+    return (req: Request, res: Response, next: NextFunction) => {
+      // Validate specific part of request
+      // Either continue to next middleware or terminate with error
+    };
+  };
+  ```
+
+- **Authentication & Authorization Chain**: Sequential security checks
+  - **authenticate**: Verifies JWT token and extracts user payload
+  - **authorize**: Checks if user has required role permissions
+  - Each middleware can terminate the chain early if validation fails
+
 ## Queue System Architecture
 
 InferNode implements a queue-based processing system:
