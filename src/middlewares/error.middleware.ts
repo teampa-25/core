@@ -2,6 +2,7 @@ import { Response, Request, NextFunction } from "express";
 import { ErrorObj, getError } from "@/common/utils/api-error";
 import { ErrorEnum } from "@/common/enums";
 import { StatusCodes } from "http-status-codes";
+import enviroment from "@/config/enviroment";
 
 /**
  * Middleware function to handle 404 errors.
@@ -59,6 +60,7 @@ export const errorHandler = (
       method: req.method,
       path: req.originalUrl,
       timestamp: new Date().toISOString(),
+      ...(enviroment.nodeEnv !== "production" && { stack: err.stack }),
     });
   } else {
     res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({

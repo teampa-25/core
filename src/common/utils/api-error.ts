@@ -35,6 +35,10 @@ const errorConfig: Record<ErrorEnum, { status: number; msg: string }> = {
     status: StatusCodes.NOT_FOUND,
     msg: "Route not found. Please check the URL and try again.",
   },
+  [ErrorEnum.EMPTY_DATASET]: {
+    status: StatusCodes.NOT_FOUND,
+    msg: "The dataset must contains at least one video.",
+  },
   [ErrorEnum.FORBIDDEN_ERROR]: {
     status: StatusCodes.FORBIDDEN,
     msg: "Access denied. You do not have permission to perform this action.",

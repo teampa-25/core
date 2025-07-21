@@ -64,6 +64,8 @@ export class InferenceJobService {
         ? await this.videoRepository.findByDatasetId(datasetId)
         : await this.getVideosByRange(datasetId, range);
 
+    if (videos.length == 0) throw getError(ErrorEnum.EMPTY_DATASET);
+
     // Sort videos by creation date
     const sorted = videos.sort(
       (a, b) =>
