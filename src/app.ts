@@ -12,7 +12,10 @@ import {
 } from "@/middlewares/error.middleware";
 import { WebSocketService } from "@/services/websocket.service";
 import helmet from "helmet";
-
+import enviroment from "./config/enviroment";
+import compression from "compression";
+import cors from "cors";
+import rateLimit from "express-rate-limit";
 /**
  * App and Websocket setup
  */
@@ -21,13 +24,30 @@ const httpServer = createServer(app);
 const wsService = WebSocketService.getInstance();
 wsService.initialize(httpServer);
 
+// Security Middlewares
 app.use(helmet());
-app.use(morganMiddleware);
+
+// Production-specific Middlewares
+if (enviroment.nodeEnv === "production") {
+  app.use(cors());
+  app.use(compression());
+  app.use(
+    rateLimit({
+      windowMs: 15 * 60 * 1000, // 15 minutes
+      max: 100, // max IP connections
+    }),
+  );
+}
+
+//Parsing and Logging Middlewares
 app.use(express.json());
+app.use(morganMiddleware);
 
 app.use("/api", routes);
 
+// Error converting and error handling Middlewares
 app.use(notFoundHandler);
 app.use(errorConverter);
 app.use(errorHandler);
+
 export default httpServer;
