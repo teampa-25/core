@@ -24,12 +24,12 @@ module.exports = {
       },
     ]);
   },
-  async up(qi, s) {
+  async up(qi) {
     const [results] = await qi.sequelize.query('SELECT id FROM "InferenceJob"');
 
     console.log(results);
     for (const element of results) {
-      await module.exports.insert(qi, s, element);
+      await module.exports.insert(qi, element);
     }
   },
   async down(queryInterface) {
