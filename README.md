@@ -568,23 +568,7 @@ The workflow for handling requests follows this path:
   }
   ```
 
-### 4. **Dependency Injection Pattern**
-
-- **Constructor Injection**: Services inject their dependencies through constructors
-- **Loose Coupling**: Components depend on abstractions rather than concrete implementations
-- **Example**: `DatasetService` injects repositories
-
-  ```typescript
-  export class DatasetService {
-    constructor() {
-      this.datasetRepository = new DatasetRepository();
-      this.videoRepository = new VideoRepository();
-      this.userRepository = new UserRepository();
-    }
-  }
-  ```
-
-### 5. **Factory Pattern**
+### 4. **Factory Pattern**
 
 - **Error Factory**: Centralized error creation with consistent formatting
 
@@ -594,7 +578,7 @@ The workflow for handling requests follows this path:
   }
   ```
 
-### 6. **Chain of Responsibility Pattern**
+### 5. **Chain of Responsibility Pattern**
 
 - **Middleware Pipeline**: Express middleware implements a chain where each middleware can process the request and decide whether to pass it to the next handler
 - **Request Processing Flow**: Authentication → Authorization → Validation → Business Logic → Error Handling
