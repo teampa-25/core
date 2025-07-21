@@ -516,6 +516,34 @@ The workflow for handling requests follows this path:
 5. **DAO (Data Access Objects)**: Execute database operations and handle queries
 6. **Models**: Define database schema, relationships, and data structures
 
+## Architectural Pattern Implementation
+
+### 1. **Repository Pattern**
+
+- **Consistent Interface**: Each repository provides uniform CRUD operations
+- **Example**: `DatasetRepository` encapsulates all dataset-related data operations
+
+  ```typescript
+  export class DatasetRepository {
+    async create(datasetData: {...}): Promise<Dataset> { /* ... */ }
+    async findByUserId(userId: string, filters?: {...}): Promise<Dataset[]> { /* ... */ }
+  }
+  ```
+
+### 2. **Data Access Object (DAO) Pattern**
+
+- **Interface Implementation**: All DAOs implement the `IDAO<T>` interface for consistency
+
+  ```typescript
+  export interface IDAO<T extends Model> {
+    get(id: string): Promise<T>;
+    getAll(): Promise<T[]>;
+    update(id: string, data: Partial<T>): Promise<T>;
+    delete(id: string): Promise<void>;
+    create(data: InferCreationAttributes<T>): Promise<T>;
+  }
+  ```
+
 ## Design Patterns Implementation
 
 ### 1. **Singleton Pattern**
@@ -542,49 +570,7 @@ The workflow for handling requests follows this path:
   }
   ```
 
-### 2. **Repository Pattern**
-
-- **Consistent Interface**: Each repository provides uniform CRUD operations
-- **Example**: `DatasetRepository` encapsulates all dataset-related data operations
-
-  ```typescript
-  export class DatasetRepository {
-    async create(datasetData: {...}): Promise<Dataset> { /* ... */ }
-    async findByUserId(userId: string, filters?: {...}): Promise<Dataset[]> { /* ... */ }
-  }
-  ```
-
-### 3. **Data Access Object (DAO) Pattern**
-
-- **Interface Implementation**: All DAOs implement the `IDAO<T>` interface for consistency
-
-  ```typescript
-  export interface IDAO<T extends Model> {
-    get(id: string): Promise<T>;
-    getAll(): Promise<T[]>;
-    update(id: string, data: Partial<T>): Promise<T>;
-    delete(id: string): Promise<void>;
-    create(data: InferCreationAttributes<T>): Promise<T>;
-  }
-  ```
-
-### 4. **Dependency Injection Pattern**
-
-- **Constructor Injection**: Services inject their dependencies through constructors
-- **Loose Coupling**: Components depend on abstractions rather than concrete implementations
-- **Example**: `DatasetService` injects repositories
-
-  ```typescript
-  export class DatasetService {
-    constructor() {
-      this.datasetRepository = new DatasetRepository();
-      this.videoRepository = new VideoRepository();
-      this.userRepository = new UserRepository();
-    }
-  }
-  ```
-
-### 5. **Factory Pattern**
+### 2. **Factory Pattern**
 
 - **Error Factory**: Centralized error creation with consistent formatting
 
@@ -594,7 +580,7 @@ The workflow for handling requests follows this path:
   }
   ```
 
-### 6. **Chain of Responsibility Pattern**
+### 3. **Chain of Responsibility Pattern**
 
 - **Middleware Pipeline**: Express middleware implements a chain where each middleware can process the request and decide whether to pass it to the next handler
 - **Request Processing Flow**: Authentication → Authorization → Validation → Business Logic → Error Handling
@@ -674,7 +660,7 @@ InferNode implements a queue-based processing system:
 ## Use Cases
 
 <div style="height:200px; overflow:hidden; margin:auto;" align="center">
-  <img src="./public/UseCase.png" style="width:70%; height:70%; object-fit:cover; object-position:center;" />
+  <img src="./public/NewUseCase.drawio.png" style="width:70%; height:70%; object-fit:cover; object-position:center;" />
 </div>
 
 ## Sequence Diagrams
