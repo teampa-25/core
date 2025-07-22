@@ -149,6 +149,12 @@ JWT_ALGORITHM=RS256
 SALT_ROUNDS=12
 ```
 
+## Run npm install
+
+```bash
+npm install
+```
+
 ## Generate JWT Keys
 
 ```bash
