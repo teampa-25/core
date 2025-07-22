@@ -73,6 +73,11 @@ InferNode is a Node.js backend service designed for running inferences on CNS (C
   - Detailed logging with Winston
   - Health check endpoints
 
+- **Data Validation**
+  - Request validation middleware
+  - TypeScript interfaces ensure data consistency
+  - Structured data validation patterns
+
 - **Git Hooks with Husky and Conventional Commits**
   - The project leverages Husky to automate code quality enforcement through Git hooks
   - Pre-commit hooks automatically run:
@@ -149,16 +154,14 @@ JWT_ALGORITHM=RS256
 SALT_ROUNDS=12
 ```
 
-## Run npm install
-
-```bash
-npm install
-```
-
 ## Generate JWT Keys
+
+Keys are automatically generated when the container is started. If for any reason you need to regenerate, you can run the following:
 
 ```bash
 npm run keys
+# or
+npm run keys --force # to force generation
 ```
 
 ## Docker Setup
@@ -665,19 +668,6 @@ InferNode implements a queue-based processing system:
 - **Error Handling**: Automatic retry mechanisms with exponential backoff
 - **Monitoring**: Bull Board dashboard for queue visualization, available at `/api/admin/queues`
 
-## Security Patterns
-
-### **Authentication & Authorization**
-
-- **JWT with RS256**: Asymmetric key encryption for token security
-- **Role-Based Access Control (RBAC)**: User and admin role separation
-- **Middleware-based Security**: Authentication required for protected routes
-
-### **Data Validation**
-
-- **Input Sanitization**: Request validation middleware
-- **Type Safety**: TypeScript interfaces ensure data consistency
-- **Schema Validation**: Structured data validation patterns
 
 # Design
 
@@ -718,6 +708,14 @@ InferNode implements a queue-based processing system:
 <div style="height:200px; overflow:hidden; margin:auto;" align="center">
   <img src="./public/SequenceDiagram-getProcessStatus.png" style="width:70%; height:70%; object-fit:cover; object-position:center;" />
 </div>
+
+# Testing
+
+To run tests:
+
+```bash
+docker exec -it infernode-app jest
+```
 
 # Contributing
 
