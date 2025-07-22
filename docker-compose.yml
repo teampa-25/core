@@ -39,7 +39,7 @@ services:
     #           capabilities: [gpu]
     ports:
       - "${FASTAPI_PORT:-8000}:8000"
-    
+
     working_dir: /workspace/src
     volumes:
       # Solo la directory cns completa

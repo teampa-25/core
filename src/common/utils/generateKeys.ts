@@ -1,7 +1,6 @@
 import { generateKeyPairSync } from "crypto";
 import { writeFileSync, mkdirSync, existsSync } from "fs";
 import { join } from "path";
-import { logger } from "../../config/logger";
 import { exit } from "process";
 
 /**
@@ -19,18 +18,18 @@ const args = process.argv.slice(2); // remove uneccessary values
 
 if (args.length > 0) {
   if (args.includes("--force")) {
-    logger.info("forcing generation of keys");
+    console.info("forcing generation of keys");
     force = true;
   }
 }
 
 // TODO: rimuovere check
 if (existsSync(keysDir)) {
-  logger.info("directory already exists - skipping");
+  console.info("directory already exists - skipping");
   directory_exists = true;
   keys_found = true;
 } else {
-  logger.info("keys directory not found - generating");
+  console.info("keys directory not found - generating");
 }
 if (!directory_exists) {
   mkdirSync(keysDir);
@@ -54,4 +53,4 @@ const { privateKey, publicKey } = generateKeyPairSync("rsa", {
 
 writeFileSync(join(keysDir, "private.key"), privateKey);
 writeFileSync(join(keysDir, "public.key"), publicKey);
-logger.info(`keys generated successfully ${keysDir}`);
+console.info(`keys generated successfully ${keysDir}`);

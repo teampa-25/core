@@ -12,5 +12,10 @@ COPY . .
 
 RUN chmod +x entrypoint/entrypoint.sh
 RUN dos2unix entrypoint/entrypoint.sh
+
 ENTRYPOINT ["bash", "./entrypoint/entrypoint.sh"]
-CMD ["npm", "run", "dev"]
+
+# CMD ["npm", "run", "dev"]
+# Production
+
+CMD ["npm", "run", "start"]
