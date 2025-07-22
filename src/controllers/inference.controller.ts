@@ -71,7 +71,8 @@ export class InferenceJobController {
    */
   getInferenceZIPResults = catchAsync(async (req: Request, res: Response) => {
     const { id } = req.params;
-    const zip = await this.inferenceJobService.getInferenceZIPResults(id);
-    res.status(StatusCodes.OK).json({ results: zip });
+    const zip = await this.inferenceJobService.getInferenceZIPResultsPath(id);
+    // res.status(StatusCodes.OK).sendFile(`/files/${req.user!.id}/results/result_${id}.zip`);
+    res.status(StatusCodes.OK).sendFile(zip);
   });
 }

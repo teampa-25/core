@@ -220,12 +220,12 @@ export class InferenceJobService {
   };
 
   /**
-   * Retrieves the ZIP file containing the inference results.
+   * Retrieves the ZIP file path containing the inference results.
    * @param jobId The ID of the inference job.
-   * @returns The ZIP file as a Buffer.
+   * @returns The ZIP file as a string.
    */
-  getInferenceZIPResults = async (jobId: string): Promise<Buffer> => {
-    return await this.resultRepository.getImageZip(jobId);
+  getInferenceZIPResultsPath = async (jobId: string): Promise<string> => {
+    return await this.resultRepository.getImageZipPath(jobId);
   };
 
   /**

@@ -91,11 +91,11 @@ export class ResultRepository {
   }
 
   /**
-   * Gets the image ZIP data for a specific result
+   * Gets the image ZIP path for a specific result
    * @param jobId - The ID of the job
    * @returns A Promise that resolves to the image ZIP buffer
    */
-  async getImageZip(jobId: string): Promise<Buffer> {
+  async getImageZipPath(jobId: string): Promise<string> {
     const result = await this.resultDAO.getByInferenceJobId(jobId);
 
     // Check if file exists
@@ -104,7 +104,7 @@ export class ResultRepository {
     }
 
     // Read and return file as buffer
-    return await FileSystemUtils.readZipFile(result.image_zip);
+    return result.image_zip;
   }
 
   /**
