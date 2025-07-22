@@ -5,10 +5,6 @@
 const { randomInt } = require("crypto");
 const { v4: uuidv4 } = require("uuid");
 
-// NOTE: these were generated with ChatGPT,
-// maybe not really relevant to the
-// real model, just for demonstration
-// -beg
 const tags = [
   "traffic-analysis",
   "computer-vision",
@@ -29,7 +25,6 @@ const tags = [
 /** @type {import("sequelize-cli").Migration} */
 module.exports = {
   get_id: async (qi, s, user_email) => {
-    // NOTE: not sure if this is the best way -beg
     const [results] = await qi.sequelize.query(
       'SELECT id FROM "User" WHERE email = :email LIMIT 1',
       {
@@ -46,7 +41,6 @@ module.exports = {
   add_dataset: async (qi, s, user_email) => {
     const { faker } = require("@faker-js/faker");
     let uid = await module.exports.get_id(qi, s, user_email);
-    // NOTE: also, we should not use bulkInsert if only one insert is made, my fault -beg
     await qi.bulkInsert("Dataset", [
       {
         id: uuidv4(),

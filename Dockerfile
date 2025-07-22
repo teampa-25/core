@@ -1,6 +1,6 @@
 FROM node:24-alpine
 
-RUN apk add --no-cache bash postgresql-client ffmpeg
+RUN apk add --no-cache bash ffmpeg
 
 WORKDIR /app
 
@@ -15,7 +15,8 @@ RUN dos2unix entrypoint/entrypoint.sh
 
 ENTRYPOINT ["bash", "./entrypoint/entrypoint.sh"]
 
+# Dev
 # CMD ["npm", "run", "dev"]
-# Production
 
+# Production
 CMD ["npm", "run", "start"]

@@ -23,7 +23,7 @@ const enviroment: Enviroment = {
   jwtPublicKeyPath: process.env.JWT_PUBLIC_KEY_PATH || "../../keys/public.key",
   jwtExpiresIn: process.env.JWT_EXPIRES_IN || "1h",
   jwtAlgorithm: process.env.JWT_ALGORITHM || "RS256",
-  saltRounds: Number(process.env.JWT_SALT_ROUNDS) || 10,
+  saltRounds: Number(process.env.JWT_SALT_ROUNDS) || 12,
 };
 
 export default enviroment;

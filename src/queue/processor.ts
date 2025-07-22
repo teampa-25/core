@@ -128,7 +128,7 @@ export class InferenceJobProcessor {
     try {
       // Create new result
       const result = await this.resultRepository.createResult({
-        inferenceJob_id: inferenceId, // Cambiato da inferenceJob_Id a inferenceJob_id
+        inferenceJob_id: inferenceId, // Cambiato da inferenceJob_Id a inferenceJob_id (4 ore perse)
         json_res: resultJson,
       } as Result);
 

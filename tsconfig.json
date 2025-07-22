@@ -17,7 +17,7 @@
     },
     "typeRoots": ["./src/@types", "./node_modules/@types"]
   },
-  "include": ["src/**/*", "src/docs/index.yaml"],
+  "include": ["src/**/*"],
   "exclude": [
     "eslint.config.js",
     "commitlint.config.js",

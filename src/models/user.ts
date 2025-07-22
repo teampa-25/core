@@ -14,7 +14,7 @@ import { UserRole } from "@/common/enums";
  */
 
 // inferattributes automatically infers what attributes the UserModel has
-// we don't need a UserAttributes interface
+// so we don't need a UserAttributes interface
 export class User extends Model<
   InferAttributes<User>,
   InferCreationAttributes<User>

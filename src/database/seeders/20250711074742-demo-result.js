@@ -28,7 +28,6 @@ module.exports = {
   async up(qi) {
     const [results] = await qi.sequelize.query('SELECT id FROM "InferenceJob"');
 
-    console.log(results);
     for (const element of results) {
       await module.exports.insert(qi, element);
     }

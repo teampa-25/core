@@ -88,7 +88,6 @@ module.exports = {
       JOIN "Video" AS v ON v.dataset_id = d.id
     `);
 
-    console.log(results);
     for (const element of results) {
       await module.exports.insert(qi, element);
     }
