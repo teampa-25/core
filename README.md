@@ -713,7 +713,7 @@ InferNode implements a queue-based processing system:
 To run tests:
 
 ```bash
-docker exec -it infernode-app jest
+docker exec -it infernode-app npx jest
 ```
 
 # Contributing
@@ -726,4 +726,4 @@ docker exec -it infernode-app jest
 
 # License
 
-This project is licensed under the MIT License - see the LICENSE file for details.
+This project is licensed under the MIT License - see the [LICENSE](./LICENSE) file for details.
