@@ -684,7 +684,7 @@ InferNode implements a queue-based processing system:
 ## Use Cases
 
 <div style="height:200px; overflow:hidden; margin:auto;" align="center">
-  <img src="./public/NewUseCase.drawio.png" style="width:70%; height:70%; object-fit:cover; object-position:center;" />
+  <img src="./public/UseCase.png" style="width:70%; height:70%; object-fit:cover; object-position:center;" />
 </div>
 
 ## Sequence Diagrams
