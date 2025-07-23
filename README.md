@@ -114,15 +114,18 @@ InferNode is a Node.js backend service designed for running inferences on CNS (C
 
 ## Prerequisites
 
-- Docker and Docker Compose
-- Node.js 18+ (for local development)
+You only need a docker engine to run this project!
+
+### Locally running
+- Node.js 18+ (for local development) with TypeScript
 - npm or yarn
 
 ## Environment Setup
 
-Create a `.env` file in the root directory with the following variables:
+Create, or copy from `.env.example`, a `.env` file in the root directory with the following variables:
 
 ```env
+## Content of .env.example
 # InferNode API Configurations
 API_PORT=3000
 NODE_ENV=development
@@ -154,13 +157,15 @@ SALT_ROUNDS=12
 
 ## Generate JWT Keys
 
-Keys are automatically generated when the container is started. If for any reason you need to regenerate, you can run the following:
+Keys are automatically generated when the container is started. 
+If for any reason you need to regenerate, you can run the following:
 
 ```bash
 docker exec -it infernode-app npm run keys
 # or
 docker exec -it infernode-app npm run keys --force # to force generation
 ```
+
 when container is already running.
 
 ## Docker Setup
@@ -185,7 +190,7 @@ docker compose up -d
 
 The Docker configuration mounts `src` and `tsconfig.json` as volumes, so changes to these files are automatically synced to the container. Changes to other files require a rebuild.
 
-### Adding Packages
+### Adding/Removing Packages on the fly
 
 ```bash
 docker exec -it infernode-app npm install package-name
