@@ -159,10 +159,11 @@ SALT_ROUNDS=12
 Keys are automatically generated when the container is started. If for any reason you need to regenerate, you can run the following:
 
 ```bash
-npm run keys
+docker exec -it infernode-app npm run keys
 # or
-npm run keys --force # to force generation
+docker exec -it infernode-app npm run keys --force # to force generation
 ```
+when container is already running.
 
 ## Docker Setup
 
