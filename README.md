@@ -73,9 +73,7 @@ InferNode is a Node.js backend service designed for running inferences on CNS (C
   - Detailed logging with Winston
   - Health check endpoints
 
-- **Data Validation**
-  - Request validation middleware
-  - TypeScript interfaces ensure data consistency
+- **Data Validation Middleware**
   - Structured data validation patterns
 
 - **Git Hooks with Husky and Conventional Commits**
