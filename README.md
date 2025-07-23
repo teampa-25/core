@@ -1,4 +1,4 @@
-# InferNode - Node Backend for FastCNS.
+# InferNode - Node Backend for FastCNS
 
 <div style="height:200px; overflow:hidden; margin:auto;" align="center">
   <img src="./public/InferNode.png" style="width:50%; height:50%; object-fit:cover; object-position:center;" />
@@ -117,6 +117,7 @@ InferNode is a Node.js backend service designed for running inferences on CNS (C
 You only need a docker engine to run this project!
 
 ### Locally running
+
 - Node.js 18+ (for local development) with TypeScript
 - npm or yarn
 
@@ -157,7 +158,7 @@ SALT_ROUNDS=12
 
 ## Generate JWT Keys
 
-Keys are automatically generated when the container is started. 
+Keys are automatically generated when the container is started.
 If for any reason you need to regenerate, you can run the following:
 
 ```bash
